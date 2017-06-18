@@ -1,0 +1,12 @@
+<div class="columns log-in-form">
+  <h4 class="text-center">Entre com sua conta de email</h4>
+  <label>Email
+    <input type="email" placeholder="alguem@exemplo.com" [(ngModel)]="email" />
+  </label>
+  <label>Senha
+    <input type="password" placeholder="Senha" [(ngModel)]="password" />
+  </label>
+  <input id="show-password" type="checkbox" /><label for="show-password">Mostrar senha</label>
+  <button (click)="login()" id="btnLogin">Login</button>
+  <p class="text-center"><a href="#">Esqueceu sua senha?</a></p>
+</div>

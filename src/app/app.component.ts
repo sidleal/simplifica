@@ -24,10 +24,6 @@ export class AppComponent {
     this.user = this.afAuth.authState;  
   }
 
-  login() {
-      this.afAuth.auth.signInWithEmailAndPassword('sid@sidle.al', 'eithne');
-  }
-
   logout() {
       this.afAuth.auth.signOut();
   }
