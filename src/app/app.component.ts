@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
 import {Observable} from 'rxjs/Observable';
+import { AuthService } from './providers/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -14,19 +15,21 @@ export class AppComponent {
   items: FirebaseListObservable<any[]>;
   msgVal: string = '';
 
-  constructor(public afAuth: AngularFireAuth, public af: AngularFireDatabase) {
+  constructor(private authService: AuthService, private router: Router, public af: AngularFireDatabase) {
     this.items = af.list('/messages', {
       query: {
         limitToLast: 50
       }
     });
 
-    this.user = this.afAuth.authState;  
+    this.user = this.authService.afAuth.authState;  
   }
 
   logout() {
-      this.afAuth.auth.signOut();
+    this.authService.logout();
+    //this.router.navigate(['login']);
   }
+
 
   send(desc: string) {
       this.items.push({ message: desc});
