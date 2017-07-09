@@ -23,7 +23,7 @@ export const firebaseConfig = {
 };
 
 const routes: Routes = [
-  { path: 'menu', component: MenuComponent },
+  { path: '', component: MenuComponent },
   { path: 'login', component: LoginComponent },
   { path: 'anotador', component: AnotadorComponent }
 ];

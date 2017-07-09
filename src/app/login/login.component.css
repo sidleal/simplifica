@@ -13,6 +13,8 @@ div#socialLogin {
 }
 button#btnLogin {
     width: 100%;
+    height: 38px;
+    padding: 0;
 }
 
 /* Shared */

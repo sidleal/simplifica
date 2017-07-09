@@ -1,16 +1,16 @@
 <div class="columns log-in-form">
-  <h4 class="text-center">Entre com sua conta de email e senha</h4>
+  <h4 class="text-center">Bem vindo(a)! Não me lembro de você, pode me ajudar?</h4>
   <label>Email
     <input type="email" placeholder="alguem@exemplo.com" [(ngModel)]="email" />
   </label>
   <label>Senha
-    <input type="password" placeholder="Senha" [(ngModel)]="password" />
+    <input type="password" placeholder="Senha" [(ngModel)]="password" (keyup.enter)="login()"/>
   </label>
   <button (click)="login()" id="btnLogin">Login</button>
-  <p class="text-center"><a href="#">Esqueceu sua senha?</a></p>
+  <p class="text-center" onclick="alert('Oops. Não funciona ainda, vamos arrumar isso, prometemos.');"><a href="#">Esqueceu sua senha?</a></p>
 
   <div id="socialLogin">
-    <button class="loginBtn loginBtn--facebook">
+    <button class="loginBtn loginBtn--facebook" onclick="alert('Oops. Este ainda não funciona direito, tente com o Google abaixo.');">
       Login with Facebook
     </button>
 

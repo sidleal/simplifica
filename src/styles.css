@@ -16,3 +16,8 @@ button {
     margin-bottom: 5px;
     cursor: pointer;
 }
+
+.centered {
+    margin-left: auto;
+    margin-right: auto;
+}
