@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-
 import { Router } from '@angular/router';
 import { AuthService } from '../providers/auth.service';
 
@@ -9,6 +8,7 @@ import { AuthService } from '../providers/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
+
 export class LoginComponent implements OnInit {
   email: string = '';
   password: string = '';
