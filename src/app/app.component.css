@@ -1,3 +1,36 @@
+div#header {
+    background-color: #3A72C9;
+    background-image: repeating-linear-gradient(180deg, rgba(58,114,201,1), rgba(58,114,201,1) 10%, rgba(0,0,0,.3)), repeating-linear-gradient(135deg, transparent, transparent 1px, rgba(0,0,0,.6) 4px);
+    width: 100%;
+    height: 5rem;
+}
+
+div#subheader {
+    background-color: #8ABC41;
+    width: 100%;
+    height: 1rem;
+    margin-bottom: 10px;
+}
+
+div#logo {
+    color: white;
+    font-size: 2rem;
+    margin-left: 0.5rem;
+    font-weight: bold;
+}
+
+div#slogan {
+    color: white;
+    margin-left: 0.5rem;
+}
+
+div#userInfo {
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 90%;
+}
+
 input#message {
     background:#fff;
     border:none;
