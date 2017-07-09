@@ -20,13 +20,13 @@ export class LoginComponent implements OnInit {
 
   login() {
       this.authService.login(this.email, this.password).then((data) => {
-        this.router.navigate(['']);
+        this.router.navigate(['menu']);
       })
   }
 
   loginWithGoogle() {
       this.authService.loginWithGoogle().then((data) => {
-        this.router.navigate(['']);
+        this.router.navigate(['menu']);
       })
   }
 

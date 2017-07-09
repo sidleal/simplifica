@@ -12,28 +12,14 @@ import { Router } from '@angular/router';
 })
 export class AppComponent {
   user: Observable<firebase.User>;
-  items: FirebaseListObservable<any[]>;
-  msgVal: string = '';
 
-  constructor(private authService: AuthService, private router: Router, public af: AngularFireDatabase) {
-    this.items = af.list('/messages', {
-      query: {
-        limitToLast: 50
-      }
-    });
-
+  constructor(private authService: AuthService, private router: Router) {
     this.user = this.authService.afAuth.authState;  
   }
 
   logout() {
     this.authService.logout();
     this.router.navigate(['']);
-  }
-
-
-  send(desc: string) {
-      this.items.push({ message: desc});
-      this.msgVal = '';
   }
 
 }

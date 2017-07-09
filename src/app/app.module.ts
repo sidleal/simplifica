@@ -9,10 +9,12 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { LoginComponent } from './login/login.component';
 import { AuthService } from './providers/auth.service';
+import { AnotadorComponent } from './anotador/anotador.component';
+import { MenuComponent } from './menu/menu.component';
 
 
 export const firebaseConfig = {
-    apiKey: "AIzaSyBAtmCYJZ6A1u_Cf4dyGcRXCD80H68jBHY",
+    apiKey: "",
     authDomain: "simplifica-4d2b8.firebaseapp.com",
     databaseURL: "https://simplifica-4d2b8.firebaseio.com",
     projectId: "simplifica-4d2b8",
@@ -21,14 +23,17 @@ export const firebaseConfig = {
 };
 
 const routes: Routes = [
-  { path: '', component: AppComponent },
-  { path: 'login', component: LoginComponent }
+  { path: 'menu', component: MenuComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'anotador', component: AnotadorComponent }
 ];
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent
+    LoginComponent,
+    AnotadorComponent,
+    MenuComponent
   ],
   imports: [
     BrowserModule,
