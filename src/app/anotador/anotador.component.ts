@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AuthService } from '../providers/auth.service';
 
 @Component({
   selector: 'app-anotador',
@@ -10,7 +11,7 @@ export class AnotadorComponent implements OnInit {
   items: FirebaseListObservable<any[]>;
   searchText: string = '';
   
-  constructor(public af: AngularFireDatabase) {
+  constructor(private authService: AuthService, public af: AngularFireDatabase) {
     this.items = af.list('/corpora', {
       query: {
         limitToLast: 50
@@ -19,6 +20,7 @@ export class AnotadorComponent implements OnInit {
    }
 
   ngOnInit() {
+
   }
 
   search() {

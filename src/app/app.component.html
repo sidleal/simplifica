@@ -1,12 +1,8 @@
 <div id="header">
   <div id="logo">Simplifica</div>
   <div id="slogan">Plataforma de Simplificação para a Língua Portuguesa</div>
-  <div id="userInfo">{{(user | async)?.email}} <a id="logout" href="#" (click)="logout()" *ngIf="(user | async)?.uid">( Sair )</a></div>
+  <div id="userInfo">{{(authState | async)?.email}} <a id="logout" href="#" (click)="logout()" *ngIf="(authState | async)?.uid">( Sair )</a></div>
 </div>
 <div id="subheader"></div>
 
-<div class="row columns">
-  <app-login *ngIf="!(user | async)?.uid">Carregando login...</app-login>  
-</div>
-
-<router-outlet *ngIf="(user | async)?.uid"></router-outlet>
+<router-outlet></router-outlet>

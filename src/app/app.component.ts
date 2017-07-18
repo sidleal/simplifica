@@ -11,15 +11,25 @@ import { Router } from '@angular/router';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  user: Observable<firebase.User>;
+  user: firebase.User;
+  authState: Observable<firebase.User>;
 
   constructor(private authService: AuthService, private router: Router) {
-    this.user = this.authService.afAuth.authState;  
+    this.authService.afAuth.authState.subscribe(
+      (auth) => {
+        if (auth != null) {
+          this.authState = this.authService.afAuth.authState;
+          this.user = auth;
+        } else {
+          this.router.navigate(['login']);
+        }
+      });
   }
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['']);
+    this.router.navigate(['login']);
   }
+
 
 }
