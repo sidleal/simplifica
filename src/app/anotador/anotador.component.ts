@@ -17,6 +17,10 @@ export class AnotadorComponent implements OnInit {
         limitToLast: 50
       }
     });
+    this.items.forEach(element => {
+       console.log(element);  
+    });
+    
    }
 
   ngOnInit() {
@@ -25,5 +29,9 @@ export class AnotadorComponent implements OnInit {
 
   search() {
 
+  }
+
+  selecionarCorpus(id_corpus) {
+    console.log(id_corpus)
   }
 }

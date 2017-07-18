@@ -3,7 +3,7 @@
     <h4>Meus corpora</h4>
     <input type="text" id="search" placeholder="Pesquisar" (keyup.enter)="search()" [(ngModel)]="searchText" />
     <div id="details-container"> 
-        <a href="" *ngFor="let item of items | async">
+        <a (click)="selecionarCorpus(item.$key)" *ngFor="let item of items | async">
           {{item.name}}<br/><p>({{item.source}})</p>
         </a>
     </div>
