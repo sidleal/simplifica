@@ -1,11 +1,35 @@
 <div class="row">
   <div class="small-12 centered columns">
-    <h4>Meus corpora</h4>
-    <input type="text" id="search" placeholder="Pesquisar" (keyup.enter)="search()" [(ngModel)]="searchText" />
-    <div id="details-container"> 
-        <a (click)="selecionarCorpus(item.$key)" *ngFor="let item of items | async">
-          {{item.name}}<br/><p>({{item.source}})</p>
+    <h4>{{stageTitle}}</h4>
+    
+    <input type="text" id="search" placeholder="Pesquisar" (keyup.enter)="search()" [(ngModel)]="searchText" *ngIf="showSearch"/>
+
+    <div id="details-container-corpora" class="details-container" *ngIf="stage == 'corpora'"> 
+        <a (click)="newCorpus()" class="new">
+          Novo Córpus<br/><p>(Criar um novo córpus)</p>
+        </a>
+        <a (click)="selectCorpus(corpus.$key, corpus.name)" *ngFor="let corpus of corpora | async">
+          {{corpus.name}}<br/><p>({{corpus.source}})</p>
         </a>
     </div>
+
+    <div id="details-container-productions" class="details-container" *ngIf="stage == 'productions'"> 
+        <a (click)="newProduction()" class="new">
+          Nova Produção<br/><p>(Criar uma nova produção)</p>
+        </a>
+        <a (click)="selectProduction(prod.$key, prod.title)" *ngFor="let prod of productions | async">
+          {{prod.title}}<br/><p>{{prod.published}}</p>
+        </a>
+    </div>
+
+    <div id="details-container-simplifications" class="details-container" *ngIf="stage == 'simplifications'"> 
+        <a (click)="newSimplification()" class="new">
+          Nova Simplificação<br/><p>(Criar uma nova simplificação)</p>
+        </a>
+        <a (click)="selectSimplification(simp.$key)" *ngFor="let simp of simplifications | async">
+          {{simp.name}}<br/><p>{{simp.level}}</p>
+        </a>
+    </div>
+
   </div>
 </div>

@@ -10,14 +10,15 @@ input#message {
     width: 80%;
 }
 
-#details-container {
+.details-container {
+    font-size:1.6em;
     display:flex;
     flex-direction: row;
     flex-wrap:wrap;
     width:100%;
 }
 
-#details-container a {
+.details-container a {
     background:#fff;
     padding:1.4em;
     color:#696969;
@@ -26,6 +27,10 @@ input#message {
     min-width:200px;
 }
 
-#details-container a p {
-    font-size: 0.7rem;
+.details-container a.new { 
+    background: #cdff84;
+}
+
+.details-container a p {
+    font-size: 0.9rem;
 }

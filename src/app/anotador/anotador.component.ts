@@ -8,18 +8,24 @@ import { AuthService } from '../providers/auth.service';
   styleUrls: ['./anotador.component.css']
 })
 export class AnotadorComponent implements OnInit {
-  items: FirebaseListObservable<any[]>;
+  corpora: FirebaseListObservable<any[]>;
+  productions: FirebaseListObservable<any[]>;
+  simplifications: FirebaseListObservable<any[]>;
+  stage: string = "corpora";
+  stageTitle: string = "Meus corpora";
   searchText: string = '';
+  showSearch: boolean = true;
+  selectedCorpus: number;
   
   constructor(private authService: AuthService, public af: AngularFireDatabase) {
-    this.items = af.list('/corpora', {
+    this.corpora = af.list('/corpora', {
       query: {
         limitToLast: 50
       }
     });
-    this.items.forEach(element => {
+/*    this.items.forEach(element => {
        console.log(element);  
-    });
+    });*/
     
    }
 
@@ -31,7 +37,26 @@ export class AnotadorComponent implements OnInit {
 
   }
 
-  selecionarCorpus(id_corpus) {
-    console.log(id_corpus)
+  selectCorpus(corpusId, corpusName) {
+    this.stage = "productions";
+    this.stageTitle = corpusName + " - Produções";
+    this.selectCorpus = corpusId;
+    this.productions = this.af.list('/corpora/' + corpusId + "/productions", {
+      query: {
+        limitToLast: 50
+      }
+    });
   }
+
+  selectProduction(prodId, prodTitle) {
+    this.stage = "simplifications";
+    this.stageTitle = "Simplificações - " + prodTitle;
+    this.showSearch = false;
+    this.simplifications = this.af.list('/corpora/' + this.selectCorpus + "/productions/" + prodId + "/simplifications", {
+      query: {
+        limitToLast: 50
+      }
+    });
+  }
+
 }
