@@ -31,5 +31,19 @@
         </a>
     </div>
 
+    <div id="newCorpus" *ngIf="stage == 'newCorpus'">
+      <input type="text" id="corpusName" placeholder="Nome" [(ngModel)]="corpusName"/>
+      <input type="text" id="corpusSource" placeholder="Fonte" [(ngModel)]="corpusSource"/>
+      <input type="text" id="corpusGenre" placeholder="Gênero" [(ngModel)]="corpusGenre"/>
+      <button (click)="saveCorpus()" id="btnSaveCorpus">Gravar</button>
+    </div>
+
+    <div id="newProduction" *ngIf="stage == 'newProduction'">
+      <input type="text" id="productionTitle" placeholder="Título" [(ngModel)]="productionTitle"/>
+      <input type="text" id="productionPublished" placeholder="Data Publicação" [(ngModel)]="productionPublished"/>
+      <textarea id="productionContent" placeholder="Conteúdo" [(ngModel)]="productionContent" rows="5"></textarea>
+      <button (click)="saveProduction()" id="btnSaveProduction">Gravar</button>
+    </div>
+
   </div>
 </div>
