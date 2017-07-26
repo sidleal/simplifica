@@ -31,6 +31,10 @@ input#message {
     background: #cdff84;
 }
 
+.details-container a.back { 
+    background: #b0cfff;
+}
+
 .details-container a p {
     font-size: 0.9rem;
 }

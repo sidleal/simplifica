@@ -5,6 +5,9 @@
     <input type="text" id="search" placeholder="Pesquisar" (keyup.enter)="search()" [(ngModel)]="searchText" *ngIf="showSearch"/>
 
     <div id="details-container-corpora" class="details-container" *ngIf="stage == 'corpora'"> 
+        <a (click)="backToMenu()" class="back">
+          Voltar<br/><p>(Menu)</p>
+        </a>
         <a (click)="newCorpus()" class="new">
           Novo Córpus<br/><p>(Criar um novo córpus)</p>
         </a>
@@ -14,15 +17,21 @@
     </div>
 
     <div id="details-container-productions" class="details-container" *ngIf="stage == 'productions'"> 
+        <a (click)="listCorpora()" class="back">
+          Voltar<br/><p>(Corpora)</p>
+        </a>
         <a (click)="newProduction()" class="new">
           Nova Produção<br/><p>(Criar uma nova produção)</p>
         </a>
         <a (click)="selectProduction(prod.$key, prod.title)" *ngFor="let prod of productions | async">
-          {{prod.title}}<br/><p>{{prod.published}}</p>
+          {{prod.title}}<br/><p>{{prod.author}} - {{prod.published}}</p>
         </a>
     </div>
 
     <div id="details-container-simplifications" class="details-container" *ngIf="stage == 'simplifications'"> 
+        <a (click)="listProductions()" class="back">
+          Voltar<br/><p>(Produções)</p>
+        </a>
         <a (click)="newSimplification()" class="new">
           Nova Simplificação<br/><p>(Criar uma nova simplificação)</p>
         </a>
@@ -35,14 +44,20 @@
       <input type="text" id="corpusName" placeholder="Nome" [(ngModel)]="corpusName"/>
       <input type="text" id="corpusSource" placeholder="Fonte" [(ngModel)]="corpusSource"/>
       <input type="text" id="corpusGenre" placeholder="Gênero" [(ngModel)]="corpusGenre"/>
-      <button (click)="saveCorpus()" id="btnSaveCorpus">Gravar</button>
+      <button (click)="saveCorpus()" id="btnSaveCorpus" class="default">Gravar</button>
+      <button (click)="listCorpora()" id="btnBackCorpus" class="natural">Voltar</button>
     </div>
 
     <div id="newProduction" *ngIf="stage == 'newProduction'">
+      <input type="file" (change)="changeListener($event)" >
       <input type="text" id="productionTitle" placeholder="Título" [(ngModel)]="productionTitle"/>
+      <input type="text" id="productionSubTitle" placeholder="SubTítulo" [(ngModel)]="productionSubTitle"/>
+      <input type="text" id="productionAuthor" placeholder="Autor" [(ngModel)]="productionAuthor"/>
       <input type="text" id="productionPublished" placeholder="Data Publicação" [(ngModel)]="productionPublished"/>
-      <textarea id="productionContent" placeholder="Conteúdo" [(ngModel)]="productionContent" rows="5"></textarea>
+      <input type="text" id="productionSource" placeholder="Fonte" [(ngModel)]="productionSource"/>      
+      <textarea id="productionContent" placeholder="Conteúdo" [(ngModel)]="productionContent" rows="20"></textarea>
       <button (click)="saveProduction()" id="btnSaveProduction">Gravar</button>
+      <button (click)="listProductions()" id="btnBackProduction" class="natural">Voltar</button>
     </div>
 
   </div>

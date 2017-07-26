@@ -17,6 +17,22 @@ button {
     cursor: pointer;
 }
 
+button.default {
+    background: #79B33A;
+}
+
+button.warning {
+    background: #c9c33a;
+}
+
+button.risc {
+    background: #c93a3d;
+}
+
+button.natural {
+    background: #3a72c9;
+}
+
 .centered {
     margin-left: auto;
     margin-right: auto;
