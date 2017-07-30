@@ -11,6 +11,7 @@ import { LoginComponent } from './login/login.component';
 import { AuthService } from './providers/auth.service';
 import { AnotadorComponent } from './anotador/anotador.component';
 import { MenuComponent } from './menu/menu.component';
+import { SenterComponent } from './senter/senter.component';
 
 
 export const firebaseConfig = {
@@ -25,7 +26,8 @@ export const firebaseConfig = {
 const routes: Routes = [
   { path: '', component: MenuComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'anotador', component: AnotadorComponent }
+  { path: 'anotador', component: AnotadorComponent },
+  { path: 'senter', component: SenterComponent }
 ];
 
 @NgModule({
@@ -33,7 +35,8 @@ const routes: Routes = [
     AppComponent,
     LoginComponent,
     AnotadorComponent,
-    MenuComponent
+    MenuComponent,
+    SenterComponent
   ],
   imports: [
     BrowserModule,

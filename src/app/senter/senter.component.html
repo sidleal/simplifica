@@ -1,0 +1,24 @@
+<div class="row">
+  <div class="small-12 centered columns">
+    <h3>SENTER Web - SENtence spliTER</h3>
+    <p>Baseado em (Pardo, 2006): <a href="http://www.icmc.usp.br/~taspardo/NILCTR0601-Pardo.pdf" target="_blank">http://www.icmc.usp.br/~taspardo/NILCTR0601-Pardo.pdf</a></p>
+    <textarea id="rawContent" placeholder="Conteúdo" [(ngModel)]="rawContent" rows="20"></textarea>
+    <button (click)="split()" id="btnSplit" class="default">Dividir Sentenças</button>
+    <button (click)="backToMenu()" id="btnBackMenu" class="natural">Voltar</button>
+
+    <div id="results" *ngIf="totalSentences != None">
+      <h4>Resultados:</h4>
+      <p>{{totalParagraphs}} Parágrafos.</p>
+      <p>{{totalSentences}} Sentenças.</p>
+      <h4>Saída Em Lista</h4>
+      <div [innerHTML]="rawOutput"></div>
+      <h4>Saída XML</h4>
+      <textarea id="xmlOutput" [(ngModel)]="xmlOutput" rows="20"></textarea>
+      <h4>Saída JSON</h4>
+      <textarea id="jsonOutput" [(ngModel)]="jsonOutput" rows="20"></textarea>
+      <h4>Saída JSON Crua</h4>
+      <textarea id="jsonOutputNoFormat" [(ngModel)]="jsonOutputNoFormat" rows="20"></textarea>
+    </div>
+
+  </div>
+</div>

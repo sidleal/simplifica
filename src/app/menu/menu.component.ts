@@ -16,5 +16,9 @@ export class MenuComponent implements OnInit {
       this.router.navigate(['anotador']);
   }
 
+  abrirSenter() {
+      this.router.navigate(['senter']);
+  }
+
 }
 
