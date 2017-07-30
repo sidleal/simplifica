@@ -5,6 +5,16 @@
     <textarea id="rawContent" placeholder="Conteúdo" [(ngModel)]="rawContent" rows="20"></textarea>
     <button (click)="split()" id="btnSplit" class="default">Dividir Sentenças</button>
     <button (click)="backToMenu()" id="btnBackMenu" class="natural">Voltar</button>
+    <button (click)="listAbbrev()" id="btnShowAbbrev" class="default" *ngIf="!showAbbreviations">Mostrar Abreviaturas</button>
+    <button (click)="hideAbbrev()" id="btnHideAbbrev" class="default" *ngIf="showAbbreviations"> Ocultar Abreviaturas</button>
+
+    <div id="abbreviations" *ngIf="showAbbreviations">
+      <h4>Abreviaturas</h4>
+       <input type="text" id="newAbrev" placeholder="Ajude-nos a melhorar. Digite a nova abreviatura e tecle Enter." (keyup.enter)="addAbbrev()" [(ngModel)]="newAbbrev"/>
+       <span *ngFor="let abbrev of abbreviations | async">
+          {{abbrev.name}} <a (click)="removeAbbrev(abbrev.$key)"> X </a>
+       </span>
+    </div>
 
     <div id="results" *ngIf="totalSentences != None">
       <h4>Resultados:</h4>

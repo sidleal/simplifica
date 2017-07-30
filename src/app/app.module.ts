@@ -9,6 +9,7 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { LoginComponent } from './login/login.component';
 import { AuthService } from './providers/auth.service';
+import { SenterService } from './providers/senter.service';
 import { AnotadorComponent } from './anotador/anotador.component';
 import { MenuComponent } from './menu/menu.component';
 import { SenterComponent } from './senter/senter.component';
@@ -47,7 +48,7 @@ const routes: Routes = [
     AngularFireAuthModule,
     RouterModule.forRoot(routes)
   ],
-  providers: [AuthService],
+  providers: [AuthService, SenterService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

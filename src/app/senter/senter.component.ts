@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { SenterService } from '../providers/senter.service';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 @Component({
   selector: 'app-senter',
@@ -7,8 +9,12 @@ import { Router } from '@angular/router';
   styleUrls: ['./senter.component.css']
 })
 export class SenterComponent implements OnInit {
-  
+  abbreviations: FirebaseListObservable<any[]>;
+  showAbbreviations: boolean = false;
+  newAbbrev: string;
+
   rawContent: string;
+  
   totalParagraphs: number;
   totalSentences: number;
   rawOutput: string = '';
@@ -16,7 +22,7 @@ export class SenterComponent implements OnInit {
   jsonOutput: string = '';
   jsonOutputNoFormat: string = '';
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private senterService: SenterService, private af: AngularFireDatabase) { }
 
   ngOnInit() {
   }
@@ -26,41 +32,38 @@ export class SenterComponent implements OnInit {
     this.router.navigate(['']);
   }
 
-  split() {
-    var parsedText = {};
-    var paragraphs = this.rawContent.split("\n");
-
-    this.totalParagraphs = 0;
-    this.totalSentences = 0;
-
-    parsedText['paragraphs'] = [];
-
-    paragraphs.forEach(p => {
-      if (p != '') {
-        this.totalParagraphs++;
-        var parsedParagraph = {"n": this.totalParagraphs, "sentences": [] };
-        var sentences = p.split("\.");
-        sentences.forEach(s => {
-          if (s != '') {
-            s = s.trim() + '.';
-            this.totalSentences++;
-            parsedParagraph['sentences'].push({"n": this.totalSentences, "text": s});
-          }
-        });
-        parsedText['paragraphs'].push(parsedParagraph);
+  listAbbrev() {
+    this.abbreviations = this.af.list('/senter/abbreviations', {
+      query: {
+        orderByChild: 'name',
+        limitToLast: 500
       }
     });
-    parsedText['totP'] = this.totalParagraphs;
-    parsedText['totS'] = this.totalSentences;
+    this.showAbbreviations = true;
+  }
 
+  addAbbrev() {
+    this.abbreviations.push({name: this.newAbbrev});
+    this.listAbbrev();
+    this.newAbbrev = '';
+  }
+  
+  removeAbbrev(abbrevKey) {
+    this.af.object('/senter/abbreviations/' + abbrevKey).remove();
+    this.listAbbrev();
+  }
 
-   this.rawOutput = '';
-    parsedText['paragraphs'].forEach(p => {
-      p['sentences'].forEach(s => {
-        this.rawOutput += 's' + s['n'] + ' - ' + s['text'] + '<br/>';
-      });
-    });
- 
+  hideAbbrev() {
+    this.showAbbreviations = false;
+  }
+
+  split() {
+
+    var parsedText = this.senterService.splitText(this.rawContent);
+
+    this.totalParagraphs = parsedText['totP'];
+    this.totalSentences =  parsedText['totS'];
+
     this.rawOutput = this.outputToRaw(parsedText);
     this.xmlOutput = this.outputToXML(parsedText);
     this.jsonOutput = this.outputToJSON(parsedText);
@@ -72,7 +75,7 @@ export class SenterComponent implements OnInit {
     var out = '';
     parsedText['paragraphs'].forEach(p => {
       p['sentences'].forEach(s => {
-        out += 's' + s['n'] + ' - ' + s['text'] + '<br/>';
+        out += 's' + s['idx'] + ' - ' + s['text'] + '<br/>';
       });
     });
     return out;
@@ -82,9 +85,9 @@ export class SenterComponent implements OnInit {
     var out = '';
     out = '<text>\n';
     parsedText['paragraphs'].forEach(p => {
-      out += '  <p>\n';
+      out += '  <p i=\"' + p['idx'] + '\">\n';
       p['sentences'].forEach(s => {
-        out += '    <s>' + s['text'] + "</s>\n";          
+        out += '    <s i=\"' + s['idx'] + '\">' + s['text'] + "</s>\n";          
       });
       out += '  </p>\n';
     });
@@ -98,9 +101,9 @@ export class SenterComponent implements OnInit {
     var out = '';
     out = '{\n  \"text\": [\n';
     parsedText['paragraphs'].forEach(p => {
-      out += '        { \"p\": [\n'
+      out += '        { \"i\": ' + p['idx'] + ', \"p\": [\n'
       p['sentences'].forEach(s => {
-        out += '               { \"s\": \"' + s['text'] + '\"},\n';            
+        out += '               {  \"i\": ' + s['idx'] + ', \"s\": \"' + s['text'] + '\"},\n';            
       });
       out += '         ]},\n';
     });
@@ -115,9 +118,9 @@ export class SenterComponent implements OnInit {
     var out = '';
     out = '{\"text\":[';
     parsedText['paragraphs'].forEach(p => {
-      out += '{\"p\":['
+      out += '{\"i\": ' + p['idx'] + ',\"p\":['
       p['sentences'].forEach(s => {
-        out += '{\"s\":\"' + s['text'] + '\"},';            
+        out += '{\"i\": ' + s['idx'] + ',\"s\":\"' + s['text'] + '\"},';            
       });
       out += ']},';
     });
