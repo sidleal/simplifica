@@ -40,14 +40,10 @@ export class SenterService {
     var match;
 
     // rule 2 - " { [ ( ) ] } "
-    var regexGroups = /["\{\(\[](.+?)["\}\)\]]/g;
-    while (match = regexGroups.exec(out)) {
-      var sentenceOld:string = match[1];
-      var sentenceNew:string = sentenceOld.replace(/\./g, '|dot|');
-      sentenceNew = sentenceNew.replace(/\?/g, '|int|');
-      sentenceNew = sentenceNew.replace(/\!/g, '|exc|');
-      out = out.replace(sentenceOld, sentenceNew);
-    }
+    out = this.applyGroupRule(out, /"(.+?)"/g)
+    out = this.applyGroupRule(out, /\{(.+?)\}/g)
+    out = this.applyGroupRule(out, /\[(.+?)\]/g)
+    out = this.applyGroupRule(out, /\((.+?)\)/g)
 
     // rule 4 - abbreviations
     this.abbreviations.forEach(abbrev => {
@@ -75,7 +71,7 @@ export class SenterService {
     out = out.replace(/([0-9]+)\.([0-9]+)/g, '$1|dot|$2');
 
     //rule 5 - quotes
-    out = out.replace(/"\s+([A-Z])/g, '\"|dot| |||$1');
+    //out = out.replace(/"\s+([A-Z])/g, '\"|dot| |||$1'); // in texts well written this rule may be disabled.
 
     //rule 5 - reticences
     out = out.replace(/\.\.\.\s*([A-Z])/g, '|dot||dot||dot| |||$1');
@@ -90,6 +86,18 @@ export class SenterService {
 
 
     return out;
+  }
+
+  applyGroupRule(rawText, regexGroup) {
+    var match;
+    while (match = regexGroup.exec(rawText)) {
+      var sentenceOld:string = match[1];
+      var sentenceNew:string = sentenceOld.replace(/\./g, '|dot|');
+      sentenceNew = sentenceNew.replace(/\?/g, '|int|');
+      sentenceNew = sentenceNew.replace(/\!/g, '|exc|');
+      rawText = rawText.replace(sentenceOld, sentenceNew);
+    }
+    return rawText;
   }
 
   parseText(rawText) {
