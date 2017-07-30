@@ -1,10 +1,23 @@
 import { Injectable } from '@angular/core';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+
 
 @Injectable()
 export class SenterService {
+  abbreviations: string[] = [];
 
-
-  constructor() { }
+  constructor(private af: AngularFireDatabase) {
+      this.af.list('/senter/abbreviations', {
+      query: {
+        orderByChild: 'name',
+        limitToLast: 500
+      }
+    }).subscribe(items => {
+      items.forEach(item => {
+        this.abbreviations.push(item.name);
+      })
+    });
+   }
 
 
   preProcesText(rawText) {
@@ -18,9 +31,16 @@ export class SenterService {
       sentenceNew = sentenceNew.replace(/\?/g, '|int|');
       sentenceNew = sentenceNew.replace(/\!/g, '|exc|');
       out = out.replace(sentenceOld, sentenceNew);
-      console.log(sentenceOld);
-      console.log(sentenceNew);   
     }
+
+    this.abbreviations.forEach(abbrev => {
+        var abbrevNew: string = abbrev.replace(/\./g, '|dot|');
+        var abbrevRe: string = abbrev.replace(/\./g, '\\.');
+        var re = new RegExp(abbrevRe, "g");
+        out = out.replace(re, abbrevNew);        
+    });
+
+
 
     out = out.replace(/\./g, '.|||');
     out = out.replace(/\?/g, '?|||');

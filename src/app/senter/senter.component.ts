@@ -14,7 +14,7 @@ export class SenterComponent implements OnInit {
   newAbbrev: string;
 
   rawContent: string;
-  
+ 
   totalParagraphs: number;
   totalSentences: number;
   rawOutput: string = '';
