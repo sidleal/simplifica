@@ -4,40 +4,35 @@
     
     <input type="text" id="search" placeholder="Pesquisar" (keyup.enter)="search()" [(ngModel)]="searchText" *ngIf="showSearch"/>
 
-    <div id="details-container-corpora" class="details-container" *ngIf="stage == 'corpora'"> 
-        <a (click)="backToMenu()" class="back">
-          Voltar<br/><p>(Menu)</p>
-        </a>
-        <a (click)="newCorpus()" class="new">
-          Novo Córpus<br/><p>(Criar um novo córpus)</p>
-        </a>
-        <a (click)="selectCorpus(corpus.$key, corpus.name)" *ngFor="let corpus of corpora | async">
-          {{corpus.name}}<br/><p>({{corpus.source}})</p>
-        </a>
+    <div id="corpora" *ngIf="stage == 'corpora'">
+      <button (click)="newCorpus()" id="btnNewCorpus" class="default">Novo Córpus</button>
+      <button (click)="backToMenu()" id="btnCorporaBack" class="natural">Voltar para Menu</button>
+      <div id="details-container-corpora" class="details-container"> 
+          <a (click)="selectCorpus(corpus.$key, corpus.name)" *ngFor="let corpus of corpora | async">
+            {{corpus.name}}<br/><p>({{corpus.source}})</p>
+          </a>
+      </div>
     </div>
 
-    <div id="details-container-productions" class="details-container" *ngIf="stage == 'productions'"> 
-        <a (click)="listCorpora()" class="back">
-          Voltar<br/><p>(Corpora)</p>
-        </a>
-        <a (click)="newProduction()" class="new">
-          Nova Produção<br/><p>(Criar uma nova produção)</p>
-        </a>
-        <a (click)="selectProduction(prod.$key, prod.title)" *ngFor="let prod of productions | async">
-          {{prod.title}}<br/><p>{{prod.author}} - {{prod.published}}</p>
-        </a>
+    <div id="productions" *ngIf="stage == 'productions'">
+      <button (click)="newProduction()" id="btnNewProd" class="default">Nova Produção</button>
+      <button (click)="listCorpora()" id="btnProdBack" class="natural">Voltar para Córpus</button>
+      <div id="details-container-productions" class="details-container"> 
+          <a (click)="selectProduction(prod.$key, prod.title)" *ngFor="let prod of productions | async">
+            {{prod.title}}<br/><p>{{prod.author}} - {{prod.published}}</p>
+          </a>
+      </div>
     </div>
 
-    <div id="details-container-simplifications" class="details-container" *ngIf="stage == 'simplifications'"> 
-        <a (click)="listProductions()" class="back">
-          Voltar<br/><p>(Produções)</p>
-        </a>
-        <a (click)="newSimplification()" class="new">
-          Nova Simplificação<br/><p>(Criar uma nova simplificação)</p>
-        </a>
-        <a (click)="selectSimplification(simp.$key)" *ngFor="let simp of simplifications | async">
-          {{simp.name}}<br/><p>{{simp.level}}</p>
-        </a>
+    <div id="simplifications" *ngIf="stage == 'simplifications'">
+      <button (click)="newSimplification()" id="btnNewSimpl" class="default">Nova Simplificação</button>
+      <button (click)="listProductions()" id="btnSimplBack" class="natural">Voltar para Produções</button>
+
+      <div id="details-container-simplifications" class="details-container"> 
+          <a (click)="selectSimplification(simp.$key)" *ngFor="let simp of simplifications | async">
+            {{simp.name}}<br/><p>{{simp.level}}</p>
+          </a>
+      </div>
     </div>
 
     <div id="newCorpus" *ngIf="stage == 'newCorpus'">
