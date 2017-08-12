@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable} from 'angularfire2/database';
 import { AuthService } from '../providers/auth.service';
 import { Router } from '@angular/router';
 
@@ -13,15 +13,23 @@ export class AnotadorComponent implements OnInit {
   productions: FirebaseListObservable<any[]>;
   simplifications: FirebaseListObservable<any[]>;
   texts: FirebaseListObservable<any[]>;
+  simplification: FirebaseObjectObservable<any>;
+  simplificationTextFrom: FirebaseObjectObservable<any>;
 
   stage: string;
   stageTitle: string;
   searchText: string = '';
   showSearch: boolean = true;
 
-  selectedCorpusId: number;
+  selectedCorpusId: string;
   selectedCorpusName: string;
   
+  selectedProductionId: string;
+  selectedProductionTitle: string;
+
+  selectedSimplificationId: string;
+  selectedSimplificationName: string;
+
   corpusName: string;
   corpusSource: string;
   corpusGenre: string;
@@ -34,8 +42,15 @@ export class AnotadorComponent implements OnInit {
   productionContent: string;
   productionRawContent: string;
 
+  simplificationName: string;
+  simplificationFrom: string;
+  simplificationTag: string;
+
+
   constructor(private authService: AuthService, public af: AngularFireDatabase, private router: Router) {
+    console.log("vou listar tudo.");
     this.listCorpora();
+    console.log(this.corpora);
    }
 
   ngOnInit() {
@@ -80,24 +95,18 @@ export class AnotadorComponent implements OnInit {
 
   listProductions() {
     this.stage = "productions";
-    this.stageTitle = this.selectedCorpusName + " - Produções";
+    this.stageTitle = "Produções - " + this.selectedCorpusName;
     this.productions = this.af.list('/corpora/' + this.selectedCorpusId + "/productions", {
       query: {
         limitToLast: 50
       }
     });
-
   }
 
   selectProduction(prodId, prodTitle) {
-    this.stage = "simplifications";
-    this.stageTitle = "Simplificações - " + prodTitle;
-    this.showSearch = false;
-    this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/productions/" + prodId + "/simplifications", {
-      query: {
-        limitToLast: 50
-      }
-    });
+    this.selectedProductionTitle = prodTitle;
+    this.selectedProductionId = prodId;
+    this.listSimplifications();
   }
   
   newProduction() {
@@ -128,6 +137,70 @@ export class AnotadorComponent implements OnInit {
     });
     this.listProductions();
   }
+
+  listSimplifications() {
+    this.stage = "simplifications";
+    this.stageTitle = "Simplificações - " + this.selectedProductionTitle;
+    this.showSearch = true;
+    this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/productions/" + this.selectedProductionId + "/simplifications", {
+      query: {
+        limitToLast: 50
+      }
+    });
+  }
+    
+  newSimplification() {
+    this.stage = "newSimplification";
+    this.stageTitle = "Nova Simplificação";
+    this.showSearch = false;
+
+    this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/productions/" + this.selectedProductionId + "/texts", {
+      query: {
+        limitToLast: 10
+      }
+    });
+
+  }
+
+  saveNewSimplification() {
+    this.simplifications.push(
+      {
+        name: this.simplificationName, 
+        from: this.simplificationFrom, 
+        tags: this.simplificationTag
+      }
+    );
+    this.listSimplifications();
+  }
+
+  saveSimplification() {
+    
+  }
+
+  selectSimplification(simplId, simplName) {
+    this.selectedSimplificationId = simplId;
+    this.selectedSimplificationName = simplName;
+    this.doSimplification();
+  }
+
+  doSimplification() {
+    this.stage = "doSimplification";
+    this.stageTitle = "Simplificação - " + this.selectedSimplificationName;
+    this.showSearch = false;
+    this.simplification = this.af.object('/corpora/' + this.selectedCorpusId 
+          + "/productions/" + this.selectedProductionId 
+          + "/simplifications/" + this.selectedSimplificationId);
+    
+    this.simplification.subscribe(simpl => {
+
+      this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId 
+          + "/productions/" + this.selectedProductionId 
+          + "/texts/" + simpl.from);
+
+    });
+   
+  }
+    
 
 
   changeListener(event) {

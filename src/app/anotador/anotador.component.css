@@ -27,6 +27,10 @@ input#message {
     min-width:200px;
 }
 
+.details-container a:hover {
+    background: #cdff84;
+}
+
 .details-container a.new { 
     background: #cdff84;
 }
