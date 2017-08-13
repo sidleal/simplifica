@@ -13,6 +13,7 @@ import { SenterService } from './providers/senter.service';
 import { AnotadorComponent } from './anotador/anotador.component';
 import { MenuComponent } from './menu/menu.component';
 import { SenterComponent } from './senter/senter.component';
+import { NgxDynamicTemplateModule } from 'ngx-dynamic-template';
 
 
 export const firebaseConfig = {
@@ -46,7 +47,8 @@ const routes: Routes = [
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes),
+    NgxDynamicTemplateModule.forRoot({ routes: routes })
   ],
   providers: [AuthService, SenterService],
   bootstrap: [AppComponent]

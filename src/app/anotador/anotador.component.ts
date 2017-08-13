@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable} from 'angularfire2/database';
 import { AuthService } from '../providers/auth.service';
 import { Router } from '@angular/router';
+import { SenterService } from '../providers/senter.service';
 
 @Component({
   selector: 'app-anotador',
@@ -46,10 +47,13 @@ export class AnotadorComponent implements OnInit {
   simplificationFrom: string;
   simplificationTag: string;
 
-  parsedSimplificationTextFrom: string;
+  parsedSimplificationTextFrom: string = '';
+  context = this;
 
+  totalParagraphs: number;
+  totalSentences: number;
 
-  constructor(private authService: AuthService, public af: AngularFireDatabase, private router: Router) {
+  constructor(private authService: AuthService, public af: AngularFireDatabase, private router: Router, private senterService: SenterService) {
     console.log("vou listar tudo.");
     this.listCorpora();
     console.log(this.corpora);
@@ -207,7 +211,24 @@ export class AnotadorComponent implements OnInit {
 
     this.simplificationTextFrom.subscribe(text => {
 
-      this.parsedSimplificationTextFrom = "vixiii<br/>vixiii."
+      var parsedText = this.senterService.splitText(text.content);
+
+      this.totalParagraphs = parsedText['totP'];
+      this.totalSentences =  parsedText['totS'];
+
+      var out = '';
+      out += "<style type='text/css'> p span:hover {background: #cdff84;cursor:pointer;} </style>"
+      parsedText['paragraphs'].forEach(p => {
+        out += "<p>"
+        p['sentences'].forEach(s => {
+          out += '<span id=\'p' + p['idx'] + '_s' + s['idx'] + '\'>' + s['text'] + ' </span>';
+        });
+        out += "</p>"
+      });
+
+      this.parsedSimplificationTextFrom = out;
+
+      //this.parsedSimplificationTextFrom = "<span style=\'color: orange;\'>{{selectedSimplificationName}}This is simple dynamic template</span>";
 
     });
   }

@@ -77,7 +77,12 @@
         <div class="small-12 large-6 centered columns">
           <h5>{{(simplificationTextFrom | async)?.title}}</h5>
           <h6>{{(simplificationTextFrom | async)?.subTitle}}</h6>
-          <div>{{parsedSimplificationTextFrom}}</div>
+
+          <ng-template dynamic-template
+             [template]="parsedSimplificationTextFrom"
+             [context]="context">
+          </ng-template>
+
         </div>
         <div class="small-12 large-6 centered columns">
           <input type="text" id="simplificationToTitle" placeholder="Título" [(ngModel)]="simplificationToTitle"/>
