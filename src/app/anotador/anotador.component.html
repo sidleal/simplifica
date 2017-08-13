@@ -77,21 +77,34 @@
         <div class="small-12 large-6 centered columns">
           <h5>{{(simplificationTextFrom | async)?.title}}</h5>
           <h6>{{(simplificationTextFrom | async)?.subTitle}}</h6>
-
+        </div>
+        <div class="small-12 large-6 centered columns">
+          <input type="text" id="simplificationToTitle" placeholder="Título" [ngModel]="simplificationToTitle"/>
+          <input type="text" id="simplificationToSubTitle" placeholder="SubTítulo" [(ngModel)]="simplificationToSubTitle"/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-12 large-6 centered columns">
           <ng-template dynamic-template
              [template]="parsedSimplificationTextFrom"
              [context]="context">
           </ng-template>
-
         </div>
         <div class="small-12 large-6 centered columns">
-          <input type="text" id="simplificationToTitle" placeholder="Título" [(ngModel)]="simplificationToTitle"/>
-          <input type="text" id="simplificationToSubTitle" placeholder="SubTítulo" [(ngModel)]="simplificationToSubTitle"/>
-          <textarea id="simplificationToContent" placeholder="Conteúdo" [(ngModel)]="simplificationToContent" rows="20"></textarea>
+          <div contenteditable="true" id="editor">
+            <ng-template dynamic-template
+              [template]="parsedSimplificationTextFrom"
+              [context]="context">
+            </ng-template>
+          </div>
         </div>
-        <button (click)="saveSimplification()" id="btnSaveSimplification">Gravar</button>
-        <button (click)="listSimplifications()" id="btnBackSimplification" class="natural">Voltar</button>
       </div> 
+      <div class="row">
+        <div class="small-12 large-6 columns">
+          <button (click)="saveSimplification()" id="btnSaveSimplification">Gravar</button>
+          <button (click)="listSimplifications()" id="btnBackSimplification" class="natural">Voltar</button>
+        </div>
+      </div>
     </div>
 
   </div>

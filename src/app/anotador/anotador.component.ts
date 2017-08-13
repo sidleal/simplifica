@@ -46,6 +46,8 @@ export class AnotadorComponent implements OnInit {
   simplificationName: string;
   simplificationFrom: string;
   simplificationTag: string;
+  simplificationToTitle: string;
+  simplificationToSubTitle: string;
 
   parsedSimplificationTextFrom: string = '';
   context = this;
@@ -210,6 +212,8 @@ export class AnotadorComponent implements OnInit {
     });
 
     this.simplificationTextFrom.subscribe(text => {
+      this.simplificationToTitle = text.title;
+      this.simplificationToSubTitle = text.subTitle;
 
       var parsedText = this.senterService.splitText(text.content);
 
