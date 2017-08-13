@@ -46,6 +46,8 @@ export class AnotadorComponent implements OnInit {
   simplificationFrom: string;
   simplificationTag: string;
 
+  parsedSimplificationTextFrom: string;
+
 
   constructor(private authService: AuthService, public af: AngularFireDatabase, private router: Router) {
     console.log("vou listar tudo.");
@@ -116,6 +118,10 @@ export class AnotadorComponent implements OnInit {
   }
 
   saveProduction() {
+    if (this.productionRawContent == null) {
+      this.productionRawContent = this.productionContent;
+    }
+
     this.productions.push(
       {
         title: this.productionTitle, 
@@ -174,7 +180,7 @@ export class AnotadorComponent implements OnInit {
   }
 
   saveSimplification() {
-    
+    console.log()
   }
 
   selectSimplification(simplId, simplName) {
@@ -198,7 +204,12 @@ export class AnotadorComponent implements OnInit {
           + "/texts/" + simpl.from);
 
     });
-   
+
+    this.simplificationTextFrom.subscribe(text => {
+
+      this.parsedSimplificationTextFrom = "vixiii<br/>vixiii."
+
+    });
   }
     
 

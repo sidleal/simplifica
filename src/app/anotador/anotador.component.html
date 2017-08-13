@@ -76,9 +76,8 @@
       <div class="row">
         <div class="small-12 large-6 centered columns">
           <h5>{{(simplificationTextFrom | async)?.title}}</h5>
-          <input type="text" id="simplificationFromTitle" placeholder="Título" [ngModel]="(simplificationTextFrom | async)?.title"/>
-          <input type="text" id="simplificationFromSubTitle" placeholder="SubTítulo" [(ngModel)]="simplificationFromSubTitle"/>
-          <textarea id="simplificationFromContent" placeholder="Conteúdo" [ngModel]="(simplificationTextFrom | async)?.content" rows="20"></textarea>
+          <h6>{{(simplificationTextFrom | async)?.subTitle}}</h6>
+          <div>{{parsedSimplificationTextFrom}}</div>
         </div>
         <div class="small-12 large-6 centered columns">
           <input type="text" id="simplificationToTitle" placeholder="Título" [(ngModel)]="simplificationToTitle"/>
