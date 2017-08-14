@@ -51,14 +51,13 @@ export class AnotadorComponent implements OnInit {
 
   parsedSimplificationTextFrom: string = '';
   context = this;
+  parsedSimplificationTextTo: string = '';
 
   totalParagraphs: number;
   totalSentences: number;
 
   constructor(private authService: AuthService, public af: AngularFireDatabase, private router: Router, private senterService: SenterService) {
-    console.log("vou listar tudo.");
     this.listCorpora();
-    console.log(this.corpora);
    }
 
   ngOnInit() {
@@ -223,20 +222,35 @@ export class AnotadorComponent implements OnInit {
       var out = '';
       out += "<style type='text/css'> p span:hover {background: #cdff84;cursor:pointer;} </style>"
       parsedText['paragraphs'].forEach(p => {
-        out += "<p>"
+        out += '<p id=\'f_p' + p['idx'] + '\'>';
         p['sentences'].forEach(s => {
-          out += '<span id=\'p' + p['idx'] + '_s' + s['idx'] + '\'>' + s['text'] + ' </span>';
+          out += '<span id=\'f_p' + p['idx'] + '_s' + s['idx'] + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>' + s['text'] + ' </span>';
         });
         out += "</p>"
       });
 
       this.parsedSimplificationTextFrom = out;
 
-      //this.parsedSimplificationTextFrom = "<span style=\'color: orange;\'>{{selectedSimplificationName}}This is simple dynamic template</span>";
+
+      out = '';
+      out += "<style type='text/css'> p span:hover {background: #cdff84;cursor:pointer;} </style>"
+      parsedText['paragraphs'].forEach(p => {
+        out += '<p id=\'t_p' + p['idx'] + '\'>';
+        p['sentences'].forEach(s => {
+          out += '<span id=\'t_p' + p['idx'] + '_s' + s['idx'] + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>' + s['text'] + ' </span>';
+        });
+        out += "</p>"
+      });
+
+      this.parsedSimplificationTextTo = out;
+
+
+
+
+
 
     });
   }
-    
 
 
   changeListener(event) {

@@ -1,3 +1,7 @@
+<script type='text/javascript'>
+function sentenceMouseOver() { alert('hey');}
+</script>
+
 <div class="row">
   <div class="small-12 centered columns">
     <h4>{{stageTitle}}</h4>
@@ -65,7 +69,7 @@
             <option *ngFor="let text of texts | async" [value]="text.$key">Nível {{text.level}} - {{text.title}}</option>
           </select>
           <label for="simplificationTag">Tags:</label>
-          <input type="text" id="simplificationTag" placeholder="Digite uma nova tag seguida por enter" [(ngModel)]="simplificationTag"/>
+          <input type="text" id="simplificationTag" placeholder="Digite as tags separadas por vírgula" [(ngModel)]="simplificationTag"/>
           <button (click)="saveNewSimplification()" id="btnSaveNewSimplification">Gravar</button>
           <button (click)="listSimplifications()" id="btnBackSimplification" class="natural">Voltar</button>
         </div> 
@@ -74,37 +78,39 @@
 
     <div id="doSimplification" *ngIf="stage == 'doSimplification'">
       <div class="row">
-        <div class="small-12 large-6 centered columns">
-          <h5>{{(simplificationTextFrom | async)?.title}}</h5>
-          <h6>{{(simplificationTextFrom | async)?.subTitle}}</h6>
-        </div>
-        <div class="small-12 large-6 centered columns">
-          <input type="text" id="simplificationToTitle" placeholder="Título" [ngModel]="simplificationToTitle"/>
-          <input type="text" id="simplificationToSubTitle" placeholder="SubTítulo" [(ngModel)]="simplificationToSubTitle"/>
+        <div class="small-12 large-6 columns">
+          <button (click)="saveSimplification()" id="btnSaveSimplification">Gravar</button>
+          <button (click)="listSimplifications()" id="btnBackSimplification" class="natural">Voltar</button>
         </div>
       </div>
       <div class="row">
         <div class="small-12 large-6 centered columns">
-          <ng-template dynamic-template
-             [template]="parsedSimplificationTextFrom"
-             [context]="context">
-          </ng-template>
+          <div class="titles">{{(simplificationTextFrom | async)?.title}}</div>
+          <div class="titles">{{(simplificationTextFrom | async)?.subTitle}}</div>
         </div>
         <div class="small-12 large-6 centered columns">
-          <div contenteditable="true" id="editor">
+          <div contenteditable="true" class="titles">{{simplificationToTitle}}</div>
+          <div contenteditable="true" class="titles">{{simplificationToSubTitle}}</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-12 large-6 centered columns">
+          <div class="editor">
             <ng-template dynamic-template
               [template]="parsedSimplificationTextFrom"
               [context]="context">
             </ng-template>
           </div>
         </div>
-      </div> 
-      <div class="row">
-        <div class="small-12 large-6 columns">
-          <button (click)="saveSimplification()" id="btnSaveSimplification">Gravar</button>
-          <button (click)="listSimplifications()" id="btnBackSimplification" class="natural">Voltar</button>
+        <div class="small-12 large-6 centered columns">
+          <div contenteditable="true" class="editor">
+            <ng-template dynamic-template
+              [template]="parsedSimplificationTextTo"
+              [context]="context">
+            </ng-template>
+          </div>
         </div>
-      </div>
+      </div> 
     </div>
 
   </div>

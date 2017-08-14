@@ -43,9 +43,22 @@ input#message {
     font-size: 0.9rem;
 }
 
-#editor {
-   display:inline-block;
-   border: solid 1px #000;
-   min-height: 200px;
-   background: white;
+.titles {
+    display:inline-block;
+    border: solid 1px #000;
+    min-width: 100%;
+    background: white;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.editor {
+    display:inline-block;
+    border: solid 1px #000;
+    min-height: 200px;
+    min-width: 100%;
+    background: white;
+    text-align: justify;
+    padding: 20px;
+    margin-bottom: 20px;
 }
