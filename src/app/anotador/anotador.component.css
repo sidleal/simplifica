@@ -20,7 +20,7 @@ input#message {
 
 .details-container a {
     background:#fff;
-    padding:1.4em;
+    padding:0.5em;
     color:#696969;
     margin: 12px;
     width:auto;
@@ -61,4 +61,13 @@ input#message {
     text-align: justify;
     padding: 20px;
     margin-bottom: 20px;
+}
+
+.inner-button {
+    margin-left: 80%;
+}
+
+
+.inner-button:hover {
+    color: red;
 }

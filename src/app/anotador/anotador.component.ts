@@ -17,10 +17,8 @@ export class AnotadorComponent implements OnInit {
   simplification: FirebaseObjectObservable<any>;
   simplificationTextFrom: FirebaseObjectObservable<any>;
 
+  breadcrumb: string = "editor";
   stage: string;
-  stageTitle: string;
-  searchText: string = '';
-  showSearch: boolean = true;
 
   selectedCorpusId: string;
   selectedCorpusName: string;
@@ -57,7 +55,7 @@ export class AnotadorComponent implements OnInit {
   totalSentences: number;
 
   constructor(private authService: AuthService, public af: AngularFireDatabase, private router: Router, private senterService: SenterService) {
-    this.listCorpora();
+    this.showMenu();
    }
 
   ngOnInit() {
@@ -68,6 +66,30 @@ export class AnotadorComponent implements OnInit {
 
   }
 
+  back() {
+    switch(this.stage) {
+      case "corpora":
+        this.showMenu();
+        break;
+      case "newCorpus":
+        this.showMenu();
+        break;
+      case "textMenu":
+        this.listCorpora();
+        break;
+      case "newProduction":
+        this.showTextMenu();
+        break;
+      default:
+        this.router.navigate(['']);
+    }
+  }
+
+  showMenu() {
+    this.stage = "menu";
+    this.breadcrumb = "editor > menu"
+  }
+
   listCorpora() {
     this.corpora = this.af.list('/corpora', {
       query: {
@@ -75,34 +97,47 @@ export class AnotadorComponent implements OnInit {
       }
     });
     this.stage = "corpora";
-    this.stageTitle = "Meus Córpus";
-    this.showSearch = true;
+    this.breadcrumb = "editor > meus corpora"
   }
 
   selectCorpus(corpusId, corpusName) {
     this.selectedCorpusId = corpusId;
     this.selectedCorpusName = corpusName;
-    this.listProductions();
+    this.showTextMenu();
   }
 
   newCorpus() {
     this.stage = "newCorpus";
-    this.stageTitle = "Novo Córpus";
-    this.showSearch = false;
+    this.breadcrumb = "editor > novo córpus"
   }
 
   saveCorpus() {
+    this.corpora = this.af.list('/corpora');
     this.corpora.push({name: this.corpusName, source: this.corpusSource, genre: this.corpusGenre});
-    this.listCorpora();
+    this.showMenu();
   }
   
+  deleteCorpus(corpusId) {
+    this.af.object('/corpora/' + corpusId).remove();
+  }
+
   backToMenu() {
     this.router.navigate(['']);
   }
 
+  showTextMenu() {
+    this.stage = "textMenu";
+    this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos";
+    this.productions = this.af.list('/corpora/' + this.selectedCorpusId + "/productions", {
+      query: {
+        limitToLast: 50
+      }
+    });
+  }
+
+
   listProductions() {
     this.stage = "productions";
-    this.stageTitle = "Produções - " + this.selectedCorpusName;
     this.productions = this.af.list('/corpora/' + this.selectedCorpusId + "/productions", {
       query: {
         limitToLast: 50
@@ -118,8 +153,7 @@ export class AnotadorComponent implements OnInit {
   
   newProduction() {
     this.stage = "newProduction";
-    this.stageTitle = "Nova Produção";
-    this.showSearch = false;
+    this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > importar novo texto";
   }
 
   saveProduction() {
@@ -151,8 +185,6 @@ export class AnotadorComponent implements OnInit {
 
   listSimplifications() {
     this.stage = "simplifications";
-    this.stageTitle = "Simplificações - " + this.selectedProductionTitle;
-    this.showSearch = true;
     this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/productions/" + this.selectedProductionId + "/simplifications", {
       query: {
         limitToLast: 50
@@ -162,8 +194,6 @@ export class AnotadorComponent implements OnInit {
     
   newSimplification() {
     this.stage = "newSimplification";
-    this.stageTitle = "Nova Simplificação";
-    this.showSearch = false;
 
     this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/productions/" + this.selectedProductionId + "/texts", {
       query: {
@@ -196,8 +226,6 @@ export class AnotadorComponent implements OnInit {
 
   doSimplification() {
     this.stage = "doSimplification";
-    this.stageTitle = "Simplificação - " + this.selectedSimplificationName;
-    this.showSearch = false;
     this.simplification = this.af.object('/corpora/' + this.selectedCorpusId 
           + "/productions/" + this.selectedProductionId 
           + "/simplifications/" + this.selectedSimplificationId);

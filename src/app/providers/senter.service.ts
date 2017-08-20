@@ -41,6 +41,7 @@ export class SenterService {
 
     // rule 2 - " { [ ( ) ] } "
     out = this.applyGroupRule(out, /"(.+?)"/g)
+    out = this.applyGroupRule(out, /“(.+?)”/g)
     out = this.applyGroupRule(out, /\{(.+?)\}/g)
     out = this.applyGroupRule(out, /\[(.+?)\]/g)
     out = this.applyGroupRule(out, /\((.+?)\)/g)

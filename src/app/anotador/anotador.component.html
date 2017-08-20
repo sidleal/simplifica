@@ -1,26 +1,52 @@
-<script type='text/javascript'>
-function sentenceMouseOver() { alert('hey');}
-</script>
 
 <div class="row">
   <div class="small-12 centered columns">
-    <h4>{{stageTitle}}</h4>
+    <div>  
+      <div id="breadcrumb">: : {{breadcrumb}}</div>
+      <a class="btn btn-danger" (click)="back()" data-toggle="tooltip" title="Voltar">
+        <i class="fa fa-arrow-left fa-2x"></i>
+      </a>
+    </div>
     
-    <input type="text" id="search" placeholder="Pesquisar" (keyup.enter)="search()" [(ngModel)]="searchText" *ngIf="showSearch"/>
+    <div id="menu" *ngIf="stage == 'menu'">
+      <div class="row">
+        <div class="small-8 large-3 centered columns">
+          <button (click)="newCorpus()" id="btnNewCorpus" class="natural">Criar Novo Córpus</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-8 large-3 centered columns">
+          <button (click)="listCorpora()" id="btnListCorpus" class="natural">Meus Corpora</button>
+        </div>
+      </div>
+    </div>
 
     <div id="corpora" *ngIf="stage == 'corpora'">
-      <button (click)="newCorpus()" id="btnNewCorpus" class="default">Novo Córpus</button>
-      <button (click)="backToMenu()" id="btnCorporaBack" class="natural">Voltar para Menu</button>
+      <p>(clique sobre o nome do corpus para selecioná-lo)</p>
       <div id="details-container-corpora" class="details-container"> 
           <a (click)="selectCorpus(corpus.$key, corpus.name)" *ngFor="let corpus of corpora | async">
-            {{corpus.name}}<br/><p>({{corpus.source}})</p>
+            {{corpus.name}}<br/>
+            <p>({{corpus.source}})</p>
+            <i class="fa fa-trash-o inner-button" data-toggle="tooltip" title="Excluir" (click)="deleteCorpus(corpus.$key);$event.stopPropagation();"></i>
           </a>
       </div>
     </div>
 
+    <div id="textMenu" *ngIf="stage == 'textMenu'">
+      <div class="row">
+        <div class="small-8 large-3 centered columns">
+          <button (click)="newProduction()" id="btnNewProd" class="natural">Importar Novo Texto</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-8 large-3 centered columns">
+          <button (click)="listTexts()" id="btnListTexts" class="natural">Simplificar Texto</button>
+        </div>
+      </div>
+    </div>
+
     <div id="productions" *ngIf="stage == 'productions'">
-      <button (click)="newProduction()" id="btnNewProd" class="default">Nova Produção</button>
-      <button (click)="listCorpora()" id="btnProdBack" class="natural">Voltar para Córpus</button>
+      <button (click)="newProduction()" id="btnNewProd" class="default">Importar Novo Texto</button>
       <div id="details-container-productions" class="details-container"> 
           <a (click)="selectProduction(prod.$key, prod.title)" *ngFor="let prod of productions | async">
             {{prod.title}}<br/><p>{{prod.author}} - {{prod.published}}</p>
@@ -40,11 +66,17 @@ function sentenceMouseOver() { alert('hey');}
     </div>
 
     <div id="newCorpus" *ngIf="stage == 'newCorpus'">
-      <input type="text" id="corpusName" placeholder="Nome" [(ngModel)]="corpusName"/>
-      <input type="text" id="corpusSource" placeholder="Fonte" [(ngModel)]="corpusSource"/>
-      <input type="text" id="corpusGenre" placeholder="Gênero" [(ngModel)]="corpusGenre"/>
-      <button (click)="saveCorpus()" id="btnSaveCorpus" class="default">Gravar</button>
-      <button (click)="listCorpora()" id="btnBackCorpus" class="natural">Voltar</button>
+      <div class="row">
+        <div class="small-12 large-6 columns centered">
+          <label for="corpusName">Nome:</label>
+          <input type="text" id="corpusName" placeholder="Nome" [(ngModel)]="corpusName"/>
+          <label for="corpusSource">Fonte:</label>
+          <input type="text" id="corpusSource" placeholder="Fonte" [(ngModel)]="corpusSource"/>
+          <label for="corpusGenre">Gênero:</label>
+          <input type="text" id="corpusGenre" placeholder="Gênero" [(ngModel)]="corpusGenre"/>
+          <button (click)="saveCorpus()" id="btnSaveCorpus" class="default">Gravar</button>
+        </div>
+      </div>
     </div>
 
     <div id="newProduction" *ngIf="stage == 'newProduction'">
@@ -56,7 +88,6 @@ function sentenceMouseOver() { alert('hey');}
       <input type="text" id="productionSource" placeholder="Fonte" [(ngModel)]="productionSource"/>      
       <textarea id="productionContent" placeholder="Conteúdo" [(ngModel)]="productionContent" rows="20"></textarea>
       <button (click)="saveProduction()" id="btnSaveProduction">Gravar</button>
-      <button (click)="listProductions()" id="btnBackProduction" class="natural">Voltar</button>
     </div>
 
     <div id="newSimplification" *ngIf="stage == 'newSimplification'">
