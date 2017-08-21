@@ -11,7 +11,6 @@ import { SenterService } from '../providers/senter.service';
 })
 export class AnotadorComponent implements OnInit {
   corpora: FirebaseListObservable<any[]>;
-  productions: FirebaseListObservable<any[]>;
   simplifications: FirebaseListObservable<any[]>;
   texts: FirebaseListObservable<any[]>;
   simplification: FirebaseObjectObservable<any>;
@@ -23,23 +22,24 @@ export class AnotadorComponent implements OnInit {
   selectedCorpusId: string;
   selectedCorpusName: string;
   
-  selectedProductionId: string;
-  selectedProductionTitle: string;
-
   selectedSimplificationId: string;
   selectedSimplificationName: string;
+
+  selectedTextId: string;
+  selectedTextTitle: string;
 
   corpusName: string;
   corpusSource: string;
   corpusGenre: string;
 
-  productionTitle: string;
-  productionSubTitle: string;
-  productionAuthor: string;
-  productionPublished: string;
-  productionSource: string;
-  productionContent: string;
-  productionRawContent: string;
+  textName: string;
+  textTitle: string;
+  textSubTitle: string;
+  textAuthor: string;
+  textPublished: string;
+  textSource: string;
+  textContent: string;
+  textRawContent: string;
 
   simplificationName: string;
   simplificationFrom: string;
@@ -77,9 +77,18 @@ export class AnotadorComponent implements OnInit {
       case "textMenu":
         this.listCorpora();
         break;
-      case "newProduction":
+      case "newText":
         this.showTextMenu();
         break;
+      case "texts":
+        this.showTextMenu();
+        break;        
+      case "doSimplification":
+        this.listTexts();
+        break;        
+      case "simplifications":
+        this.showTextMenu();
+        break;        
       default:
         this.router.navigate(['']);
     }
@@ -128,115 +137,90 @@ export class AnotadorComponent implements OnInit {
   showTextMenu() {
     this.stage = "textMenu";
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos";
-    this.productions = this.af.list('/corpora/' + this.selectedCorpusId + "/productions", {
+  }
+
+
+  listTexts() {
+    this.stage = "texts";
+    this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos";
+    this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/texts", {
       query: {
         limitToLast: 50
       }
     });
   }
 
-
-  listProductions() {
-    this.stage = "productions";
-    this.productions = this.af.list('/corpora/' + this.selectedCorpusId + "/productions", {
-      query: {
-        limitToLast: 50
-      }
-    });
-  }
-
-  selectProduction(prodId, prodTitle) {
-    this.selectedProductionTitle = prodTitle;
-    this.selectedProductionId = prodId;
-    this.listSimplifications();
-  }
-  
-  newProduction() {
-    this.stage = "newProduction";
+  newText() {
+    this.stage = "newText";
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > importar novo texto";
   }
 
-  saveProduction() {
-    if (this.productionRawContent == null) {
-      this.productionRawContent = this.productionContent;
+  deleteText(textId) {
+    this.af.object('/corpora/' + this.selectedCorpusId + '/texts/' + textId).remove();
+  }
+
+  saveText() {
+
+    if (this.textRawContent == null) {
+      this.textRawContent = this.textContent;
     }
 
-    this.productions.push(
+    this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/texts");
+    this.texts.push(
       {
-        title: this.productionTitle, 
-        published: this.productionPublished, 
-        author: this.productionAuthor,
-        source: this.productionSource,
-        rawContent: this.productionRawContent
+        name: this.textName,
+        title: this.textTitle,
+        subTitle: this.textSubTitle, 
+        content: this.textContent, 
+        published: this.textPublished, 
+        author: this.textAuthor,
+        source: this.textSource,
+        rawContent: this.textRawContent,
+        level: 0
       }
-    ).then((item) => {
-      this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/productions/" + item.key + "/texts");
-      this.texts.push(
-        {
-          title: this.productionTitle,
-          subTitle: this.productionSubTitle, 
-          content: this.productionContent, 
-          level: 1
-        }
-      );
-    });
-    this.listProductions();
+    );
+    this.showTextMenu();
+  }
+
+  selectText(textId, textTitle) {
+    this.selectedTextId = textId;
+    this.selectedTextTitle = textTitle;
+    this.doSimplification();
   }
 
   listSimplifications() {
     this.stage = "simplifications";
-    this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/productions/" + this.selectedProductionId + "/simplifications", {
+    this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > Simplificações";
+    this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications", {
       query: {
         limitToLast: 50
       }
     });
   }
     
-  newSimplification() {
-    this.stage = "newSimplification";
-
-    this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/productions/" + this.selectedProductionId + "/texts", {
-      query: {
-        limitToLast: 10
-      }
-    });
-
-  }
-
-  saveNewSimplification() {
+  saveSimplification() {
+    this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications");
     this.simplifications.push(
       {
-        name: this.simplificationName, 
-        from: this.simplificationFrom, 
-        tags: this.simplificationTag
+        name: this.simplificationName,
+        from: this.selectedTextId,
+        tags: this.simplificationTag,
+        updated: '12.12.2012'
       }
     );
-    this.listSimplifications();
-  }
-
-  saveSimplification() {
-    console.log()
+    this.showTextMenu();
   }
 
   selectSimplification(simplId, simplName) {
     this.selectedSimplificationId = simplId;
     this.selectedSimplificationName = simplName;
-    this.doSimplification();
+    //this.doSimplification();
   }
 
   doSimplification() {
     this.stage = "doSimplification";
-    this.simplification = this.af.object('/corpora/' + this.selectedCorpusId 
-          + "/productions/" + this.selectedProductionId 
-          + "/simplifications/" + this.selectedSimplificationId);
-    
-    this.simplification.subscribe(simpl => {
-
-      this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId 
-          + "/productions/" + this.selectedProductionId 
-          + "/texts/" + simpl.from);
-
-    });
+    this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos > " + this.selectedTextTitle + " > Nova Simplificação";
+    this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
 
     this.simplificationTextFrom.subscribe(text => {
       this.simplificationToTitle = text.title;
@@ -285,15 +269,15 @@ export class AnotadorComponent implements OnInit {
 
     var reader:FileReader = new FileReader();
     
-    this.productionTitle = '';
-    this.productionSubTitle = '';
-    this.productionAuthor = '';
-    this.productionPublished = '';
-    this.productionSource = '';
+    this.textTitle = '';
+    this.textSubTitle = '';
+    this.textAuthor = '';
+    this.textPublished = '';
+    this.textSource = '';
     
     reader.onloadend = (e) => {
         //console.log(reader.result);
-        this.productionRawContent = reader.result;
+        this.textRawContent = reader.result;
 
         var linhas: string[] = reader.result.split("\n");
         var parsedText: string = '';
@@ -306,14 +290,14 @@ export class AnotadorComponent implements OnInit {
           
           match = /<title>(.*)<\/title>/g.exec(element);
           if (match) {
-            this.productionTitle = match[1];
+            this.textTitle = match[1];
             meta = true;
           }
 
           match = /<subtitle>(.*)<\/subtitle>/g.exec(element);
           if (match) {
-            if (!this.productionSubTitle) {
-              this.productionSubTitle = match[1];
+            if (!this.textSubTitle) {
+              this.textSubTitle = match[1];
             } else {
               parsedText += "\n" + match[1] + "\n\n";
             }
@@ -322,19 +306,19 @@ export class AnotadorComponent implements OnInit {
 
           match = /<author>(.*)<\/author>/g.exec(element);
           if (match) {
-            this.productionAuthor = match[1];
+            this.textAuthor = match[1];
             meta = true;
           }
 
           match = /<date>(.*)<\/date>/g.exec(element);
           if (match) {
-            this.productionPublished = match[1];
+            this.textPublished = match[1];
             meta = true;
           }
 
           match = /<url>(.*)<\/url>/g.exec(element);
           if (match) {
-            this.productionSource = match[1];
+            this.textSource = match[1];
             meta = true;
           }
 
@@ -344,7 +328,7 @@ export class AnotadorComponent implements OnInit {
 
         });
 
-        this.productionContent = parsedText;
+        this.textContent = parsedText;
 
     }
     reader.readAsText(event.target.files[0], 'UTF-8');

@@ -35,32 +35,36 @@
     <div id="textMenu" *ngIf="stage == 'textMenu'">
       <div class="row">
         <div class="small-8 large-3 centered columns">
-          <button (click)="newProduction()" id="btnNewProd" class="natural">Importar Novo Texto</button>
+          <button (click)="newText()" class="default">Importar Novo Texto</button>
         </div>
       </div>
       <div class="row">
         <div class="small-8 large-3 centered columns">
-          <button (click)="listTexts()" id="btnListTexts" class="natural">Simplificar Texto</button>
+          <button (click)="listTexts()" class="default">Simplificar Texto</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-8 large-3 centered columns">
+          <button (click)="listSimplifications()" class="default">Editar Simplificação Existente</button>
         </div>
       </div>
     </div>
 
-    <div id="productions" *ngIf="stage == 'productions'">
-      <button (click)="newProduction()" id="btnNewProd" class="default">Importar Novo Texto</button>
-      <div id="details-container-productions" class="details-container"> 
-          <a (click)="selectProduction(prod.$key, prod.title)" *ngFor="let prod of productions | async">
-            {{prod.title}}<br/><p>{{prod.author}} - {{prod.published}}</p>
+    <div *ngIf="stage == 'texts'">
+      <input type="text" placeholder="Pesquisar" (keyup.enter)="search()" [(ngModel)]="searchText"/>
+      <input type="checkbox" checked="true"/>Original <input type="checkbox" checked="true"/>Simplificação
+      <div class="details-container"> 
+          <a (click)="selectText(text.$key, text.title)" *ngFor="let text of texts | async">
+            {{text.title}}<br/><p>{{text.name}}<br/>{{text.source}}<br/>Nível {{text.level}} ({{text.published}})</p>
+            <i class="fa fa-trash-o inner-button" data-toggle="tooltip" title="Excluir" (click)="deleteText(text.$key);$event.stopPropagation();"></i>            
           </a>
       </div>
     </div>
 
     <div id="simplifications" *ngIf="stage == 'simplifications'">
-      <button (click)="newSimplification()" id="btnNewSimpl" class="default">Nova Simplificação</button>
-      <button (click)="listProductions()" id="btnSimplBack" class="natural">Voltar para Produções</button>
-
-      <div id="details-container-simplifications" class="details-container"> 
+      <div class="details-container"> 
           <a (click)="selectSimplification(simp.$key, simp.name)" *ngFor="let simp of simplifications | async">
-            {{simp.name}}<br/><p>{{simp.tags}}</p>
+            {{simp.name}}<br/><p>{{simp.tags}}<br/>({{simp.updated}})</p>
           </a>
       </div>
     </div>
@@ -79,41 +83,29 @@
       </div>
     </div>
 
-    <div id="newProduction" *ngIf="stage == 'newProduction'">
+    <div id="newText" *ngIf="stage == 'newText'">
       <input type="file" (change)="changeListener($event)" >
-      <input type="text" id="productionTitle" placeholder="Título" [(ngModel)]="productionTitle"/>
-      <input type="text" id="productionSubTitle" placeholder="SubTítulo" [(ngModel)]="productionSubTitle"/>
-      <input type="text" id="productionAuthor" placeholder="Autor" [(ngModel)]="productionAuthor"/>
-      <input type="text" id="productionPublished" placeholder="Data Publicação" [(ngModel)]="productionPublished"/>
-      <input type="text" id="productionSource" placeholder="Fonte" [(ngModel)]="productionSource"/>      
-      <textarea id="productionContent" placeholder="Conteúdo" [(ngModel)]="productionContent" rows="20"></textarea>
-      <button (click)="saveProduction()" id="btnSaveProduction">Gravar</button>
-    </div>
-
-    <div id="newSimplification" *ngIf="stage == 'newSimplification'">
-      <div class="row">
-        <div class="small-12 large-6 columns">
-          <label for="simplificationName">Nome:</label>
-          <input type="text" id="simplificationName" placeholder="Nome simples para identificar o bitexto" [(ngModel)]="simplificationName"/>
-          <label for="simplificationFrom">Texto base:</label>
-          <select id="simplificationFrom" [(ngModel)]="simplificationFrom" required>
-            <option *ngFor="let text of texts | async" [value]="text.$key">Nível {{text.level}} - {{text.title}}</option>
-          </select>
-          <label for="simplificationTag">Tags:</label>
-          <input type="text" id="simplificationTag" placeholder="Digite as tags separadas por vírgula" [(ngModel)]="simplificationTag"/>
-          <button (click)="saveNewSimplification()" id="btnSaveNewSimplification">Gravar</button>
-          <button (click)="listSimplifications()" id="btnBackSimplification" class="natural">Voltar</button>
-        </div> 
-      </div>
+      <input type="text" placeholder="Nome do Arquivo" [(ngModel)]="textName"/>
+      <input type="text" placeholder="Título" [(ngModel)]="textTitle"/>
+      <input type="text" placeholder="SubTítulo" [(ngModel)]="textSubTitle"/>
+      <input type="text" placeholder="Autor" [(ngModel)]="textAuthor"/>
+      <input type="text" placeholder="Data Publicação" [(ngModel)]="textPublished"/>
+      <input type="text" placeholder="Fonte" [(ngModel)]="textSource"/>      
+      <textarea placeholder="Conteúdo" [(ngModel)]="textContent" rows="20"></textarea>
+      <button (click)="saveText()" id="btnSaveText">Gravar</button>
     </div>
 
     <div id="doSimplification" *ngIf="stage == 'doSimplification'">
+
       <div class="row">
-        <div class="small-12 large-6 columns">
-          <button (click)="saveSimplification()" id="btnSaveSimplification">Gravar</button>
-          <button (click)="listSimplifications()" id="btnBackSimplification" class="natural">Voltar</button>
-        </div>
+        <div class="small-12 large-6 columns centered">
+          <label for="simplificationName">Nome:</label>
+          <input type="text" id="simplificationName" placeholder="Nome simples para identificar o bitexto" [(ngModel)]="simplificationName"/>
+          <label for="simplificationTag">Tags:</label>
+          <input type="text" id="simplificationTag" placeholder="Digite as tags separadas por vírgula" [(ngModel)]="simplificationTag"/>
+        </div> 
       </div>
+
       <div class="row">
         <div class="small-12 large-6 centered columns">
           <div class="titles">{{(simplificationTextFrom | async)?.title}}</div>
@@ -142,6 +134,13 @@
           </div>
         </div>
       </div> 
+
+      <div class="row">
+        <div class="small-12 large-6 columns">
+          <button (click)="saveSimplification()" id="btnSaveSimplification">Gravar</button>
+        </div>
+      </div>
+
     </div>
 
   </div>
