@@ -153,6 +153,14 @@ export class AnotadorComponent implements OnInit {
   newText() {
     this.stage = "newText";
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > importar novo texto";
+    this.textName = '';
+    this.textTitle = '';
+    this.textSubTitle = '';
+    this.textAuthor = '';
+    this.textPublished = '';
+    this.textSource = '';
+    this.textContent = '';
+    this.textRawContent = '';
   }
 
   deleteText(textId) {
@@ -268,7 +276,10 @@ export class AnotadorComponent implements OnInit {
   changeListener(event) {
 
     var reader:FileReader = new FileReader();
-    
+    var fileTokens = event.target.value.split('\\')[2].split('.');
+    var fileName: string = fileTokens[0] + ' nível_0';
+
+    this.textName = fileName;
     this.textTitle = '';
     this.textSubTitle = '';
     this.textAuthor = '';

@@ -85,12 +85,19 @@
 
     <div id="newText" *ngIf="stage == 'newText'">
       <input type="file" (change)="changeListener($event)" >
+      <label for="textName">Nome:</label>
       <input type="text" placeholder="Nome do Arquivo" [(ngModel)]="textName"/>
+      <label for="textTitle">Título:</label>
       <input type="text" placeholder="Título" [(ngModel)]="textTitle"/>
+      <label for="textSubTitle">SubTítulo:</label>
       <input type="text" placeholder="SubTítulo" [(ngModel)]="textSubTitle"/>
+      <label for="textAuthor">Autor:</label>
       <input type="text" placeholder="Autor" [(ngModel)]="textAuthor"/>
+      <label for="textPublished">Data:</label>
       <input type="text" placeholder="Data Publicação" [(ngModel)]="textPublished"/>
-      <input type="text" placeholder="Fonte" [(ngModel)]="textSource"/>      
+      <label for="textSource">Fonte:</label>
+      <input type="text" placeholder="Fonte" [(ngModel)]="textSource"/>
+      <label for="textContent">Conteúdo:</label>    
       <textarea placeholder="Conteúdo" [(ngModel)]="textContent" rows="20"></textarea>
       <button (click)="saveText()" id="btnSaveText">Gravar</button>
     </div>
