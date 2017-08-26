@@ -3,6 +3,7 @@ import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable} 
 import { AuthService } from '../providers/auth.service';
 import { Router } from '@angular/router';
 import { SenterService } from '../providers/senter.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-anotador',
@@ -54,15 +55,12 @@ export class AnotadorComponent implements OnInit {
   totalParagraphs: number;
   totalSentences: number;
 
-  constructor(private authService: AuthService, public af: AngularFireDatabase, private router: Router, private senterService: SenterService) {
+  constructor(private authService: AuthService, public af: AngularFireDatabase, 
+    private router: Router, private senterService: SenterService) {
     this.showMenu();
    }
 
   ngOnInit() {
-
-  }
-
-  search() {
 
   }
 

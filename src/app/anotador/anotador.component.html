@@ -11,12 +11,12 @@
     <div id="menu" *ngIf="stage == 'menu'">
       <div class="row">
         <div class="small-8 large-3 centered columns">
-          <button (click)="newCorpus()" id="btnNewCorpus" class="natural">Criar Novo Córpus</button>
+          <button (click)="newCorpus()" id="btnNewCorpus" class="natural"><i class="fa fa-file-o fa-2x"></i><br/>Criar Novo Córpus</button>
         </div>
       </div>
       <div class="row">
         <div class="small-8 large-3 centered columns">
-          <button (click)="listCorpora()" id="btnListCorpus" class="natural">Meus Corpora</button>
+          <button (click)="listCorpora()" id="btnListCorpus" class="natural"><i class="fa fa-th fa-2x"></i><br/>Meus Corpora</button>
         </div>
       </div>
     </div>
@@ -35,17 +35,17 @@
     <div id="textMenu" *ngIf="stage == 'textMenu'">
       <div class="row">
         <div class="small-8 large-3 centered columns">
-          <button (click)="newText()" class="default">Importar Novo Texto</button>
+          <button (click)="newText()" class="default"><i class="fa fa-arrow-circle-o-up fa-2x"></i><br/>Importar Novo Texto</button>
         </div>
       </div>
       <div class="row">
         <div class="small-8 large-3 centered columns">
-          <button (click)="listTexts()" class="default">Simplificar Texto</button>
+          <button (click)="listTexts()" class="default"><i class="fa fa-files-o fa-2x"></i><br/>Simplificar Texto</button>
         </div>
       </div>
       <div class="row">
         <div class="small-8 large-3 centered columns">
-          <button (click)="listSimplifications()" class="default">Editar Simplificação Existente</button>
+          <button (click)="listSimplifications()" class="default"><i class="fa fa-file-text fa-2x"></i><br/>Editar Simplificação Existente</button>
         </div>
       </div>
     </div>
@@ -78,7 +78,7 @@
           <input type="text" id="corpusSource" placeholder="Fonte" [(ngModel)]="corpusSource"/>
           <label for="corpusGenre">Gênero:</label>
           <input type="text" id="corpusGenre" placeholder="Gênero" [(ngModel)]="corpusGenre"/>
-          <button (click)="saveCorpus()" id="btnSaveCorpus" class="default">Gravar</button>
+          <button (click)="saveCorpus()" id="btnSaveCorpus" class="default"><i class="fa fa-save fa-2x"></i><br/>Gravar</button>
         </div>
       </div>
     </div>
@@ -99,7 +99,7 @@
       <input type="text" placeholder="Fonte" [(ngModel)]="textSource"/>
       <label for="textContent">Conteúdo:</label>    
       <textarea placeholder="Conteúdo" [(ngModel)]="textContent" rows="20"></textarea>
-      <button (click)="saveText()" id="btnSaveText">Gravar</button>
+      <button (click)="saveText()" id="btnSaveText"><i class="fa fa-save fa-2x"></i><br/>Gravar</button>
     </div>
 
     <div id="doSimplification" *ngIf="stage == 'doSimplification'">
@@ -144,7 +144,7 @@
 
       <div class="row">
         <div class="small-12 large-6 columns">
-          <button (click)="saveSimplification()" id="btnSaveSimplification">Gravar</button>
+          <button (click)="saveSimplification()" id="btnSaveSimplification"><i class="fa fa-save fa-2x"></i><br/>Gravar</button>
         </div>
       </div>
 
