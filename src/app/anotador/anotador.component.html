@@ -53,10 +53,12 @@
     <div *ngIf="stage == 'texts'">
       <input type="text" placeholder="Pesquisar" (keyup)="filterText()" [(ngModel)]="searchText"/>
       <input type="checkbox" checked="true"/>Original <input type="checkbox" checked="true"/>Simplificação
+
       <div class="details-container"> 
-          <a (click)="selectText(text.$key, text.title)" *ngFor="let text of texts | async">
+          <a (click)="selectText(text.$key, text.title)" onmousedown="document.getElementById('waiting').style='';" *ngFor="let text of texts | async">
             {{text.title}}<br/><p>{{text.name}}<br/>{{text.source}}<br/>Nível {{text.level}} ({{text.published}})</p>
-            <i class="fa fa-trash-o inner-button" data-toggle="tooltip" title="Excluir" (click)="deleteText(text.$key);$event.stopPropagation();"></i>            
+            <i class="fa fa-spinner fa-pulse fa-fw" id='waiting' style="display:none"></i>
+            <i class="fa fa-trash-o inner-button" data-toggle="tooltip" title="Excluir" (click)="deleteText(text.$key);$event.stopPropagation();"></i>
           </a>
       </div>
     </div>
@@ -143,7 +145,7 @@
       </div> 
 
       <div class="row">
-        <div class="small-12 large-6 columns">
+        <div class="small-12 large-6 centered columns">
           <button (click)="saveSimplification()" id="btnSaveSimplification"><i class="fa fa-save fa-2x"></i><br/>Gravar</button>
         </div>
       </div>

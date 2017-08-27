@@ -154,7 +154,6 @@ export class AnotadorComponent implements OnInit {
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos";
   }
 
-
   listTexts() {
     this.stage = "texts";
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos";
@@ -315,10 +314,11 @@ export class AnotadorComponent implements OnInit {
       for(var p in text.paragraphs) {
         out += '<p id=\'f.p.' + p + '\'>';
         for(var s in text.paragraphs[p].sentences) {
-          out += '<span id=\'f.s.' + s + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
+          out += '<span id=\'f.s.' + s + '\' data-pair=\'t.s.' + s + '\'';
+          out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
           for(var t in text.paragraphs[p].sentences[s].tokens) {
             var token = text.paragraphs[p].sentences[s].tokens[t].token;
-            out += '<div id=\'f.t.' + t + '\'';
+            out += '<div id=\'f.t.' + t + '\' data-pair=\'t.t.' + t + '\'';
             out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
             out += '&nbsp;';
           }
@@ -330,17 +330,18 @@ export class AnotadorComponent implements OnInit {
 
       out = '';
       out += "<style type='text/css'>";
-      out += " p span:hover {background:#cdff84;cursor:pointer;}";
+      out += " p span:hover {background:#cdff84;cursor:text;}";
       out += " p span div {display:inline-block;}";
-      out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:pointer;}";
+      out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:text;}";
       out += "</style>";
       for(var p in text.paragraphs) {
         out += '<p id=\'t.p.' + p + '\'>';
         for(var s in text.paragraphs[p].sentences) {
-          out += '<span id=\'t.s.' + s + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
+          out += '<span id=\'t.s.' + s + '\' data-pair=\'f.s.' + s + '\'';
+          out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
           for(var t in text.paragraphs[p].sentences[s].tokens) {
             var token = text.paragraphs[p].sentences[s].tokens[t].token;
-            out += '<div id=\'t.t.' + t + '\'';
+            out += '<div id=\'t.t.' + t + '\' data-pair=\'f.t.' + t + '\'';
             out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
             out += '&nbsp;';
           }

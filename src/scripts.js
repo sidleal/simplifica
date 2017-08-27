@@ -15,12 +15,7 @@ function outToken(token) {
 }
 
 function toggleObject(obj, style) {
-    pairObj = '';
-    if (obj.id.startsWith('f')) {
-        pairObj = 't' + obj.id.substring(1,obj.id.length);
-    } else {
-        pairObj = 'f' + obj.id.substring(1,obj.id.length);
-    }
+    pairObj = obj.getAttribute('data-pair');
     if (document.getElementById(pairObj) != null) {
         document.getElementById(pairObj).style = style;
     }
