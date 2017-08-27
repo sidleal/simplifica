@@ -5,7 +5,9 @@ function overSentence(sentence) {
     } else {
         pairSentence = 'f' + sentence.id.substring(1,sentence.id.length);
     }
-    document.getElementById(pairSentence).style = "background: #b0cfff;"
+    if (document.getElementById(pairSentence) != null) {
+        document.getElementById(pairSentence).style = "background: #b0cfff;";
+    }
 }
 
 function outSentence(sentence) {
@@ -15,5 +17,7 @@ function outSentence(sentence) {
     } else {
         pairSentence = 'f' + sentence.id.substring(1,sentence.id.length);
     }
-    document.getElementById(pairSentence).style = ""
+    if (document.getElementById(pairSentence) != null) {
+        document.getElementById(pairSentence).style = "";
+    }
 }

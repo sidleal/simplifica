@@ -107,6 +107,7 @@ export class SenterService {
 
     var idxParagraphs = 0;
     var idxSentences = 0;
+    var idxTokens = 0;
 
     parsedText['paragraphs'] = [];
 
@@ -114,13 +115,21 @@ export class SenterService {
       p = p.trim();
       if (p != '') {
         idxParagraphs++;
-        var parsedParagraph = {"idx": idxParagraphs, "sentences": [] };
+        var parsedParagraph = {"idx": idxParagraphs, "sentences": [], "text": p };
         var sentences = p.split("|||");
         sentences.forEach(s => {
           s = s.trim();
           if (s.length > 1) {
             idxSentences++;
-            parsedParagraph['sentences'].push({"idx": idxSentences, "text": s});
+            var parsedSentence = {"idx": idxSentences, "tokens": [], "text": s};
+            var tokens = this.tokenizeText(s);
+            tokens.forEach(t => {
+              if (t.length > 0) {
+                idxTokens++;
+                parsedSentence['tokens'].push({"idx": idxTokens, "token": t});
+              }
+            });
+            parsedParagraph['sentences'].push(parsedSentence);
           }
         });
         parsedText['paragraphs'].push(parsedParagraph);
@@ -128,6 +137,7 @@ export class SenterService {
     });
     parsedText['totP'] = idxParagraphs;
     parsedText['totS'] = idxSentences;
+    parsedText['totT'] = idxTokens;
 
     return parsedText;
   }
@@ -135,16 +145,25 @@ export class SenterService {
   postProcess(parsedText) {
 
     parsedText['paragraphs'].forEach(p => {
+      p['text'] = this.punctuateBack(p['text']);
       p['sentences'].forEach(s => {
-        var text = s['text'];
-        text = text.replace(/\|dot\|/g, '.');
-        text = text.replace(/\|int\|/g, '?');
-        text = text.replace(/\|exc\|/g, '!');
-        s['text'] = text;
+        s['text'] = this.punctuateBack(s['text']);
+        s['tokens'].forEach(t => {
+          t['token'] = this.punctuateBack(t['token']);
+        });
       });
     });
 
     return parsedText;
+  }
+
+  punctuateBack(text) {
+    text = text.replace(/\|dot\|/g, '.');
+    text = text.replace(/\|int\|/g, '?');
+    text = text.replace(/\|exc\|/g, '!');
+    text = text.replace(/\|hyp\|/g, '-');
+    text = text.replace(/\|\|\|/g, '')
+    return text;
   }
 
   splitText(rawText) {
@@ -159,8 +178,11 @@ export class SenterService {
   }
 
   tokenizeText(rawText) {
-    rawText = rawText.replace(/[\.\,"\(\)\[\]\{\};]+/g, '');
-    rawText = rawText.replace(/\s-/g, '');
+    rawText = rawText.replace(/([A-z]+)-([A-z]+)/g, "$1|hyp|$2");
+    rawText = rawText.replace(/\|int\|/g, "?");
+    rawText = rawText.replace(/\|exc\|/g, "!");
+    rawText = rawText.replace(/([\.\,"\(\)\[\]\{\}\?\!;-]{1})/g, " $1 ");
+    rawText = rawText.replace(/\s+/g, ' ');
     return rawText.split(' ');
   }
 

@@ -101,33 +101,31 @@ export class SenterComponent implements OnInit {
     var out = '';
     out = '{\n  \"text\": [\n';
     parsedText['paragraphs'].forEach(p => {
-      out += '        { \"i\": ' + p['idx'] + ', \"p\": [\n'
+      out += '            { \"i\": ' + p['idx'] + ',\n';
+      out += '              \"p\":\"' + p['text'].replace(/"/g,'\\"') + '\",\n';
+      out += '              \"ps\":[\n'
       p['sentences'].forEach(s => {
-        out += '               {  \"i\": ' + s['idx'] + ', \"s\": \"' + s['text'] + '\"},\n';            
+        out += '                   { \"i\": ' + s['idx'] + ', \"s\": \"' + s['text'].replace(/"/g,'\\"');
+        out += '\",\n                     \"st\": [\n';
+        s['tokens'].forEach(t => {
+          out += '                             { \"i\": ' + t['idx'] + ', \"t\": \"' + t['token'] + '\"},\n';
+        });
+        out += '                     ]\n';
+        out += '                   },\n';
       });
-      out += '         ]},\n';
+      out += '              ]\n            },\n';
     });
-    out += '       ],\n';
+    out += '  ],\n';
     out += '  \"totP\":' + parsedText['totP'] + ',\n';
     out += '  \"totS\":' + parsedText['totS'] + ',\n';
+    out += '  \"totT\":' + parsedText['totT'] + ',\n';
     out += '}';
     return out;
   }
 
     outputToJSONNoFormat(parsedText) {
-    var out = '';
-    out = '{\"text\":[';
-    parsedText['paragraphs'].forEach(p => {
-      out += '{\"i\": ' + p['idx'] + ',\"p\":['
-      p['sentences'].forEach(s => {
-        out += '{\"i\": ' + s['idx'] + ',\"s\":\"' + s['text'] + '\"},';            
-      });
-      out += ']},';
-    });
-    out += '],';
-    out += '\"totP\":' + parsedText['totP'] + ',';
-    out += '\"totS\":' + parsedText['totS'] + ',';
-    out += '}';
+    var out = this.outputToJSON(parsedText);
+    out = out.replace(/\n\s+/g, '');
     return out;
   }
 

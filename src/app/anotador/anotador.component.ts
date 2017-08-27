@@ -49,9 +49,9 @@ export class AnotadorComponent implements OnInit {
   simplificationToTitle: string;
   simplificationToSubTitle: string;
 
-  parsedSimplificationTextFrom: string = '';
+  textFrom: string = '';
   context = this;
-  parsedSimplificationTextTo: string = '';
+  textTo: string = '';
 
   totalParagraphs: number;
   totalSentences: number;
@@ -201,12 +201,12 @@ export class AnotadorComponent implements OnInit {
         rawContent: this.textRawContent,
         level: 0
       }
-    ).then((text) => { this.saveSentences(text) });
+    ).then((text) => { this.saveParagraphs(text) });
 
     this.showTextMenu();
   }
 
-  saveSentences(text) {
+  saveParagraphs(text) {
     var parsedText = this.senterService.splitText(this.textContent);
 
     var textObj = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key);
@@ -216,27 +216,39 @@ export class AnotadorComponent implements OnInit {
         totS:  parsedText['totS']
       });
 
-    var sentences = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/sentences");
+    var paragraphs = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs");
 
     parsedText['paragraphs'].forEach(p => {
-      p['sentences'].forEach(s => {
-        sentences.push(
-          {
-            idx: s['idx'],
-            text: s['text'],
-            p: p['idx']
-          }
-        ).then((sent) => {
-          this.saveTokens(text, sent);
-        });
+      paragraphs.push(
+        {
+          idx: p['idx'],
+          text: p['text']
+        }
+      ).then((par) => {
+        this.saveSentences(text, par, p);
       });
     });
 
   }
 
-  saveTokens(text, sent) {
-    var tokens = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/sentences/" + sent.key + "/tokens");
-    var sentence = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/sentences/" + sent.key).take(1);
+  saveSentences(text, par, p) {
+    var sentences = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences");
+    p['sentences'].forEach(s => {
+      sentences.push(
+        {
+          idx: s['idx'],
+          text: s['text'],
+        }
+      ).then((sent) => {
+        this.saveTokens(text, par, sent);
+      });
+    });
+
+  }
+
+  saveTokens(text, par, sent) {
+    var tokens = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences/" + sent.key + "/tokens");
+    var sentence = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences/" + sent.key).take(1);
     sentence.subscribe( s => {
       var tokenList = this.senterService.tokenizeText(s.text);
       tokenList.forEach(t => {
@@ -291,44 +303,41 @@ export class AnotadorComponent implements OnInit {
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos > " + this.selectedTextTitle + " > Nova Simplificação";
     this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
 
-    this.simplificationTextFrom.subscribe(text => {
+    this.simplificationTextFrom.take(1).subscribe(text => {
       this.simplificationToTitle = text.title;
       this.simplificationToSubTitle = text.subTitle;
 
-      var parsedText = this.senterService.splitText(text.content);
-
-      this.totalParagraphs = parsedText['totP'];
-      this.totalSentences =  parsedText['totS'];
+      this.totalParagraphs = text.totP;
+      this.totalSentences =  text.totS;
 
       var out = '';
       out += "<style type='text/css'> p span:hover {background: #cdff84;cursor:pointer;} </style>"
-      parsedText['paragraphs'].forEach(p => {
-        out += '<p id=\'f_p' + p['idx'] + '\'>';
-        p['sentences'].forEach(s => {
-          out += '<span id=\'f_p' + p['idx'] + '_s' + s['idx'] + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>' + s['text'] + ' </span>';
-        });
+      for(var p in text.paragraphs) {
+        out += '<p id=\'f.p.' + p + '\'>';
+        for(var s in text.paragraphs[p].sentences) {
+          var sentence = text.paragraphs[p].sentences[s].text;
+          for(var t in text.paragraphs[p].sentences[s].tokens) {
+            var token = text.paragraphs[p].sentences[s].tokens[t].token;
+            sentence = sentence.replace(token, '<span id=\'f.t.' + t + '\'>' + token + '</span>');
+            //console.log(text.paragraphs[p].sentences[s].tokens[t].token);
+          }
+          out += '<span id=\'f.s.' + s + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>' + sentence + ' </span>';
+        }
         out += "</p>"
-      });
-
-      this.parsedSimplificationTextFrom = out;
-
+      }
+      console.log(out);
+      this.textFrom = out;
 
       out = '';
       out += "<style type='text/css'> p span:hover {background: #cdff84;cursor:pointer;} </style>"
-      parsedText['paragraphs'].forEach(p => {
-        out += '<p id=\'t_p' + p['idx'] + '\'>';
-        p['sentences'].forEach(s => {
-          out += '<span id=\'t_p' + p['idx'] + '_s' + s['idx'] + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>' + s['text'] + ' </span>';
-        });
+      for(var p in text.paragraphs) {
+        out += '<p id=\'t.p.' + p + '\'>';
+        for(var s in text.paragraphs[p].sentences) {
+          out += '<span id=\'t.s.' + s + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>' + text.paragraphs[p].sentences[s].text + ' </span>';
+        }
         out += "</p>"
-      });
-
-      this.parsedSimplificationTextTo = out;
-
-
-
-
-
+      }
+      this.textTo = out;
 
     });
   }
