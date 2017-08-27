@@ -1,23 +1,27 @@
 function overSentence(sentence) {
-     pairSentence = '';
-    if (sentence.id.startsWith('f')) {
-        pairSentence = 't' + sentence.id.substring(1,sentence.id.length);
-    } else {
-        pairSentence = 'f' + sentence.id.substring(1,sentence.id.length);
-    }
-    if (document.getElementById(pairSentence) != null) {
-        document.getElementById(pairSentence).style = "background: #b0cfff;";
-    }
+    toggleObject(sentence, "background: #b0cfff;");
 }
 
 function outSentence(sentence) {
-     pairSentence = '';
-    if (sentence.id.startsWith('f')) {
-        pairSentence = 't' + sentence.id.substring(1,sentence.id.length);
+    toggleObject(sentence, "");
+}
+
+function overToken(token) {
+    toggleObject(token, "font-weight:bold;text-decoration:underline;");
+}
+
+function outToken(token) {
+    toggleObject(token, "");
+}
+
+function toggleObject(obj, style) {
+    pairObj = '';
+    if (obj.id.startsWith('f')) {
+        pairObj = 't' + obj.id.substring(1,obj.id.length);
     } else {
-        pairSentence = 'f' + sentence.id.substring(1,sentence.id.length);
+        pairObj = 'f' + obj.id.substring(1,obj.id.length);
     }
-    if (document.getElementById(pairSentence) != null) {
-        document.getElementById(pairSentence).style = "";
+    if (document.getElementById(pairObj) != null) {
+        document.getElementById(pairObj).style = style;
     }
 }

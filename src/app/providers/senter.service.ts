@@ -93,9 +93,9 @@ export class SenterService {
     var match;
     while (match = regexGroup.exec(rawText)) {
       var sentenceOld:string = match[1];
-      var sentenceNew:string = sentenceOld.replace(/\./g, '|dot|');
-      sentenceNew = sentenceNew.replace(/\?/g, '|int|');
-      sentenceNew = sentenceNew.replace(/\!/g, '|exc|');
+      var sentenceNew:string = sentenceOld.replace(/\./g, '|gdot|');
+      sentenceNew = sentenceNew.replace(/\?/g, '|gint|');
+      sentenceNew = sentenceNew.replace(/\!/g, '|gexc|');
       rawText = rawText.replace(sentenceOld, sentenceNew);
     }
     return rawText;
@@ -159,8 +159,9 @@ export class SenterService {
 
   punctuateBack(text) {
     text = text.replace(/\|dot\|/g, '.');
-    text = text.replace(/\|int\|/g, '?');
-    text = text.replace(/\|exc\|/g, '!');
+    text = text.replace(/\|gdot\|/g, '.');
+    text = text.replace(/\|gint\|/g, '?');
+    text = text.replace(/\|gexc\|/g, '!');    
     text = text.replace(/\|hyp\|/g, '-');
     text = text.replace(/\|\|\|/g, '')
     return text;
@@ -179,8 +180,9 @@ export class SenterService {
 
   tokenizeText(rawText) {
     rawText = rawText.replace(/([A-z]+)-([A-z]+)/g, "$1|hyp|$2");
-    rawText = rawText.replace(/\|int\|/g, "?");
-    rawText = rawText.replace(/\|exc\|/g, "!");
+    rawText = rawText.replace(/\|gdot\|/g, ".");
+    rawText = rawText.replace(/\|gint\|/g, "?");
+    rawText = rawText.replace(/\|gexc\|/g, "!");
     rawText = rawText.replace(/([\.\,"\(\)\[\]\{\}\?\!;-]{1})/g, " $1 ");
     rawText = rawText.replace(/\s+/g, ' ');
     return rawText.split(' ');

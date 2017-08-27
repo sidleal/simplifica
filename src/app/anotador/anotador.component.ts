@@ -240,27 +240,23 @@ export class AnotadorComponent implements OnInit {
           text: s['text'],
         }
       ).then((sent) => {
-        this.saveTokens(text, par, sent);
+        this.saveTokens(text, par, sent, s);
       });
     });
 
   }
 
-  saveTokens(text, par, sent) {
+  saveTokens(text, par, sent, s) {
     var tokens = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences/" + sent.key + "/tokens");
-    var sentence = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences/" + sent.key).take(1);
-    sentence.subscribe( s => {
-      var tokenList = this.senterService.tokenizeText(s.text);
-      tokenList.forEach(t => {
-        tokens.push(
-          {
-            token: t,
-            lemma: t
-          }
-        );
-       });
+    s['tokens'].forEach(t => {
+      tokens.push(
+        {
+          idx: t['idx'],
+          token: t['token'],
+          lemma: t['token']
+        }
+      );
     });
-
   }
 
   selectText(textId, textTitle) {
@@ -311,29 +307,44 @@ export class AnotadorComponent implements OnInit {
       this.totalSentences =  text.totS;
 
       var out = '';
-      out += "<style type='text/css'> p span:hover {background: #cdff84;cursor:pointer;} </style>"
+      out += "<style type='text/css'>";
+      out += " p span:hover {background:#cdff84;cursor:pointer;}";
+      out += " p span div {display:inline-block;}";
+      out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:pointer;}";
+      out += "</style>";
       for(var p in text.paragraphs) {
         out += '<p id=\'f.p.' + p + '\'>';
         for(var s in text.paragraphs[p].sentences) {
-          var sentence = text.paragraphs[p].sentences[s].text;
+          out += '<span id=\'f.s.' + s + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
           for(var t in text.paragraphs[p].sentences[s].tokens) {
             var token = text.paragraphs[p].sentences[s].tokens[t].token;
-            sentence = sentence.replace(token, '<span id=\'f.t.' + t + '\'>' + token + '</span>');
-            //console.log(text.paragraphs[p].sentences[s].tokens[t].token);
+            out += '<div id=\'f.t.' + t + '\'';
+            out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
+            out += '&nbsp;';
           }
-          out += '<span id=\'f.s.' + s + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>' + sentence + ' </span>';
+          out += ' </span>';
         }
         out += "</p>"
       }
-      console.log(out);
       this.textFrom = out;
 
       out = '';
-      out += "<style type='text/css'> p span:hover {background: #cdff84;cursor:pointer;} </style>"
+      out += "<style type='text/css'>";
+      out += " p span:hover {background:#cdff84;cursor:pointer;}";
+      out += " p span div {display:inline-block;}";
+      out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:pointer;}";
+      out += "</style>";
       for(var p in text.paragraphs) {
         out += '<p id=\'t.p.' + p + '\'>';
         for(var s in text.paragraphs[p].sentences) {
-          out += '<span id=\'t.s.' + s + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>' + text.paragraphs[p].sentences[s].text + ' </span>';
+          out += '<span id=\'t.s.' + s + '\' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
+          for(var t in text.paragraphs[p].sentences[s].tokens) {
+            var token = text.paragraphs[p].sentences[s].tokens[t].token;
+            out += '<div id=\'t.t.' + t + '\'';
+            out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
+            out += '&nbsp;';
+          }
+          out += ' </span>';
         }
         out += "</p>"
       }
