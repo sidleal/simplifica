@@ -43,9 +43,9 @@ export class AnotadorComponent implements OnInit {
   textContent: string;
   textRawContent: string;
 
-  simplificationName: string;
+  simplificationName: string = "Natural";
   simplificationFrom: string;
-  simplificationTag: string;
+  simplificationTag: string = "Nivel 1";
   simplificationToTitle: string;
   simplificationToSubTitle: string;
 
@@ -275,17 +275,165 @@ export class AnotadorComponent implements OnInit {
   }
     
   saveSimplification() {
-    this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications");
-    this.simplifications.push(
-      {
-        name: this.simplificationName,
-        from: this.selectedTextId,
-        tags: this.simplificationTag,
-        updated: '12.12.2012'
-      }
-    );
+    var textToTitle = document.getElementById("divTextToTitle").innerHTML;
+    var textToSubTitle = document.getElementById("divTextToSubTitle").innerHTML;
+
+    var parsedParagraphs = [];
+    var idxParagraphs = 0;
+    var idxSentences = 0;
+    var idxTokens = 0;
+
+    var textToHTML = document.getElementById("divTextTo").innerHTML;
+    textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.indexOf("</p></div>"));
+    textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
+    var paragraphs = textToHTML.split("|||");
+    paragraphs.forEach(p => {
+      idxParagraphs++;
+      // parsedParagraphs.push({"idx": idxParagraphs, "text": "TODO", "sentences": []});
+      var parsedParagraph = {"idx": idxParagraphs, "text": "TODO", "sentences": []};
+
+      p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
+      var sentences = p.split("|||");
+      sentences.forEach(s => {
+        idxSentences++;
+        var regexp = /id="t\.s\.(.+?)"/g
+        var match = regexp.exec(s);
+        var sId = match[1];
+
+        regexp = /data-pair="f\.s\.(.+?)"/g
+        match = regexp.exec(s);
+        var sPair = match[1];
+
+        // console.log('sentence id ' + sId + 'pair ' + sPair);
+
+        var parsedSentence = {"idx": idxSentences, text: "TODO", "id": sId, "pair": sPair, "tokens": []};
+        var tokens = s.split("&nbsp;");
+        tokens.forEach(t => {
+          if (t.indexOf("div") > 0) {
+            idxTokens++;
+            var regexp = /id="t\.t\.(.+?)"/g
+            var match = regexp.exec(t);
+            var tId = match[1];
+
+            regexp = /data-pair="f\.t\.(.+?)"/g
+            match = regexp.exec(t);
+            var tPair = match[1];
+
+            regexp = />([^<]+?)</g
+            match = regexp.exec(t);
+            var t = match[1];
+
+            var parsedToken = {"idx": idxTokens, "token": t, "lemma": "TODO", "id": tId, "pair": tPair}
+            parsedSentence.tokens.push(parsedToken);
+            // console.log('token id ' + tId + ' pair ' + tPair + ' - ' + t);
+          }
+        });
+        parsedParagraph.sentences.push(parsedSentence);
+      });
+      parsedParagraphs.push(parsedParagraph);
+    });
+
+    var parsedText = {"totP": idxParagraphs, "totS": idxSentences, "totT": idxTokens, "paragraphs": parsedParagraphs};
+
+    this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
+    this.simplificationTextFrom.take(1).subscribe(text => {
+
+      this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/texts");
+      var newName = text.name;
+      newName = newName.replace(/nível_[0-9]+/g, "nível_" + (text.level + 1));
+      this.texts.push(
+        {
+          name: newName,
+          title: textToTitle,
+          subTitle: textToSubTitle, 
+          content: 'TODO',
+          published: "12.12.12",
+          updated: "12.12.12",
+          author: "TODO",
+          source: text.source,
+          rawContent: "TODO",
+          level: text.level + 1
+        }
+      ).then((text) => {
+        this.saveParagraphsB(text, parsedText);
+
+        this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications");
+        this.simplifications.push(
+          {
+            name: this.simplificationName,
+            from: this.selectedTextId,
+            to: text.key,
+            tags: this.simplificationTag,
+            updated: '12.12.2012'
+          }
+        );
+
+      });
+    });
+
     this.showTextMenu();
   }
+
+
+
+
+  saveParagraphsB(text, parsedText) {
+    var textObj = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key);
+    textObj.update(
+      {
+        totP: parsedText['totP'],
+        totS: parsedText['totS'],
+        totT: parsedText['totT']
+      });
+
+    var paragraphs = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs");
+
+    parsedText['paragraphs'].forEach(p => {
+      paragraphs.push(
+        {
+          idx: p['idx'],
+          text: p['text']
+        }
+      ).then((par) => {
+        this.saveSentencesB(text, par, p);
+      });
+    });
+
+  }
+
+  saveSentencesB(text, par, p) {
+    var sentences = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences");
+    p['sentences'].forEach(s => {
+      sentences.push(
+        {
+          idx: s['idx'],
+          text: s['text'],
+        }
+      ).then((sent) => {
+        this.saveTokensB(text, par, sent, s);
+      });
+    });
+
+  }
+
+  saveTokensB(text, par, sent, s) {
+    var tokens = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences/" + sent.key + "/tokens");
+    s['tokens'].forEach(t => {
+      tokens.push(
+        {
+          idx: t['idx'],
+          token: t['token'],
+          lemma: t['lemma']
+        }
+      ).then((token) => {
+        t['id'] = token.id;
+      });
+    });
+  }
+
+
+
+
 
   selectSimplification(simplId, simplName) {
     this.selectedSimplificationId = simplId;

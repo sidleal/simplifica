@@ -121,8 +121,8 @@
           <div class="titles">{{(simplificationTextFrom | async)?.subTitle}}</div>
         </div>
         <div class="small-12 large-6 centered columns">
-          <div contenteditable="true" class="titles">{{simplificationToTitle}}</div>
-          <div contenteditable="true" class="titles">{{simplificationToSubTitle}}</div>
+          <div contenteditable="true" class="titles" id="divTextToTitle">{{simplificationToTitle}}</div>
+          <div contenteditable="true" class="titles" id="divTextToSubTitle">{{simplificationToSubTitle}}</div>
         </div>
       </div>
       <div class="row">
@@ -135,7 +135,7 @@
           </div>
         </div>
         <div class="small-12 large-6 centered columns">
-          <div contenteditable="true" class="editor">
+          <div contenteditable="true" class="editor" id="divTextTo">
             <ng-template dynamic-template
               [template]="textTo"
               [context]="context">
