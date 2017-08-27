@@ -51,7 +51,7 @@
     </div>
 
     <div *ngIf="stage == 'texts'">
-      <input type="text" placeholder="Pesquisar" (keyup.enter)="search()" [(ngModel)]="searchText"/>
+      <input type="text" placeholder="Pesquisar" (keyup)="filterText()" [(ngModel)]="searchText"/>
       <input type="checkbox" checked="true"/>Original <input type="checkbox" checked="true"/>Simplificação
       <div class="details-container"> 
           <a (click)="selectText(text.$key, text.title)" *ngFor="let text of texts | async">

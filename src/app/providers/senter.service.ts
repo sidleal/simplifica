@@ -158,4 +158,10 @@ export class SenterService {
     return parsedText;
   }
 
+  tokenizeText(rawText) {
+    rawText = rawText.replace(/[\.\,"\(\)\[\]\{\};]+/g, '');
+    rawText = rawText.replace(/\s-/g, '');
+    return rawText.split(' ');
+  }
+
 }

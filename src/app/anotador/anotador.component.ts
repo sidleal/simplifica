@@ -4,6 +4,7 @@ import { AuthService } from '../providers/auth.service';
 import { Router } from '@angular/router';
 import { SenterService } from '../providers/senter.service';
 import { ChangeDetectorRef } from '@angular/core';
+import 'rxjs/add/operator/take';
 
 @Component({
   selector: 'app-anotador',
@@ -55,6 +56,8 @@ export class AnotadorComponent implements OnInit {
   totalParagraphs: number;
   totalSentences: number;
 
+  searchText: string;
+
   constructor(private authService: AuthService, public af: AngularFireDatabase, 
     private router: Router, private senterService: SenterService) {
     this.showMenu();
@@ -62,6 +65,20 @@ export class AnotadorComponent implements OnInit {
 
   ngOnInit() {
 
+  }
+
+  filterText() {
+    var title = this.searchText;
+    if (title.length > 3) {
+      this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/texts", {
+        query: {
+          orderByChild: 'title',
+          startAt: title,
+          endAt: title + '\uf8ff',
+          limitToLast: 50
+        }
+      });
+    }
   }
 
   back() {
@@ -184,8 +201,54 @@ export class AnotadorComponent implements OnInit {
         rawContent: this.textRawContent,
         level: 0
       }
-    );
+    ).then((text) => { this.saveSentences(text) });
+
     this.showTextMenu();
+  }
+
+  saveSentences(text) {
+    var parsedText = this.senterService.splitText(this.textContent);
+
+    var textObj = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key);
+    textObj.update(
+      {
+        totP: parsedText['totP'],
+        totS:  parsedText['totS']
+      });
+
+    var sentences = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/sentences");
+
+    parsedText['paragraphs'].forEach(p => {
+      p['sentences'].forEach(s => {
+        sentences.push(
+          {
+            idx: s['idx'],
+            text: s['text'],
+            p: p['idx']
+          }
+        ).then((sent) => {
+          this.saveTokens(text, sent);
+        });
+      });
+    });
+
+  }
+
+  saveTokens(text, sent) {
+    var tokens = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/sentences/" + sent.key + "/tokens");
+    var sentence = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/sentences/" + sent.key).take(1);
+    sentence.subscribe( s => {
+      var tokenList = this.senterService.tokenizeText(s.text);
+      tokenList.forEach(t => {
+        tokens.push(
+          {
+            token: t,
+            lemma: t
+          }
+        );
+       });
+    });
+
   }
 
   selectText(textId, textTitle) {
