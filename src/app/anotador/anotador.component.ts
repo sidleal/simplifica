@@ -212,7 +212,8 @@ export class AnotadorComponent implements OnInit {
     textObj.update(
       {
         totP: parsedText['totP'],
-        totS:  parsedText['totS']
+        totS:  parsedText['totS'],
+        totT:  parsedText['totT']
       });
 
     var paragraphs = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs");
@@ -237,6 +238,8 @@ export class AnotadorComponent implements OnInit {
         {
           idx: s['idx'],
           text: s['text'],
+          qtw: s['qtw'],
+          qtt: s['qtt']
         }
       ).then((sent) => {
         this.saveTokens(text, par, sent, s);
@@ -462,11 +465,15 @@ export class AnotadorComponent implements OnInit {
       for(var p in text.paragraphs) {
         out += '<p id=\'f.p.' + p + '\'>';
         for(var s in text.paragraphs[p].sentences) {
-          out += '<span id=\'f.s.' + s + '\' data-pair=\'t.s.' + s + '\'';
+          var sObj = text.paragraphs[p].sentences[s];
+          out += '<span id=\'f.s.' + s + '\' data-selected=\'false\' data-pair=\'t.s.' + s + '\'';
+          out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
+          out += ' onclick=\'sentenceClick(this)\'';
           out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
-          for(var t in text.paragraphs[p].sentences[s].tokens) {
-            var token = text.paragraphs[p].sentences[s].tokens[t].token;
-            out += '<div id=\'f.t.' + t + '\' data-pair=\'t.t.' + t + '\'';
+          for(var t in sObj.tokens) {
+            var token = sObj.tokens[t].token;
+            out += '<div id=\'f.t.' + t + '\' data-selected=\'false\' data-pair=\'t.t.' + t + '\'';
+            out += ' onclick=\'wordClick(this)\'';
             out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
             out += '&nbsp;';
           }
@@ -479,19 +486,32 @@ export class AnotadorComponent implements OnInit {
       out = '';
       out += "<style type='text/css'>";
       out += " p span:hover {background:#cdff84;cursor:text;}";
-      out += " p span div {display:inline-block;}";
-      out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:text;}";
+      // out += " p span div {display:inline-block;padding-top:2px;padding-bottom:2px;}";
+      // out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:text;}";
       out += "</style>";
+      var openQuotes = false;
       for(var p in text.paragraphs) {
         out += '<p id=\'t.p.' + p + '\'>';
         for(var s in text.paragraphs[p].sentences) {
+          var sObj = text.paragraphs[p].sentences[s];
           out += '<span id=\'t.s.' + s + '\' data-pair=\'f.s.' + s + '\'';
+          out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
           out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
-          for(var t in text.paragraphs[p].sentences[s].tokens) {
-            var token = text.paragraphs[p].sentences[s].tokens[t].token;
-            out += '<div id=\'t.t.' + t + '\' data-pair=\'f.t.' + t + '\'';
-            out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
-            out += '&nbsp;';
+          for(var t in sObj.tokens) {
+            var token = sObj.tokens[t].token;
+            // out += '<div id=\'t.t.' + t + '\' data-pair=\'f.t.' + t + '\'';
+            // out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
+            if ('\"\''.indexOf(token) >= 0) {
+              openQuotes = !openQuotes;
+              if (openQuotes) {
+                out += ' ';
+              }
+            } else if (openQuotes && '\"\''.indexOf(out.substr(-1)) >= 0) {
+              //nothing
+            } else if ('.,)]}!?'.indexOf(token) < 0 && '([{'.indexOf(out.substr(-1)) < 0) {
+              out += ' ';
+            }
+            out += token;
           }
           out += ' </span>';
         }
@@ -501,7 +521,6 @@ export class AnotadorComponent implements OnInit {
 
     });
   }
-
 
   changeListener(event) {
 

@@ -105,7 +105,7 @@ export class SenterComponent implements OnInit {
       out += '              \"p\":\"' + p['text'].replace(/"/g,'\\"') + '\",\n';
       out += '              \"ps\":[\n'
       p['sentences'].forEach(s => {
-        out += '                   { \"i\": ' + s['idx'] + ', \"s\": \"' + s['text'].replace(/"/g,'\\"');
+        out += '                   { \"i\": ' + s['idx'] + ', \"qtw\": ' + s['qtw'] + ', \"qtt\": ' + s['qtt'] + ', \"s\": \"' + s['text'].replace(/"/g,'\\"');
         out += '\",\n                     \"st\": [\n';
         s['tokens'].forEach(t => {
           out += '                             { \"i\": ' + t['idx'] + ', \"t\": \"' + t['token'] + '\"},\n';

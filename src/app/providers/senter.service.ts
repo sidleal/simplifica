@@ -121,14 +121,23 @@ export class SenterService {
           s = s.trim();
           if (s.length > 1) {
             idxSentences++;
-            var parsedSentence = {"idx": idxSentences, "tokens": [], "text": s};
+            var parsedSentence = {"idx": idxSentences, "tokens": [], "text": s, "qtt": 0, "qtw": 0};
             var tokens = this.tokenizeText(s);
+            var qtw = 0;
+            var qtt = 0;
             tokens.forEach(t => {
               if (t.length > 0) {
                 idxTokens++;
+                qtt++;
                 parsedSentence['tokens'].push({"idx": idxTokens, "token": t});
+                if (t.length > 1 || '{[()]}.,"?!;:-\''.indexOf(t) < 0) {
+                  qtw++;
+                }
               }
             });
+            parsedSentence['qtt'] = qtt;
+            parsedSentence['qtw'] = qtw;
+
             parsedParagraph['sentences'].push(parsedSentence);
           }
         });
@@ -183,7 +192,7 @@ export class SenterService {
     rawText = rawText.replace(/\|gdot\|/g, ".");
     rawText = rawText.replace(/\|gint\|/g, "?");
     rawText = rawText.replace(/\|gexc\|/g, "!");
-    rawText = rawText.replace(/([\.\,"\(\)\[\]\{\}\?\!;-]{1})/g, " $1 ");
+    rawText = rawText.replace(/([\.\,"\(\)\[\]\{\}\?\!;:-]{1})/g, " $1 ");
     rawText = rawText.replace(/\s+/g, ' ');
     return rawText.split(' ');
   }

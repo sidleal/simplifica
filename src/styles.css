@@ -21,6 +21,11 @@ button.default {
     background: #79B33A;
 }
 
+button.mini {
+    background: #3a72c9;
+    width: 70px;
+}
+
 button.warning {
     background: #c9c33a;
 }

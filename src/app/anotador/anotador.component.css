@@ -57,6 +57,7 @@ input#message {
     border: solid 1px #000;
     min-height: 200px;
     min-width: 100%;
+    max-width: 100%;
     background: white;
     text-align: justify;
     padding: 20px;
@@ -70,4 +71,29 @@ input#message {
 
 .inner-button:hover {
     color: red;
+}
+
+#tools {
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    background:#8ABC41;
+    height: 50px;
+}
+
+#qtTokens {
+    position: fixed;
+    right: 10px;
+    bottom: 0px;
+    background:#8ABC41;
+    height: 50px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.7em;
+}
+
+
+.selected {
+    font-weight: bold;
 }

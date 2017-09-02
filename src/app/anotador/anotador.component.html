@@ -105,7 +105,11 @@
     </div>
 
     <div id="doSimplification" *ngIf="stage == 'doSimplification'">
-
+      <div id='tools'>
+        <button onclick="markWords(true)" class="mini" id='markWords' data-toggle="tooltip" title="Marcar Palavras"><i class="fa fa-text-width"></i></button>
+        <button onclick="markWords(false)" class="mini" id='markSentences' data-toggle="tooltip" title="Marcar Sentenças" style='display:none;'><i class="fa fa-align-justify"></i></button>
+        <span id='qtTokens' data-toggle="tooltip" title="Quantidade Palavras - Quantidade Tokens (da sentença)">0 - 0</span>
+      </div>
       <div class="row">
         <div class="small-12 large-6 columns centered">
           <label for="simplificationName">Nome:</label>
