@@ -51,30 +51,15 @@ function sentenceClick(sentence) {
     if (!markingWords) {
         var selected = sentence.getAttribute('data-selected');
         if (selected == 'true') {
-            // sentence.style = '';
-            // sentence.setAttribute('data-selected', 'false');
-            // document.getElementById(pairObj).style = '';
-            // document.getElementById(pairObj).setAttribute('data-selected', 'false');
             selectSentence(sentence, '', 'false');
             selectedSentences.splice(selectedSentences.indexOf(sentence.id), 1);
             $("#sentenceOperations").html('');
         } else {
-            // sentence.style = 'background: #EDE981;';
-            // sentence.setAttribute('data-selected', 'true');
-            // document.getElementById(pairObj).style = 'background: #EDE981;';
-            // document.getElementById(pairObj).setAttribute('data-selected', 'true');
             selectSentence(sentence, 'background: #EDE981;', 'true');
             selectedSentences.push(sentence.id);
             $("#sentenceOperations").html(sentence.getAttribute('data-operations'));
         }
-    }
-
-    // var sentenceList = 'Selected Sentences: <br/>';
-    // selectedSentences.forEach(s => {
-    //     sentenceList += s + '<br/>';
-    // });
-    // $("#alinhamentosS").html(sentenceList);
-    
+    }    
 }
 
 function selectSentence(sentence, style, selected) {
@@ -104,12 +89,6 @@ function wordClick(word) {
             selectedWords.push(word.id);
         }
     }
-    // var wordList = 'Selected Words: <br/>';
-    // selectedWords.forEach(w => {
-    //     wordList += w + '<br/>';
-    // });
-    // $("#alinhamentosW").html(wordList);
-
 }
 
 
@@ -156,6 +135,10 @@ function rewriteTextTo(type) {
                 doDivision(sentences); break;
             case 'remotion':
                 doRemotion(sentences); break;
+            case 'inclusion':
+                doInclusion(sentences); break;
+            case 'rewrite':
+                doRewrite(sentences); break;
         }
 
     });
@@ -223,7 +206,7 @@ function doDivision(sentences) {
             document.getElementById(selectedSentences[0]).setAttribute('data-selected', 'false');
             document.getElementById(selectedSentences[0]).setAttribute('data-pair', id + ',' + id + "_new");
             
-            document.getElementById(id).style = 'font-weight: bold;';
+            document.getElementById(id).style = '';
             document.getElementById(id).setAttribute('data-selected', 'false');
     
         }
@@ -239,6 +222,55 @@ function doRemotion(sentences) {
                 document.getElementById(ss).style = '';
                 document.getElementById(ss).setAttribute('data-selected', 'false');
                 document.getElementById(ss).setAttribute('data-pair', '');
+            }
+        });
+    });
+}
+
+
+function doInclusion(sentences) {
+    sentences.forEach(s => {
+        if (s.indexOf(selectedSentences[0]) > 0) {
+            var regexp = /<span[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+            var match = regexp.exec(s);
+            var id = match[4];
+            
+            var newHtml = "<span _ngcontent-c3=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
+            newHtml = newHtml.replace("{id}", id + '_new_b4');
+            newHtml = newHtml.replace("{pair}", '');
+            newHtml = newHtml.replace("{qtt}", 0);
+            newHtml = newHtml.replace("{qtw}", 0);
+            newHtml = newHtml.replace("{content}", "[Sentença nova aqui].");
+            
+            $("#divTextTo").html($("#divTextTo").html().replace(s, newHtml + s));
+            document.getElementById(selectedSentences[0]).style = '';
+            document.getElementById(selectedSentences[0]).setAttribute('data-selected', 'false');
+            document.getElementById(selectedSentences[0]).setAttribute('data-pair', id + ',' + id + "_new");
+            
+            document.getElementById(id).style = '';
+            document.getElementById(id).setAttribute('data-selected', 'false');
+
+            document.getElementById(id + '_new_b4').style = 'font-weight: bold;';
+        }
+    });
+}
+
+
+function doRewrite(sentences) {
+    sentences.forEach(s => {
+        selectedSentences.forEach( ss => {
+            if (s.indexOf(ss) > 0) {
+                var regexp = /<span[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+                var match = regexp.exec(s);
+                var id = match[4];
+                
+                document.getElementById(ss).style = '';
+                document.getElementById(ss).setAttribute('data-selected', 'false');
+                
+                document.getElementById(id).style = '';
+                document.getElementById(id).setAttribute('data-selected', 'false');
+
+                document.getElementById(id).style = 'font-weight: bold;';
             }
         });
     });

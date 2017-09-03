@@ -295,7 +295,6 @@ export class AnotadorComponent implements OnInit {
     var paragraphs = textToHTML.split("|||");
     paragraphs.forEach(p => {
       idxParagraphs++;
-      // parsedParagraphs.push({"idx": idxParagraphs, "text": "TODO", "sentences": []});
       var parsedParagraph = {"idx": idxParagraphs, "text": "TODO", "sentences": []};
 
       p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
@@ -309,8 +308,6 @@ export class AnotadorComponent implements OnInit {
         regexp = /data-pair="f\.s\.(.+?)"/g
         match = regexp.exec(s);
         var sPair = match[1];
-
-        // console.log('sentence id ' + sId + 'pair ' + sPair);
 
         var parsedSentence = {"idx": idxSentences, text: "TODO", "id": sId, "pair": sPair, "tokens": []};
         var tokens = s.split("&nbsp;");
@@ -331,7 +328,6 @@ export class AnotadorComponent implements OnInit {
 
             var parsedToken = {"idx": idxTokens, "token": t, "lemma": "TODO", "id": tId, "pair": tPair}
             parsedSentence.tokens.push(parsedToken);
-            // console.log('token id ' + tId + ' pair ' + tPair + ' - ' + t);
           }
         });
         parsedParagraph.sentences.push(parsedSentence);
@@ -439,8 +435,6 @@ export class AnotadorComponent implements OnInit {
 
 
 
-
-
   selectSimplification(simplId, simplName) {
     this.selectedSimplificationId = simplId;
     this.selectedSimplificationName = simplName;
@@ -494,7 +488,6 @@ export class AnotadorComponent implements OnInit {
             out += '<div id=\'f.t.' + t + '\' data-selected=\'false\' data-pair=\'t.t.' + t + '\'';
             out += ' onclick=\'wordClick(this)\'';
             out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
-            // out += '&nbsp;';
             lastToken = token;
           }
           out += ' </span>';
@@ -558,14 +551,12 @@ export class AnotadorComponent implements OnInit {
     this.textSource = '';
     
     reader.onloadend = (e) => {
-        //console.log(reader.result);
         this.textRawContent = reader.result;
 
         var linhas: string[] = reader.result.split("\n");
         var parsedText: string = '';
 
         linhas.forEach(element => {
-          //console.log(element);
           var meta: boolean = false;
           
           var match;
