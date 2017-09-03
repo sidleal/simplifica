@@ -114,10 +114,10 @@ function doOperation(type) {
 
 function rewriteTextTo(type) {
 
-    console.log(type);
-    selectedSentences.forEach(s => {
-        console.log(s);
-    });
+    // console.log(type);
+    // selectedSentences.forEach(s => {
+    //     console.log(s);
+    // });
 
     var textToHTML = document.getElementById("divTextTo").innerHTML;
     textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.indexOf("</p></div>")+4);

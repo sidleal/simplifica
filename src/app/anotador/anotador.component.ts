@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { SenterService } from '../providers/senter.service';
 import { ChangeDetectorRef } from '@angular/core';
 import 'rxjs/add/operator/take';
+import * as moment from 'moment';
 
 declare var jQuery:any;
 
@@ -45,9 +46,9 @@ export class AnotadorComponent implements OnInit {
   textContent: string;
   textRawContent: string;
 
-  simplificationName: string = "Natural";
+  simplificationName: string;
   simplificationFrom: string;
-  simplificationTag: string = "Nivel 1";
+  simplificationTag: string;
   simplificationToTitle: string;
   simplificationToSubTitle: string;
 
@@ -60,10 +61,37 @@ export class AnotadorComponent implements OnInit {
 
   searchText: string;
 
+  loggedUser: string;
+
   constructor(private authService: AuthService, public af: AngularFireDatabase, 
     private router: Router, private senterService: SenterService) {
+    this.authService.afAuth.authState.subscribe( auth => {
+        this.loggedUser = auth.email;     
+    });
     this.showMenu();
-   }
+  }
+
+  confirmDialog(message, callback) {
+    jQuery('<div></div>').appendTo('body')
+    .html('<div><h6>'+message+'?</h6></div>')
+    .dialog({
+        modal: true, title: 'Atenção', zIndex: 10000, autoOpen: true,
+        width: 'auto', resizable: false,
+        buttons: {
+            Yes: function () {
+                jQuery(this).dialog("close");
+                callback(true);
+            },
+            No: function () {
+                jQuery(this).dialog("close");
+                callback(false);
+            }
+        },
+        close: function (event, ui) {
+            jQuery(this).remove();
+        }
+    });
+  };
 
   ngOnInit() {
     jQuery("#operations").draggable();    
@@ -145,7 +173,11 @@ export class AnotadorComponent implements OnInit {
   }
   
   deleteCorpus(corpusId) {
-    this.af.object('/corpora/' + corpusId).remove();
+    this.confirmDialog('Confirma a exclusão?', ret => {
+      if (ret) {
+        this.af.object('/corpora/' + corpusId).remove();        
+      }
+    });
   }
 
   backToMenu() {
@@ -181,7 +213,12 @@ export class AnotadorComponent implements OnInit {
   }
 
   deleteText(textId) {
-    this.af.object('/corpora/' + this.selectedCorpusId + '/texts/' + textId).remove();
+    this.confirmDialog('Confirma a exclusão?', ret => {
+      if (ret) {
+        this.af.object('/corpora/' + this.selectedCorpusId + '/texts/' + textId).remove();
+      }
+    });
+
   }
 
   saveText() {
@@ -203,14 +240,15 @@ export class AnotadorComponent implements OnInit {
         rawContent: this.textRawContent,
         level: 0
       }
-    ).then((text) => { this.saveParagraphs(text) });
+    ).then((text) => { 
+      var parsedText = this.senterService.splitText(this.textContent);
+      this.saveParagraphs(text, parsedText); 
+    });
 
     this.showTextMenu();
   }
 
-  saveParagraphs(text) {
-    var parsedText = this.senterService.splitText(this.textContent);
-
+  saveParagraphs(text, parsedText) {
     var textObj = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key);
     textObj.update(
       {
@@ -288,51 +326,60 @@ export class AnotadorComponent implements OnInit {
     var idxParagraphs = 0;
     var idxSentences = 0;
     var idxTokens = 0;
+    var newTextcontent = '';
 
     var textToHTML = document.getElementById("divTextTo").innerHTML;
-    textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.indexOf("</p></div>"));
+    textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.indexOf("</p></div>")+4);
     textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
     var paragraphs = textToHTML.split("|||");
     paragraphs.forEach(p => {
+      var pContent = '';
       idxParagraphs++;
-      var parsedParagraph = {"idx": idxParagraphs, "text": "TODO", "sentences": []};
+      var parsedParagraph = {"idx": idxParagraphs, "sentences": []};
 
+      p = p.substring(p.indexOf("<span "), p.indexOf("</span></p>")+7);
       p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
       var sentences = p.split("|||");
       sentences.forEach(s => {
         idxSentences++;
-        var regexp = /id="t\.s\.(.+?)"/g
+        var regexp = /id="(.+?)"/g
         var match = regexp.exec(s);
         var sId = match[1];
 
-        regexp = /data-pair="f\.s\.(.+?)"/g
+        regexp = /<span.+?>(.+?)<\/span>/g
+        match = regexp.exec(s);
+        var sContent = match[1];
+        newTextcontent += sContent;
+        pContent += sContent;
+
+        regexp = /data-pair="(.+?)"/g
         match = regexp.exec(s);
         var sPair = match[1];
 
-        var parsedSentence = {"idx": idxSentences, text: "TODO", "id": sId, "pair": sPair, "tokens": []};
-        var tokens = s.split("&nbsp;");
-        tokens.forEach(t => {
-          if (t.indexOf("div") > 0) {
-            idxTokens++;
-            var regexp = /id="t\.t\.(.+?)"/g
-            var match = regexp.exec(t);
-            var tId = match[1];
-
-            regexp = /data-pair="f\.t\.(.+?)"/g
-            match = regexp.exec(t);
-            var tPair = match[1];
-
-            regexp = />([^<]+?)</g
-            match = regexp.exec(t);
-            var t = match[1];
-
-            var parsedToken = {"idx": idxTokens, "token": t, "lemma": "TODO", "id": tId, "pair": tPair}
-            parsedSentence.tokens.push(parsedToken);
+        var operations = '';
+        var sPairList = sPair.split(',');
+        sPairList.forEach(pair => {
+          if (document.getElementById(pair) != null) {
+            operations += document.getElementById(pair).getAttribute("data-operations");            
           }
         });
+
+        var parsedSentence = {"idx": idxSentences, "text": sContent, "id": sId, "pair": sPair, "operations": operations, "tokens": []};
+        
+        var parsedText = this.senterService.splitText(sContent);
+        var parsedS = parsedText['paragraphs'][0]['sentences'][0];
+        parsedSentence["qtt"] = parsedS["qtt"];
+        parsedSentence["qtw"] = parsedS["qtw"];
+        parsedS["tokens"].forEach(t => {
+          idxTokens++;
+          parsedSentence['tokens'].push({"idx": idxTokens, "token": t["token"]});
+        });
+
         parsedParagraph.sentences.push(parsedSentence);
       });
+      parsedParagraph['text'] = pContent;
       parsedParagraphs.push(parsedParagraph);
+      newTextcontent += '\n';
     });
 
     var parsedText = {"totP": idxParagraphs, "totS": idxSentences, "totT": idxTokens, "paragraphs": parsedParagraphs};
@@ -348,91 +395,32 @@ export class AnotadorComponent implements OnInit {
           name: newName,
           title: textToTitle,
           subTitle: textToSubTitle, 
-          content: 'TODO',
-          published: "12.12.12",
-          updated: "12.12.12",
-          author: "TODO",
-          source: text.source,
-          rawContent: "TODO",
+          content: newTextcontent,
+          published: moment().format("DD/MM/YYYY"),
+          updated: moment().format("DD/MM/YYYY"),
+          author: text.author + ' / ' + this.loggedUser,
+          source: 'Simplificação Nível ' + (text.level + 1),
           level: text.level + 1
         }
       ).then((text) => {
-        this.saveParagraphsB(text, parsedText);
+        this.saveParagraphs(text, parsedText);
 
-        this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications");
-        this.simplifications.push(
-          {
-            name: this.simplificationName,
-            from: this.selectedTextId,
-            to: text.key,
-            tags: this.simplificationTag,
-            updated: '12.12.2012'
-          }
-        );
+        // this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications");
+        // this.simplifications.push(
+        //   {
+        //     name: this.simplificationName,
+        //     from: this.selectedTextId,
+        //     to: text.key,
+        //     tags: this.simplificationTag,
+        //     updated: '12.12.2012'
+        //   }
+        // );
 
       });
     });
 
-    this.showTextMenu();
+    // this.showTextMenu();
   }
-
-
-
-
-  saveParagraphsB(text, parsedText) {
-    var textObj = this.af.object('/corpora/' + this.selectedCorpusId + "/texts/" + text.key);
-    textObj.update(
-      {
-        totP: parsedText['totP'],
-        totS: parsedText['totS'],
-        totT: parsedText['totT']
-      });
-
-    var paragraphs = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs");
-
-    parsedText['paragraphs'].forEach(p => {
-      paragraphs.push(
-        {
-          idx: p['idx'],
-          text: p['text']
-        }
-      ).then((par) => {
-        this.saveSentencesB(text, par, p);
-      });
-    });
-
-  }
-
-  saveSentencesB(text, par, p) {
-    var sentences = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences");
-    p['sentences'].forEach(s => {
-      sentences.push(
-        {
-          idx: s['idx'],
-          text: s['text'],
-        }
-      ).then((sent) => {
-        this.saveTokensB(text, par, sent, s);
-      });
-    });
-
-  }
-
-  saveTokensB(text, par, sent, s) {
-    var tokens = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs/" + par.key + "/sentences/" + sent.key + "/tokens");
-    s['tokens'].forEach(t => {
-      tokens.push(
-        {
-          idx: t['idx'],
-          token: t['token'],
-          lemma: t['lemma']
-        }
-      ).then((token) => {
-        t['id'] = token.id;
-      });
-    });
-  }
-
 
 
   selectSimplification(simplId, simplName) {
@@ -450,7 +438,9 @@ export class AnotadorComponent implements OnInit {
     this.simplificationTextFrom.take(1).subscribe(text => {
       this.simplificationToTitle = text.title;
       this.simplificationToSubTitle = text.subTitle;
-
+      this.simplificationName = "Natural " + (text.level) + ' -> ' + (text.level + 1);
+      this.simplificationTag = "Nível " + (text.level + 1);
+  
       this.totalParagraphs = text.totP;
       this.totalSentences =  text.totS;
 
