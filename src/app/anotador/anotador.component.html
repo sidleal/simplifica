@@ -110,14 +110,14 @@
           <button onclick="markWords(false)" class="mini" id='markSentences' data-toggle="tooltip" title="Marcar Sentenças" style='display:none;'><i class="fa fa-align-justify"></i></button>
           <span id="qtTokens" class='operations-qt-tokens' data-toggle="tooltip" title="Quantidade de palavras da sentença">0</span>
         </div>
-  
+
         <div><a onclick="$('#operations-sentenciais').toggle();"><i class="fa fa-align-justify"></i> Sentenciais</a></div>
         <div id="operations-sentenciais" style="display:none;">
-          <a onclick="alert('xxx');"> - Divisão de sentença</a><br/>
-          <a onclick="alert('xxx');"> - União de sentenças</a><br/>
-          <a onclick="alert('xxx');"> - Remoção de sentença</a><br/>
-          <a onclick="alert('xxx');"> - Inclusão de sentença</a><br/>
-          <a onclick="alert('xxx');"> - Reescrita de sentença</a>
+          <a onclick="doOperation('divide');"> - Divisão de sentença</a><br/>
+          <a onclick="doOperation('union');"> - União de sentenças</a><br/>
+          <a onclick="doOperation('remove');"> - Remoção de sentença</a><br/>
+          <a onclick="doOperation('include');"> - Inclusão de sentença</a><br/>
+          <a onclick="doOperation('rewrite');"> - Reescrita de sentença</a>
         </div>
         <div><a onclick="$('#operations-intra-sentenciais').toggle();"><i class="fa fa-text-width"></i> Intra-sentenciais</a></div>
         <div id="operations-intra-sentenciais" style="display:none;">
@@ -134,6 +134,9 @@
           <a onclick="alert('xxx');"> - Redução de sintagma nominal</a><br/>
           <a onclick="alert('xxx');"> - Substituição de marcador discursivo</a>
         </div>        
+        <div id="sentenceOperations" style='margin-top:20px;margin-bottom:20px;font-size:10px;'></div>
+        <span id="alinhamentosS" style='font-size:10px;'></span>
+        <span id="alinhamentosW" style='font-size:10px;'></span>
       </div>
 
     <div id="doSimplification" *ngIf="stage == 'doSimplification'">

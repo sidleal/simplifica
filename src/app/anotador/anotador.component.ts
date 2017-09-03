@@ -466,20 +466,36 @@ export class AnotadorComponent implements OnInit {
       out += " p span div {display:inline-block;}";
       out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:pointer;}";
       out += "</style>";
+      var openQuotes = false;
+      var lastToken = '';
       for(var p in text.paragraphs) {
         out += '<p id=\'f.p.' + p + '\'>';
         for(var s in text.paragraphs[p].sentences) {
           var sObj = text.paragraphs[p].sentences[s];
           out += '<span id=\'f.s.' + s + '\' data-selected=\'false\' data-pair=\'t.s.' + s + '\'';
           out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
+          out += ' data-operations=\'\'';
           out += ' onclick=\'sentenceClick(this)\'';
           out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
           for(var t in sObj.tokens) {
             var token = sObj.tokens[t].token;
+
+            if ('\"\''.indexOf(token) >= 0) {
+              openQuotes = !openQuotes;
+              if (openQuotes) {
+                out += ' ';
+              }
+            } else if (openQuotes && '\"\''.indexOf(lastToken) >= 0) {
+              //nothing
+            } else if ('.,)]}!?:'.indexOf(token) < 0 && '([{'.indexOf(lastToken) < 0) {
+              out += ' ';
+            }
+
             out += '<div id=\'f.t.' + t + '\' data-selected=\'false\' data-pair=\'t.t.' + t + '\'';
             out += ' onclick=\'wordClick(this)\'';
             out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
-            out += '&nbsp;';
+            // out += '&nbsp;';
+            lastToken = token;
           }
           out += ' </span>';
         }
