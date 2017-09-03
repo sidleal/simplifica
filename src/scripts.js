@@ -1,6 +1,7 @@
 function overSentence(sentence) {
     toggleObject(sentence, "background: #b0cfff;");
-    document.getElementById("qtTokens").innerHTML = sentence.getAttribute("data-qtw") + " - " + sentence.getAttribute("data-qtt");
+    document.getElementById("qtTokens").innerHTML = sentence.getAttribute("data-qtw");
+    document.getElementById("qtTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
 }
 
 function outSentence(sentence) {
@@ -18,7 +19,10 @@ function outToken(token) {
 function toggleObject(obj, style) {
     pairObj = obj.getAttribute('data-pair');
     if (document.getElementById(pairObj) != null) {
-        document.getElementById(pairObj).style = style;
+        var selected = document.getElementById(pairObj).getAttribute('data-selected');
+        if (selected == 'false') {
+            document.getElementById(pairObj).style = style;            
+        }
     }
 }
 
@@ -43,13 +47,18 @@ function markWords(newValue) {
 function sentenceClick(sentence) {
     if (!markingWords) {
         var selected = sentence.getAttribute('data-selected');
+        var pairObj = sentence.getAttribute('data-pair');
         if (selected == 'true') {
             sentence.style = '';
             sentence.setAttribute('data-selected', 'false');
+            document.getElementById(pairObj).style = '';
+            document.getElementById(pairObj).setAttribute('data-selected', 'false');
             selectedSentences.pop(sentence.id);
         } else {
-            sentence.style = 'font-weight: bold;';
+            sentence.style = 'background: #EDE981;';
             sentence.setAttribute('data-selected', 'true');
+            document.getElementById(pairObj).style = 'background: #EDE981;';
+            document.getElementById(pairObj).setAttribute('data-selected', 'true');
             selectedSentences.push(sentence.id);
         }
     }
@@ -63,7 +72,7 @@ function wordClick(word) {
             word.setAttribute('data-selected', 'false');
             selectedWords.pop(word.id);
         } else {
-            word.style = 'font-weight: bold;';    
+            word.style = 'background: #EDE981;font-weight: bold;';
             word.setAttribute('data-selected', 'true');
             selectedWords.push(word.id);
         }

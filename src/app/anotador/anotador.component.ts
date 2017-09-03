@@ -6,6 +6,8 @@ import { SenterService } from '../providers/senter.service';
 import { ChangeDetectorRef } from '@angular/core';
 import 'rxjs/add/operator/take';
 
+declare var jQuery:any;
+
 @Component({
   selector: 'app-anotador',
   templateUrl: './anotador.component.html',
@@ -64,7 +66,7 @@ export class AnotadorComponent implements OnInit {
    }
 
   ngOnInit() {
-
+    jQuery("#operations").draggable();    
   }
 
   filterText() {
@@ -100,6 +102,7 @@ export class AnotadorComponent implements OnInit {
         break;        
       case "doSimplification":
         this.listTexts();
+        jQuery("#operations").hide();        
         break;        
       case "simplifications":
         this.showTextMenu();
@@ -445,6 +448,7 @@ export class AnotadorComponent implements OnInit {
   }
 
   doSimplification() {
+    
     this.stage = "doSimplification";
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos > " + this.selectedTextTitle + " > Nova Simplificação";
     this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
@@ -494,7 +498,7 @@ export class AnotadorComponent implements OnInit {
         out += '<p id=\'t.p.' + p + '\'>';
         for(var s in text.paragraphs[p].sentences) {
           var sObj = text.paragraphs[p].sentences[s];
-          out += '<span id=\'t.s.' + s + '\' data-pair=\'f.s.' + s + '\'';
+          out += '<span id=\'t.s.' + s + '\'  data-selected=\'false\' data-pair=\'f.s.' + s + '\'';
           out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
           out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
           for(var t in sObj.tokens) {
@@ -508,7 +512,7 @@ export class AnotadorComponent implements OnInit {
               }
             } else if (openQuotes && '\"\''.indexOf(out.substr(-1)) >= 0) {
               //nothing
-            } else if ('.,)]}!?'.indexOf(token) < 0 && '([{'.indexOf(out.substr(-1)) < 0) {
+            } else if ('.,)]}!?:'.indexOf(token) < 0 && '([{'.indexOf(out.substr(-1)) < 0) {
               out += ' ';
             }
             out += token;
@@ -520,6 +524,8 @@ export class AnotadorComponent implements OnInit {
       this.textTo = out;
 
     });
+
+    jQuery('#operations').show();
   }
 
   changeListener(event) {

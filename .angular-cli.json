@@ -20,7 +20,8 @@
       "prefix": "app",
       "styles": [
         "styles.css",
-        "font-awesome.min.css"
+        "font-awesome.min.css",
+        "jquery-ui.css"
       ],
       "scripts": [
         "scripts.js"

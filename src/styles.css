@@ -23,7 +23,9 @@ button.default {
 
 button.mini {
     background: #3a72c9;
-    width: 70px;
+    width: 40px;
+    padding: 5px;
+    margin: 5px;
 }
 
 button.warning {

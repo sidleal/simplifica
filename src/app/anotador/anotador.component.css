@@ -73,27 +73,53 @@ input#message {
     color: red;
 }
 
-#tools {
+.selected {
+    font-weight: bold;
+}
+
+.operations {
     position: fixed;
-    bottom: 0px;
-    left: 0px;
+    top: 45%;
+    left: 35%;
+    width: 400px;
+    background:#8ABC41;
+    cursor:default;
+    border-style: solid;
+    border-color: white;
+    border-width: 1px;
+    box-shadow: 10px 10px 35px grey;
+    display: inline-block;
+}
+
+.operations-tools {
     width: 100%;
     background:#8ABC41;
     height: 50px;
 }
 
-#qtTokens {
-    position: fixed;
-    right: 10px;
-    bottom: 0px;
+.operations-qt-tokens {
+    float: right;
     background:#8ABC41;
-    height: 50px;
     color: white;
     font-weight: bold;
-    font-size: 1.7em;
+    font-size: 1.6em;
+    margin-right: 10px;
 }
 
+.operations-header {
+    width: 100%;
+    background:#3a72c9;
+    height: 27px;
+    color: white;
+    text-align: center;
+    cursor:move;
+}
 
-.selected {
-    font-weight: bold;
+.operations div a {
+    color: black;
+    margin-left: 15px;
+}
+
+.operations div a:hover {
+    text-decoration: underline;
 }
