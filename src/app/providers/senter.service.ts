@@ -40,7 +40,7 @@ export class SenterService {
     var match;
 
     // rule 2 - " { [ ( ) ] } "
-    out = this.applyGroupRule(out, /"(.+?)"/g)
+    out = this.applyGroupRule(out, /"([^"]+?)"[^A-z]/g)
     out = this.applyGroupRule(out, /“(.+?)”/g)
     out = this.applyGroupRule(out, /\{(.+?)\}/g)
     out = this.applyGroupRule(out, /\[(.+?)\]/g)

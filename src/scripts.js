@@ -152,22 +152,24 @@ function doUnion(sentences) {
     var pairUnion = '';
     var qttUnion = 0;
     var qtwUnion = 0;
+    var ngContent = '';
     sentences.forEach(s => {
         selectedSentences.forEach( ss => {
             if (s.indexOf(ss) > 0) {
                 htmlUnion += s;
-                var regexp = /<span[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+                var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
                 var match = regexp.exec(s);
-                pairUnion += match[1] + ',';
-                qttUnion += parseInt(match[2]);
-                qtwUnion += parseInt(match[3]);
-                idsUnion += match[4] + '|';
-                contentUnion += match[5];
+                ngContent = match[1];
+                pairUnion += match[2] + ',';
+                qttUnion += parseInt(match[3]);
+                qtwUnion += parseInt(match[4]);
+                idsUnion += match[5] + '|';
+                contentUnion += match[6];
             }
         });
     });
     if (contentUnion.length > 0) {
-        var newHtml = "<span _ngcontent-c3=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
+        var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
         newHtml = newHtml.replace("{id}", idsUnion);
         newHtml = newHtml.replace("{pair}", pairUnion);
         newHtml = newHtml.replace("{qtt}", qttUnion);
@@ -186,15 +188,17 @@ function doUnion(sentences) {
 function doDivision(sentences) {
     sentences.forEach(s => {
         if (s.indexOf(selectedSentences[0]) > 0) {
-            var regexp = /<span[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+            var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+
             var match = regexp.exec(s);
-            var pair = match[1];
-            var qtt = parseInt(match[2]);
-            var qtw = parseInt(match[3]);
-            var id = match[4];
-            var content = match[5];
+            var ngContent = match[1]; 
+            var pair = match[2];
+            var qtt = parseInt(match[3]);
+            var qtw = parseInt(match[4]);
+            var id = match[5];
+            var content = match[6];
             
-            var newHtml = "<span _ngcontent-c3=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
+            var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
             newHtml = newHtml.replace("{id}", id + '_new');
             newHtml = newHtml.replace("{pair}", pair);
             newHtml = newHtml.replace("{qtt}", qtt);
@@ -231,11 +235,12 @@ function doRemotion(sentences) {
 function doInclusion(sentences) {
     sentences.forEach(s => {
         if (s.indexOf(selectedSentences[0]) > 0) {
-            var regexp = /<span[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+            var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
             var match = regexp.exec(s);
-            var id = match[4];
+            var ngContent = match[1];
+            var id = match[5];
             
-            var newHtml = "<span _ngcontent-c3=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
+            var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
             newHtml = newHtml.replace("{id}", id + '_new_b4');
             newHtml = newHtml.replace("{pair}", '');
             newHtml = newHtml.replace("{qtt}", 0);
