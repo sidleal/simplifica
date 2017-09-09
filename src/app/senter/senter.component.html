@@ -4,15 +4,15 @@
     <p>Baseado em (Pardo, 2006): <a href="http://www.icmc.usp.br/~taspardo/NILCTR0601-Pardo.pdf" target="_blank">http://www.icmc.usp.br/~taspardo/NILCTR0601-Pardo.pdf</a></p>
     <textarea id="rawContent" placeholder="Conteúdo" [(ngModel)]="rawContent" rows="20"></textarea>
     <button (click)="split()" id="btnSplit" class="default"><i class="fa fa-list-ul fa-2x"></i><br/>Dividir Sentenças</button>
-    <button (click)="backToMenu()" id="btnBackMenu" class="natural"><i class="fa fa-arrow-left fa-2x"></i><br/>Voltar</button>
     <button (click)="listAbbrev()" id="btnShowAbbrev" class="default" *ngIf="!showAbbreviations"><i class="fa fa-toggle-down fa-2x"></i><br/>Mostrar Abreviaturas</button>
     <button (click)="hideAbbrev()" id="btnHideAbbrev" class="default" *ngIf="showAbbreviations"><i class="fa fa-toggle-up fa-2x"></i><br/>Ocultar Abreviaturas</button>
-
+    <button (click)="backToMenu()" id="btnBackMenu" class="natural"><i class="fa fa-arrow-left fa-2x"></i><br/>Voltar</button>
+    
     <div id="abbreviations" *ngIf="showAbbreviations">
       <h4>Abreviaturas</h4>
        <input type="text" id="newAbrev" placeholder="Ajude-nos a melhorar. Digite a nova abreviatura e tecle Enter." (keyup.enter)="addAbbrev()" [(ngModel)]="newAbbrev"/>
        <span *ngFor="let abbrev of abbreviations | async">
-          {{abbrev.name}} <a (click)="removeAbbrev(abbrev.$key)"> X </a>
+          {{abbrev.name}} <a (click)="removeAbbrev(abbrev.$key)"><i class="fa fa-trash-o inline-inner-button" data-toggle="tooltip" title="Excluir"></i> </a>
        </span>
     </div>
 

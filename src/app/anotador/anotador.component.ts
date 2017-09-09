@@ -94,7 +94,8 @@ export class AnotadorComponent implements OnInit {
   };
 
   ngOnInit() {
-    jQuery("#operations").draggable();    
+    jQuery("#operations").draggable();  
+    jQuery("#selected-sentence").draggable();
   }
 
   filterText() {
@@ -396,8 +397,8 @@ export class AnotadorComponent implements OnInit {
           title: textToTitle,
           subTitle: textToSubTitle, 
           content: newTextcontent,
-          published: moment().format("DD/MM/YYYY"),
-          updated: moment().format("DD/MM/YYYY"),
+          published: moment().format("YYYY-MM-DD"),
+          updated: moment().format("YYYY-MM-DD"),
           author: text.author + ' / ' + this.loggedUser,
           source: 'Simplificação Nível ' + (text.level + 1),
           level: text.level + 1
@@ -412,7 +413,7 @@ export class AnotadorComponent implements OnInit {
         //     from: this.selectedTextId,
         //     to: text.key,
         //     tags: this.simplificationTag,
-        //     updated: '12.12.2012'
+        //     updated: moment().format("YYYY-MM-DD")
         //   }
         // );
 
@@ -525,6 +526,7 @@ export class AnotadorComponent implements OnInit {
     });
 
     jQuery('#operations').show();
+    jQuery('#selected-sentence').show();
   }
 
   changeListener(event) {

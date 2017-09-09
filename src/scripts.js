@@ -2,7 +2,6 @@ function overSentence(sentence) {
     toggleObject(sentence, "background: #b0cfff;");
     document.getElementById("qtTokens").innerHTML = sentence.getAttribute("data-qtw");
     document.getElementById("qtTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
-    $("#sentenceOperations").html(sentence.getAttribute('data-operations'));
 }
 
 function outSentence(sentence) {
@@ -47,17 +46,39 @@ function markWords(newValue) {
     }
 }
 
+var operationsMap = {
+    union: 'União de Sentença',
+    division: 'Divisão de Sentença'
+}
+
+
 function sentenceClick(sentence) {
     if (!markingWords) {
         var selected = sentence.getAttribute('data-selected');
         if (selected == 'true') {
             selectSentence(sentence, '', 'false');
             selectedSentences.splice(selectedSentences.indexOf(sentence.id), 1);
+            document.getElementById("qtSelectedTokens").innerHTML = '';
+            document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
             $("#sentenceOperations").html('');
         } else {
+            var operationsHtml = '';
             selectSentence(sentence, 'background: #EDE981;', 'true');
             selectedSentences.push(sentence.id);
-            $("#sentenceOperations").html(sentence.getAttribute('data-operations'));
+            document.getElementById("qtSelectedTokens").innerHTML = sentence.getAttribute("data-qtw");
+            document.getElementById("qtSelectedTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
+            var operations = sentence.getAttribute('data-operations');
+            if (operations != '') {
+                var operationsList = operations.split(";");
+                operationsList.forEach( op => {
+                    if (op != '') {
+                        var opKey = op.split('(')[0];
+                        var opDesc = operationsMap[opKey];
+                        operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o inline-inner-button\" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\"></i>"
+                    }
+                });
+            }
+            $("#sentenceOperations").html(operationsHtml);
         }
     }    
 }
@@ -101,11 +122,9 @@ function doOperation(type) {
         sentenceList = sentenceList.substring(0, sentenceList.length - 1);
     }
 
-    var operations = $("#sentenceOperations").html(); 
-    operations +=  ' ' + type + '(' + sentenceList + ');';
-    $("#sentenceOperations").html(operations);
-
     selectedSentences.forEach(s => {
+        var operations = document.getElementById(s).getAttribute('data-operations');
+        operations += type + '(' + sentenceList + ');';
         document.getElementById(s).setAttribute('data-operations', operations);
     });
 

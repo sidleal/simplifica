@@ -5,3 +5,8 @@ h4 {
 span {
     margin-right: 10px;
 }
+
+.inline-inner-button:hover {
+    cursor: pointer;
+    color: red;
+}

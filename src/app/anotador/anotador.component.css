@@ -73,14 +73,17 @@ input#message {
     color: red;
 }
 
+.inline-inner-button:hover {
+    cursor: pointer;
+    color: red;
+}
+
 .selected {
     font-weight: bold;
 }
 
 .operations {
     position: fixed;
-    top: 45%;
-    left: 35%;
     width: 400px;
     background:#8ABC41;
     cursor:default;
