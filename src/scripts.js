@@ -1,3 +1,4 @@
+
 function overSentence(sentence) {
     toggleObject(sentence, "background: #b0cfff;");
     document.getElementById("qtTokens").innerHTML = sentence.getAttribute("data-qtw");
@@ -48,7 +49,10 @@ function markWords(newValue) {
 
 var operationsMap = {
     union: 'União de Sentença',
-    division: 'Divisão de Sentença'
+    division: 'Divisão de Sentença',
+    remotion: 'Remoção de Sentença',
+    inclusion: 'Inclusão de Sentença',
+    rewrite: 'Reescrita de Sentença'
 }
 
 
@@ -61,27 +65,37 @@ function sentenceClick(sentence) {
             document.getElementById("qtSelectedTokens").innerHTML = '';
             document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
             $("#sentenceOperations").html('');
+            updateOperationsList(null);
         } else {
-            var operationsHtml = '';
             selectSentence(sentence, 'background: #EDE981;', 'true');
             selectedSentences.push(sentence.id);
             document.getElementById("qtSelectedTokens").innerHTML = sentence.getAttribute("data-qtw");
             document.getElementById("qtSelectedTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
-            var operations = sentence.getAttribute('data-operations');
-            if (operations != '') {
-                var operationsList = operations.split(";");
-                operationsList.forEach( op => {
-                    if (op != '') {
-                        var opKey = op.split('(')[0];
-                        var opDesc = operationsMap[opKey];
-                        operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o inline-inner-button\" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\"></i>"
-                    }
-                });
-            }
-            $("#sentenceOperations").html(operationsHtml);
+            updateOperationsList(sentence);
         }
+        $("#selectedSentences").val(selectedSentences.toString());
     }    
 }
+
+
+function updateOperationsList(sentence) {
+    var operations = sentence.getAttribute('data-operations');
+    var operationsHtml = '';
+    if (sentence != null) {    
+        if (operations != '') {
+            var operationsList = operations.split(";");
+            operationsList.forEach( op => {
+                if (op != '') {
+                    var opKey = op.split('(')[0];
+                    var opDesc = operationsMap[opKey];
+                    operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
+                }
+            });
+        }
+    }
+    $("#sentenceOperations").html(operationsHtml);
+}
+
 
 function selectSentence(sentence, style, selected) {
     sentence.style = style;
@@ -114,29 +128,17 @@ function wordClick(word) {
 
 
 function doOperation(type) {
-    var sentenceList = '';
-    selectedSentences.forEach(s => {
-        sentenceList += s + ',';
-    });
-    if (sentenceList.length > 1) {
-        sentenceList = sentenceList.substring(0, sentenceList.length - 1);
-    }
-
     selectedSentences.forEach(s => {
         var operations = document.getElementById(s).getAttribute('data-operations');
-        operations += type + '(' + sentenceList + ');';
+        operations += type + '(' + selectedSentences.toString() + ');';
         document.getElementById(s).setAttribute('data-operations', operations);
+        updateOperationsList(document.getElementById(s));
     });
 
     rewriteTextTo(type);
 }
 
 function rewriteTextTo(type) {
-
-    // console.log(type);
-    // selectedSentences.forEach(s => {
-    //     console.log(s);
-    // });
 
     var textToHTML = document.getElementById("divTextTo").innerHTML;
     textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.indexOf("</p></div>")+4);
@@ -150,8 +152,8 @@ function rewriteTextTo(type) {
         switch (type) {
             case 'union':
                 doUnion(sentences); break;
-            case 'division':
-                doDivision(sentences); break;
+            // case 'division':
+            //     doDivision(sentences); break;
             case 'remotion':
                 doRemotion(sentences); break;
             case 'inclusion':
@@ -188,7 +190,7 @@ function doUnion(sentences) {
         });
     });
     if (contentUnion.length > 0) {
-        var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
+        var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
         newHtml = newHtml.replace("{id}", idsUnion);
         newHtml = newHtml.replace("{pair}", pairUnion);
         newHtml = newHtml.replace("{qtt}", qttUnion);
@@ -197,53 +199,20 @@ function doUnion(sentences) {
         
         $("#divTextTo").html($("#divTextTo").html().replace(htmlUnion, newHtml));
         selectedSentences.forEach( ss => {
-            document.getElementById(ss).style = '';
-            document.getElementById(ss).setAttribute('data-selected', 'false');
+            // document.getElementById(ss).style = '';
+            // document.getElementById(ss).setAttribute('data-selected', 'false');
             document.getElementById(ss).setAttribute('data-pair', idsUnion);
         });
     }
 }
-
-function doDivision(sentences) {
-    sentences.forEach(s => {
-        if (s.indexOf(selectedSentences[0]) > 0) {
-            var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
-
-            var match = regexp.exec(s);
-            var ngContent = match[1]; 
-            var pair = match[2];
-            var qtt = parseInt(match[3]);
-            var qtw = parseInt(match[4]);
-            var id = match[5];
-            var content = match[6];
-            
-            var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
-            newHtml = newHtml.replace("{id}", id + '_new');
-            newHtml = newHtml.replace("{pair}", pair);
-            newHtml = newHtml.replace("{qtt}", qtt);
-            newHtml = newHtml.replace("{qtw}", qtw);
-            newHtml = newHtml.replace("{content}", content);
-            
-            $("#divTextTo").html($("#divTextTo").html().replace(s, newHtml + s));
-            document.getElementById(selectedSentences[0]).style = '';
-            document.getElementById(selectedSentences[0]).setAttribute('data-selected', 'false');
-            document.getElementById(selectedSentences[0]).setAttribute('data-pair', id + ',' + id + "_new");
-            
-            document.getElementById(id).style = '';
-            document.getElementById(id).setAttribute('data-selected', 'false');
-    
-        }
-    });
-}
-
 
 function doRemotion(sentences) {
     sentences.forEach(s => {
         selectedSentences.forEach( ss => {
             if (s.indexOf(ss) > 0) {
                 $("#divTextTo").html($("#divTextTo").html().replace(s, ''));
-                document.getElementById(ss).style = '';
-                document.getElementById(ss).setAttribute('data-selected', 'false');
+                // document.getElementById(ss).style = '';
+                // document.getElementById(ss).setAttribute('data-selected', 'false');
                 document.getElementById(ss).setAttribute('data-pair', '');
             }
         });
@@ -259,7 +228,7 @@ function doInclusion(sentences) {
             var ngContent = match[1];
             var id = match[5];
             
-            var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;\"> {content}</span>";
+            var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
             newHtml = newHtml.replace("{id}", id + '_new_b4');
             newHtml = newHtml.replace("{pair}", '');
             newHtml = newHtml.replace("{qtt}", 0);
@@ -267,12 +236,12 @@ function doInclusion(sentences) {
             newHtml = newHtml.replace("{content}", "[Sentença nova aqui].");
             
             $("#divTextTo").html($("#divTextTo").html().replace(s, newHtml + s));
-            document.getElementById(selectedSentences[0]).style = '';
-            document.getElementById(selectedSentences[0]).setAttribute('data-selected', 'false');
+            // document.getElementById(selectedSentences[0]).style = '';
+            // document.getElementById(selectedSentences[0]).setAttribute('data-selected', 'false');
             document.getElementById(selectedSentences[0]).setAttribute('data-pair', id + ',' + id + "_new");
             
-            document.getElementById(id).style = '';
-            document.getElementById(id).setAttribute('data-selected', 'false');
+            // document.getElementById(id).style = '';
+            // document.getElementById(id).setAttribute('data-selected', 'false');
 
             document.getElementById(id + '_new_b4').style = 'font-weight: bold;';
         }
@@ -288,13 +257,13 @@ function doRewrite(sentences) {
                 var match = regexp.exec(s);
                 var id = match[4];
                 
-                document.getElementById(ss).style = '';
-                document.getElementById(ss).setAttribute('data-selected', 'false');
+                // document.getElementById(ss).style = '';
+                // document.getElementById(ss).setAttribute('data-selected', 'false');
                 
-                document.getElementById(id).style = '';
-                document.getElementById(id).setAttribute('data-selected', 'false');
+                // document.getElementById(id).style = '';
+                // document.getElementById(id).setAttribute('data-selected', 'false');
 
-                document.getElementById(id).style = 'font-weight: bold;';
+                document.getElementById(id).style = 'font-weight: bold;background: #EDE981;';
             }
         });
     });

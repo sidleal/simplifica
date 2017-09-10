@@ -73,11 +73,6 @@ input#message {
     color: red;
 }
 
-.inline-inner-button:hover {
-    cursor: pointer;
-    color: red;
-}
-
 .selected {
     font-weight: bold;
 }
@@ -125,4 +120,9 @@ input#message {
 
 .operations div a:hover {
     text-decoration: underline;
+}
+
+.ui-widget-header {
+    background: #3a72c9;
+    color: white;
 }

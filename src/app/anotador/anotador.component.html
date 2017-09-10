@@ -114,7 +114,7 @@
 
       <div><a onclick="$('#operations-sentenciais').toggle();"><i class="fa fa-align-justify"></i> Sentenciais</a></div>
       <div id="operations-sentenciais" style="display:none;">
-        <a onclick="doOperation('division');"> - Divisão de sentença</a><br/>
+        <a (click)="doOperation('division');"> - Divisão de sentença</a><br/>
         <a onclick="doOperation('union');"> - União de sentenças</a><br/>
         <a onclick="doOperation('remotion');"> - Remoção de sentença</a><br/>
         <a onclick="doOperation('inclusion');"> - Inclusão de sentença</a><br/>
@@ -143,7 +143,7 @@
         <span id="qtSelectedTokens" class='operations-qt-tokens' data-toggle="tooltip" title="Quantidade de palavras da sentença">0</span>
         <ul id="sentenceOperations">
         </ul>
-        <div id="sentenceOperationsDiv" style='margin-top:20px;font-size:12px;'></div>
+        <input type="hidden" id="selectedSentences"/>        
       </div>
     </div>
 
