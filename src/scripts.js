@@ -79,9 +79,9 @@ function sentenceClick(sentence) {
 
 
 function updateOperationsList(sentence) {
-    var operations = sentence.getAttribute('data-operations');
     var operationsHtml = '';
     if (sentence != null) {    
+        var operations = sentence.getAttribute('data-operations');
         if (operations != '') {
             var operationsList = operations.split(";");
             operationsList.forEach( op => {
