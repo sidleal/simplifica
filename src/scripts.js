@@ -59,24 +59,53 @@ var operationsMap = {
 function sentenceClick(sentence) {
     if (!markingWords) {
         var selected = sentence.getAttribute('data-selected');
-        if (selected == 'true') {
-            selectSentence(sentence, '', 'false');
-            selectedSentences.splice(selectedSentences.indexOf(sentence.id), 1);
-            document.getElementById("qtSelectedTokens").innerHTML = '';
-            document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
-            $("#sentenceOperations").html('');
-            updateOperationsList(null);
-        } else {
+        
+        clearSelection();
+
+        if (selected == 'false') {
             selectSentence(sentence, 'background: #EDE981;', 'true');
             selectedSentences.push(sentence.id);
             document.getElementById("qtSelectedTokens").innerHTML = sentence.getAttribute("data-qtw");
             document.getElementById("qtSelectedTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
             updateOperationsList(sentence);
         }
+
+        // if (selected == 'true') {
+        //     selectSentence(sentence, '', 'false');
+        //     selectedSentences.splice(selectedSentences.indexOf(sentence.id), 1);
+        //     document.getElementById("qtSelectedTokens").innerHTML = '';
+        //     document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
+        //     $("#sentenceOperations").html('');
+        //     updateOperationsList(null);
+        // } else {
+        //     selectSentence(sentence, 'background: #EDE981;', 'true');
+        //     selectedSentences.push(sentence.id);
+        //     document.getElementById("qtSelectedTokens").innerHTML = sentence.getAttribute("data-qtw");
+        //     document.getElementById("qtSelectedTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
+        //     updateOperationsList(sentence);
+        // }
         $("#selectedSentences").val(selectedSentences.toString());
     }    
 }
 
+function clearSelection() {
+
+    selectedSentences.forEach( s => {
+        selectSentence(document.getElementById(s), '', 'false');
+        document.getElementById("qtSelectedTokens").innerHTML = '';
+        document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
+        $("#sentenceOperations").html('');
+        updateOperationsList(null);
+    });
+    selectedSentences = []
+
+    selectedWords.forEach(w => {
+        word = document.getElementById(w);
+        word.style = '';
+        word.setAttribute('data-selected', 'false');
+    });
+    selectedWords = [];    
+}
 
 function updateOperationsList(sentence) {
     var operationsHtml = '';
@@ -150,8 +179,8 @@ function rewriteTextTo(type) {
         var sentences = p.split("|||");
     
         switch (type) {
-            case 'union':
-                doUnion(sentences); break;
+            // case 'union':
+            //     doUnion(sentences); break;
             // case 'division':
             //     doDivision(sentences); break;
             case 'remotion':
@@ -164,46 +193,6 @@ function rewriteTextTo(type) {
 
     });
     selectedSentences = [];
-}
-
-function doUnion(sentences) {
-    var contentUnion = '';
-    var htmlUnion = '';
-    var idsUnion = '';
-    var pairUnion = '';
-    var qttUnion = 0;
-    var qtwUnion = 0;
-    var ngContent = '';
-    sentences.forEach(s => {
-        selectedSentences.forEach( ss => {
-            if (s.indexOf(ss) > 0) {
-                htmlUnion += s;
-                var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
-                var match = regexp.exec(s);
-                ngContent = match[1];
-                pairUnion += match[2] + ',';
-                qttUnion += parseInt(match[3]);
-                qtwUnion += parseInt(match[4]);
-                idsUnion += match[5] + '|';
-                contentUnion += match[6];
-            }
-        });
-    });
-    if (contentUnion.length > 0) {
-        var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-        newHtml = newHtml.replace("{id}", idsUnion);
-        newHtml = newHtml.replace("{pair}", pairUnion);
-        newHtml = newHtml.replace("{qtt}", qttUnion);
-        newHtml = newHtml.replace("{qtw}", qtwUnion);
-        newHtml = newHtml.replace("{content}", contentUnion);
-        
-        $("#divTextTo").html($("#divTextTo").html().replace(htmlUnion, newHtml));
-        selectedSentences.forEach( ss => {
-            // document.getElementById(ss).style = '';
-            // document.getElementById(ss).setAttribute('data-selected', 'false');
-            document.getElementById(ss).setAttribute('data-pair', idsUnion);
-        });
-    }
 }
 
 function doRemotion(sentences) {

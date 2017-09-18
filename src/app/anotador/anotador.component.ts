@@ -632,13 +632,7 @@ export class AnotadorComponent implements OnInit {
   doOperation(type) {
 
     var selectedSentences = jQuery('#selectedSentences').val().split(',');
-    var sentenceList = '';
-    selectedSentences.forEach(s => {
-        sentenceList += s + ',';
-    });
-    if (sentenceList.length > 1) {
-        sentenceList = sentenceList.substring(0, sentenceList.length - 1);
-    }
+    var sentenceList = selectedSentences.toString();
     
     selectedSentences.forEach(s => {
         var operations = document.getElementById(s).getAttribute('data-operations');
@@ -661,8 +655,8 @@ export class AnotadorComponent implements OnInit {
           var sentences = p.split("|||");
           
           switch (type) {
-              // case 'union':
-              //     doUnion(sentences); break;
+              case 'union':
+                  this.doUnion(sentences, selectedSentences); break;
               case 'division':
                   this.doDivision(sentences, selectedSentences); break;
               // case 'remotion':
@@ -680,33 +674,24 @@ export class AnotadorComponent implements OnInit {
   doDivision(sentences, selectedSentences) {
     sentences.forEach(s => {
         if (s.indexOf(selectedSentences[0]) > 0) {
-            var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+            var pp = this.parseSentence(s);
   
-            var match = regexp.exec(s);
-            var ngContent = match[1]; 
-            var pair = match[2];
-            var qtt = parseInt(match[3]);
-            var qtw = parseInt(match[4]);
-            var id = match[5];
-            var content = match[6];
-  
-            this.editSentenceDialog(this, "Divisão de Sentença", content, function (context, ret, text) {
+            this.editSentenceDialog(this, "Divisão de Sentença", pp['content'], function (context, ret, text) {
                 if (ret) {
                     var parsedText = context.senterService.splitText(text);
                     var parsedSentences = parsedText['paragraphs'][0]['sentences']; 
-                    console.log(parsedSentences);
 
                     var newHtml = "";
                     var newIds = [];
                     parsedSentences.forEach(ns => {
-                      var newSentHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-                      newSentHtml = newSentHtml.replace("{id}", id + '_new_' + ns['idx']);
-                      newSentHtml = newSentHtml.replace("{pair}", pair);
+                      var newSentHtml = "<span _ngcontent-" + pp['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                      newSentHtml = newSentHtml.replace("{id}", pp['id'] + '_new_' + ns['idx']);
+                      newSentHtml = newSentHtml.replace("{pair}", pp['pair']);
                       newSentHtml = newSentHtml.replace("{qtt}", ns['qtt']);
                       newSentHtml = newSentHtml.replace("{qtw}", ns['qtw']);
                       newSentHtml = newSentHtml.replace("{content}", ns['text']);
 
-                      newIds.push(id + '_new_' + ns['idx']);
+                      newIds.push(pp['id'] + '_new_' + ns['idx']);
                       newHtml += newSentHtml;
                     });
                    
@@ -719,7 +704,54 @@ export class AnotadorComponent implements OnInit {
         }
     });
   }
+
+  parseSentence(sentence) {
+      var ret = {};
+      var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+      var match = regexp.exec(sentence);
+      ret['ngContent'] = match[1]; 
+      ret['pair'] = match[2];
+      ret['qtt'] = parseInt(match[3]);
+      ret['qtw'] = parseInt(match[4]);
+      ret['id'] = match[5];
+      ret['content'] = match[6];
+      return ret;
+  }
+
+  doUnion(sentences, selectedSentences) {
+    var previousSentence = '';
+    sentences.forEach(s => {
+        if (s.indexOf(selectedSentences[0]) > 0) {
+            var ps = this.parseSentence(s);
+            var pps = this.parseSentence(previousSentence);
   
+            this.editSentenceDialog(this, "União de Sentença", pps['content'] + ' ' + ps['content'], function (context, ret, text) {
+                if (ret) {
+                    var parsedText = context.senterService.splitText(text);
+                    var parsedSentence = parsedText['paragraphs'][0]['sentences'][0]; 
+
+                    var newId = pps['id'] + '|' + ps['id'];
+
+                    var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                    newSentHtml = newSentHtml.replace("{id}", newId);
+                    newSentHtml = newSentHtml.replace("{pair}", pps['pair'] + ',' + ps['pair']);
+                    newSentHtml = newSentHtml.replace("{qtt}", parsedSentence['qtt']);
+                    newSentHtml = newSentHtml.replace("{qtw}", parsedSentence['qtw']);
+                    newSentHtml = newSentHtml.replace("{content}", parsedSentence['text']);
+
+                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(document.getElementById(pps['id']).outerHTML, ''));
+                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+
+                    document.getElementById(ps['pair']).setAttribute('data-pair', newId);
+                    document.getElementById(pps['pair']).setAttribute('data-pair', newId);
+                }
+  
+            });
+        }
+        previousSentence = s;
+    });
+  }
+
 
 
 }
