@@ -43,6 +43,43 @@ input#message {
     font-size: 0.9rem;
 }
 
+
+
+.details-container-lines {
+    font-size:1.6em;
+    display:flex;
+    flex-direction: row;
+    flex-wrap:wrap;
+    width:100%;
+}
+
+.details-container-lines a {
+    background:#fff;
+    padding:0.5em;
+    color:#696969;
+    margin: 6px;
+    width: 100%;
+    min-width:200px;
+}
+
+.details-container-lines a:hover {
+    background: #cdff84;
+}
+
+.details-container-lines a.new { 
+    background: #cdff84;
+}
+
+.details-container-lines a.back { 
+    background: #b0cfff;
+}
+
+.details-container-lines a p {
+    font-size: 0.9rem;
+    margin-bottom: 0px;
+}
+
+
 .titles {
     display:inline-block;
     border: solid 1px #000;
@@ -65,7 +102,7 @@ input#message {
 }
 
 .inner-button {
-    margin-left: 80%;
+    float: right;
 }
 
 

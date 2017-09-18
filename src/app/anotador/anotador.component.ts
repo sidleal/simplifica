@@ -120,6 +120,35 @@ export class AnotadorComponent implements OnInit {
     });
   };
 
+  editSentenceDialogInclusion(context, operation, sentence, callback) {
+    jQuery('<div></div>').appendTo('body')
+    .html('<div><textarea rows="5" cols="80" id="editSentenceText">' + sentence + '</textarea></div>')
+    .dialog({
+        modal: true, title: operation, zIndex: 10000, autoOpen: true,
+        width: 'auto', resizable: true,
+        buttons: {
+            Antes: function () {
+                var text = jQuery('#editSentenceText').val();
+                callback(context, 1, text);
+                jQuery(this).dialog("close");
+            },
+            Depois: function () {
+              var text = jQuery('#editSentenceText').val();
+              callback(context, 2, text);
+              jQuery(this).dialog("close");
+            },
+            Cancelar: function () {
+                jQuery(this).dialog("close");
+                callback(context, -1, '');
+            }
+        },
+        close: function (event, ui) {
+            jQuery(this).remove();
+            callback(context, false, '');
+        }
+    });
+  };
+
   ngOnInit() {
     jQuery("#operations").draggable();  
     jQuery("#selected-sentence").draggable();
@@ -661,8 +690,8 @@ export class AnotadorComponent implements OnInit {
                   this.doDivision(sentences, selectedSentences); break;
               // case 'remotion':
               //     doRemotion(sentences); break;
-              // case 'inclusion':
-              //     doInclusion(sentences); break;
+              case 'inclusion':
+                  this.doInclusion(sentences, selectedSentences); break;
               // case 'rewrite':
               //     doRewrite(sentences); break;
           }
@@ -752,6 +781,42 @@ export class AnotadorComponent implements OnInit {
     });
   }
 
+
+  doInclusion(sentences, selectedSentences) {
+    sentences.forEach(s => {
+        if (s.indexOf(selectedSentences[0]) > 0) {
+            var ps = this.parseSentence(s);
+  
+            this.editSentenceDialogInclusion(this, "Inclusão de Sentença", '', function (context, ret, text) {
+                if (ret > 0) {
+                    var parsedText = context.senterService.splitText(text);
+                    var parsedSentence = parsedText['paragraphs'][0]['sentences'][0]; 
+
+                    var newId = ps['id'] + '_new';
+
+                    var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                    newSentHtml = newSentHtml.replace("{id}", newId);
+                    newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+                    newSentHtml = newSentHtml.replace("{qtt}", parsedSentence['qtt']);
+                    newSentHtml = newSentHtml.replace("{qtw}", parsedSentence['qtw']);
+                    newSentHtml = newSentHtml.replace("{content}", parsedSentence['text']);
+
+                    var newHtml = '';
+                    if (ret == 1) {
+                      newHtml = newSentHtml + s;
+                    } else {
+                      newHtml = s + newSentHtml;
+                    }
+                    
+                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
+
+                    document.getElementById(ps['pair']).setAttribute('data-pair', ps['id'] + ',' + newId);
+                }
+  
+            });
+        }
+    });
+  }
 
 
 }

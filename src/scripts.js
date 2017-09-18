@@ -185,8 +185,8 @@ function rewriteTextTo(type) {
             //     doDivision(sentences); break;
             case 'remotion':
                 doRemotion(sentences); break;
-            case 'inclusion':
-                doInclusion(sentences); break;
+            // case 'inclusion':
+            //     doInclusion(sentences); break;
             case 'rewrite':
                 doRewrite(sentences); break;
         }
@@ -205,35 +205,6 @@ function doRemotion(sentences) {
                 document.getElementById(ss).setAttribute('data-pair', '');
             }
         });
-    });
-}
-
-
-function doInclusion(sentences) {
-    sentences.forEach(s => {
-        if (s.indexOf(selectedSentences[0]) > 0) {
-            var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
-            var match = regexp.exec(s);
-            var ngContent = match[1];
-            var id = match[5];
-            
-            var newHtml = "<span _ngcontent-" + ngContent + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-            newHtml = newHtml.replace("{id}", id + '_new_b4');
-            newHtml = newHtml.replace("{pair}", '');
-            newHtml = newHtml.replace("{qtt}", 0);
-            newHtml = newHtml.replace("{qtw}", 0);
-            newHtml = newHtml.replace("{content}", "[Sentença nova aqui].");
-            
-            $("#divTextTo").html($("#divTextTo").html().replace(s, newHtml + s));
-            // document.getElementById(selectedSentences[0]).style = '';
-            // document.getElementById(selectedSentences[0]).setAttribute('data-selected', 'false');
-            document.getElementById(selectedSentences[0]).setAttribute('data-pair', id + ',' + id + "_new");
-            
-            // document.getElementById(id).style = '';
-            // document.getElementById(id).setAttribute('data-selected', 'false');
-
-            document.getElementById(id + '_new_b4').style = 'font-weight: bold;';
-        }
     });
 }
 

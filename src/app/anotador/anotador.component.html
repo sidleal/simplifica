@@ -53,11 +53,12 @@
       <input type="text" placeholder="Pesquisar" (keyup)="filterText()" [(ngModel)]="searchText"/>
       <input type="checkbox" checked="true"/>Original <input type="checkbox" checked="true"/>Simplificação
 
-      <div class="details-container"> 
+      <div class="details-container-lines"> 
           <a (click)="selectText(text.$key, text.title)" onmousedown="$('#waiting').toggle();" *ngFor="let text of texts | async">
-            {{text.name}}<br/><p>{{text.title}}<br/>{{text.source}}<br/>Nível {{text.level}} ({{text.published}})</p>
-            <i class="fa fa-spinner fa-pulse fa-fw" id='waiting' style="float:right;display:none;"></i>
+            {{text.name}} 
             <i class="fa fa-trash-o inner-button" data-toggle="tooltip" title="Excluir" (click)="deleteText(text.$key);$event.stopPropagation();" (mousedown)="$event.stopPropagation();"></i>
+            <i class="fa fa-spinner fa-pulse fa-fw" id='waiting' style="float:right;display:none;"></i>
+            <br/><p>{{text.title}} - {{text.source}} - Nível {{text.level}} ({{text.published}})</p>
           </a>
       </div>
     </div>
@@ -103,13 +104,13 @@
       <button (click)="saveText()" id="btnSaveText"><i class="fa fa-save fa-2x"></i><br/>Gravar</button>
     </div>
 
-    <div id='operations' class='operations' style='top: 45%;left: 35%;display:none;'>
+    <div id='operations' class='operations' style='top: 15%;left: 70%;display:none;'>
       <div class="operations-header">Operações</div>
       <div class='operations-tools'>
         <button onclick="markWords(true)" class="mini" id='markWords' data-toggle="tooltip" title="Marcar Palavras"><i class="fa fa-text-width"></i></button>
         <button onclick="markWords(false)" class="mini" id='markSentences' data-toggle="tooltip" title="Marcar Sentenças" style='display:none;'><i class="fa fa-align-justify"></i></button>
-        <button (click)="saveSimplification()" class="mini" data-toggle="tooltip" title="Salvar Bitexto"><i class="fa fa-save"></i></button>
         <button onclick="clearSelection()" class="mini" id='clearSelection' data-toggle="tooltip" title="Limpar selecionadas"><i class="fa fa-eraser"></i></button>
+        <button (click)="saveSimplification()" class="mini" data-toggle="tooltip" title="Salvar Bitexto"><i class="fa fa-save"></i></button>
         <span id="qtTokens" class='operations-qt-tokens' data-toggle="tooltip" title="Quantidade de palavras da sentença">0</span>
       </div>
 
@@ -118,7 +119,7 @@
         <a (click)="doOperation('division');"> - Divisão de sentença</a><br/>
         <a (click)="doOperation('union');"> - União de sentenças</a><br/>
         <a onclick="doOperation('remotion');"> - Remoção de sentença</a><br/>
-        <a onclick="doOperation('inclusion');"> - Inclusão de sentença</a><br/>
+        <a (click)="doOperation('inclusion');"> - Inclusão de sentença</a><br/>
         <a onclick="doOperation('rewrite');"> - Reescrita de sentença</a>
       </div>
       <div><a onclick="$('#operations-intra-sentenciais').toggle();"><i class="fa fa-text-width"></i> Intra-sentenciais</a></div>
@@ -130,6 +131,7 @@
         <a onclick="alert('not yet');"> - Simplificação de expressão numérica</a><br/>
         <a onclick="alert('not yet');"> - Remoção de parte da sentença</a><br/>
         <a onclick="alert('not yet');"> - Mudança de voz passiva para voz ativa</a><br/>
+        <a onclick="alert('not yet');"> - Mudança da ordem das orações</a><br/>
         <a onclick="alert('not yet');"> - Mudança da ordem dos constituintes para SVO</a><br/>
         <a onclick="alert('not yet');"> - Mudança da ordem de adjunto adverbial</a><br/>
         <a onclick="alert('not yet');"> - Substituição de pronome por nome</a><br/>
