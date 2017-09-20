@@ -69,21 +69,6 @@ function sentenceClick(sentence) {
             document.getElementById("qtSelectedTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
             updateOperationsList(sentence);
         }
-
-        // if (selected == 'true') {
-        //     selectSentence(sentence, '', 'false');
-        //     selectedSentences.splice(selectedSentences.indexOf(sentence.id), 1);
-        //     document.getElementById("qtSelectedTokens").innerHTML = '';
-        //     document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
-        //     $("#sentenceOperations").html('');
-        //     updateOperationsList(null);
-        // } else {
-        //     selectSentence(sentence, 'background: #EDE981;', 'true');
-        //     selectedSentences.push(sentence.id);
-        //     document.getElementById("qtSelectedTokens").innerHTML = sentence.getAttribute("data-qtw");
-        //     document.getElementById("qtSelectedTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
-        //     updateOperationsList(sentence);
-        // }
         $("#selectedSentences").val(selectedSentences.toString());
     }    
 }
@@ -144,15 +129,29 @@ function wordClick(word) {
     if (markingWords) {
         var selected = word.getAttribute('data-selected');
         if (selected == 'true') {
-            word.style = '';
-            word.setAttribute('data-selected', 'false');
-            selectedWords.splice(selectedWords.indexOf(word.id), 1);
+            selectedWords.forEach(w => {
+                selectWord(document.getElementById(w), '', 'false');
+            });
+            selectedWords = [];
         } else {
-            word.style = 'background: #EDE981;font-weight: bold;';
-            word.setAttribute('data-selected', 'true');
+            if (selectedWords.length > 0) {
+                var firstWordIdx = document.getElementById(selectedWords[0]).getAttribute('data-idx');
+                var lastWordIdx = word.getAttribute('data-idx');
+                for (var i = parseInt(firstWordIdx); i < parseInt(lastWordIdx);i++) {
+                    var midWord = document.getElementById(getTokenIdFromIdx(i));
+                    selectWord(midWord, 'background: #EDE981;font-weight: bold;', 'true');
+                    selectedWords.push(midWord.id);
+                }
+            }
+            selectWord(word, 'background: #EDE981;font-weight: bold;', 'true');
             selectedWords.push(word.id);
         }
     }
+}
+
+function selectWord(word, style, selected) {
+    word.style = style;
+    word.setAttribute('data-selected', selected);
 }
 
 
@@ -227,4 +226,29 @@ function doRewrite(sentences) {
             }
         });
     });
+}
+
+
+function getTokenIdFromIdx(idx) {
+    var ret = '';
+    var tokens = $('#tokenList').val().split('|/|');
+    tokens.forEach(t => {
+        var items = t.split('||');
+        if (parseInt(items[0]) == parseInt(idx)) {
+            ret = items[2];
+        }
+    });
+    return ret;
+}
+
+function getTokenIdxFromId(id) {
+    var ret = '';
+    var tokens = $('#tokenList').val().split('|/|');
+    tokens.forEach(t => {
+        var items = t.split('||');
+        if (parseInt(items[2]) == parseInt(id)) {
+            ret = items[0];
+        }
+    });
+    return ret;
 }

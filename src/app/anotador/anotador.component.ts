@@ -63,6 +63,8 @@ export class AnotadorComponent implements OnInit {
 
   loggedUser: string;
 
+  tokenList:string = '';
+
   constructor(private authService: AuthService, public af: AngularFireDatabase, 
     private router: Router, private senterService: SenterService) {
     this.authService.afAuth.authState.subscribe( auth => {
@@ -311,7 +313,7 @@ export class AnotadorComponent implements OnInit {
       {
         totP: parsedText['totP'],
         totS:  parsedText['totS'],
-        totT:  parsedText['totT']
+        totT:  parsedText['totT'],
       });
 
     var paragraphs = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs");
@@ -521,6 +523,7 @@ export class AnotadorComponent implements OnInit {
           out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
           for(var t in sObj.tokens) {
             var token = sObj.tokens[t].token;
+            var idx = sObj.tokens[t].idx;
 
             if ('\"\''.indexOf(token) >= 0) {
               openQuotes = !openQuotes;
@@ -534,9 +537,11 @@ export class AnotadorComponent implements OnInit {
             }
 
             out += '<div id=\'f.t.' + t + '\' data-selected=\'false\' data-pair=\'t.t.' + t + '\'';
+            out += ' data-idx=\'' + idx + '\'';            
             out += ' onclick=\'wordClick(this)\'';
             out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
             lastToken = token;
+            this.tokenList += (idx + "||" + token + "||" + 'f.t.' + t + '|/|');
           }
           out += ' </span>';
         }
@@ -581,7 +586,6 @@ export class AnotadorComponent implements OnInit {
       this.textTo = out;
 
     });
-
     jQuery('#operations').show();
     jQuery('#selected-sentence').show();
   }
