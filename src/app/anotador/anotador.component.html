@@ -63,10 +63,15 @@
       </div>
     </div>
 
-    <div id="simplifications" *ngIf="stage == 'simplifications'">
-      <div class="details-container"> 
-          <a (click)="selectSimplification(simp.$key, simp.name)" *ngFor="let simp of simplifications | async">
-            {{simp.name}}<br/><p>{{simp.tags}}<br/>({{simp.updated}})</p>
+    <div *ngIf="stage == 'simplifications'">
+      <input type="text" placeholder="Pesquisar" (keyup)="filterText()" [(ngModel)]="searchText"/>
+
+      <div class="details-container-lines"> 
+          <a (click)="selectSimplification(simp.$key, simp.name)" onmousedown="$('#waiting').toggle();" *ngFor="let simp of simplifications | async">
+            {{simp.title}} - {{simp.name}} 
+            <i class="fa fa-trash-o inner-button" data-toggle="tooltip" title="Excluir" (click)="deleteSimplification(simp.$key);$event.stopPropagation();" (mousedown)="$event.stopPropagation();"></i>
+            <i class="fa fa-spinner fa-pulse fa-fw" id='waiting' style="float:right;display:none;"></i>
+            <br/><p>{{simp.tags}} - {{simp.updated}}</p>
           </a>
       </div>
     </div>

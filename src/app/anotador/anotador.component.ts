@@ -188,10 +188,11 @@ export class AnotadorComponent implements OnInit {
         break;
       case "texts":
         this.showTextMenu();
-        break;        
+        break;
       case "doSimplification":
         this.listTexts();
-        jQuery("#operations").hide();        
+        jQuery("#operations").hide();
+        jQuery("#selected-sentence").hide();
         break;        
       case "simplifications":
         this.showTextMenu();
@@ -383,7 +384,16 @@ export class AnotadorComponent implements OnInit {
       }
     });
   }
-    
+   
+  deleteSimplification(simpId) {
+    this.confirmDialog('Confirma a exclusão?', ret => {
+      if (ret) {
+        this.af.object('/corpora/' + this.selectedCorpusId + '/simplifications/' + simpId).remove();
+      }
+    });
+
+  }
+
   saveSimplification() {
     var textToTitle = document.getElementById("divTextToTitle").innerHTML;
     var textToSubTitle = document.getElementById("divTextToSubTitle").innerHTML;
@@ -482,6 +492,7 @@ export class AnotadorComponent implements OnInit {
     this.simplifications.push(
       {
         name: this.simplificationName,
+        title: this.selectedTextTitle,
         from: this.selectedTextId,
         to: text.key,
         tags: this.simplificationTag,
