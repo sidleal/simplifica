@@ -65,6 +65,8 @@ export class AnotadorComponent implements OnInit {
 
   tokenList:string = '';
 
+  simplificationParsedText: any;
+
   constructor(private authService: AuthService, public af: AngularFireDatabase, 
     private router: Router, private senterService: SenterService) {
     this.authService.afAuth.authState.subscribe( auth => {
@@ -342,6 +344,11 @@ export class AnotadorComponent implements OnInit {
           qtt: s['qtt']
         }
       ).then((sent) => {
+        s['newId'] = sent.key;
+        if (this.simplificationParsedText.totS == s['idx']) {
+              this.saveOperationList(text);
+        }
+ 
         this.saveTokens(text, par, sent, s);
       });
     });
@@ -441,7 +448,7 @@ export class AnotadorComponent implements OnInit {
       newTextcontent += '\n';
     });
 
-    var parsedText = {"totP": idxParagraphs, "totS": idxSentences, "totT": idxTokens, "paragraphs": parsedParagraphs};
+    this.simplificationParsedText = {"totP": idxParagraphs, "totS": idxSentences, "totT": idxTokens, "paragraphs": parsedParagraphs};
 
     this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
     this.simplificationTextFrom.take(1).subscribe(text => {
@@ -449,6 +456,7 @@ export class AnotadorComponent implements OnInit {
       this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/texts");
       var newName = text.name;
       newName = newName.replace(/nível_[0-9]+/g, "nível_" + (text.level + 1));
+      
       this.texts.push(
         {
           name: newName,
@@ -462,25 +470,48 @@ export class AnotadorComponent implements OnInit {
           level: text.level + 1
         }
       ).then((text) => {
-        this.saveParagraphs(text, parsedText);
-
-        // this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications");
-        // this.simplifications.push(
-        //   {
-        //     name: this.simplificationName,
-        //     from: this.selectedTextId,
-        //     to: text.key,
-        //     tags: this.simplificationTag,
-        //     updated: moment().format("YYYY-MM-DD")
-        //   }
-        // );
-
+        this.saveParagraphs(text, this.simplificationParsedText);
       });
     });
 
     // this.showTextMenu();
   }
 
+  saveOperationList(text) {
+    this.simplifications = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications");
+    this.simplifications.push(
+      {
+        name: this.simplificationName,
+        from: this.selectedTextId,
+        to: text.key,
+        tags: this.simplificationTag,
+        updated: moment().format("YYYY-MM-DD")
+      }
+    ).then(simpl => {
+      var simplSentences = this.af.list('/corpora/' + this.selectedCorpusId + "/simplifications/" + simpl.key + "/sentences");
+      this.simplificationParsedText.paragraphs.forEach(p => {
+        p.sentences.forEach(s => {
+
+          var from = s.pair.replace(/f\.s\./g, '');
+          var operations = s.operations.replace(/f\.s\./g, '');
+          if (operations == '') {
+            operations = 'none();'
+          }
+          
+          simplSentences.push(
+            {
+              idx: s.idx,
+              from: from,
+              to: s.newId,
+              operations: operations
+            }
+          );
+        });
+      });
+
+    });
+
+  }
 
   selectSimplification(simplId, simplName) {
     this.selectedSimplificationId = simplId;
