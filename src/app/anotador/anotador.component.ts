@@ -198,7 +198,11 @@ export class AnotadorComponent implements OnInit {
         this.showTextMenu();
         break;
       case "doSimplification":
-        this.listTexts();
+        if (this.selectedSimplificationId == null) {
+          this.listTexts();          
+        } else {
+          this.listSimplifications();
+        }
         jQuery("#operations").hide();
         jQuery("#selected-sentence").hide();
         break;        
@@ -380,6 +384,7 @@ export class AnotadorComponent implements OnInit {
   selectText(textId, textTitle) {
     this.selectedTextId = textId;
     this.selectedTextTitle = textTitle;
+    this.selectedSimplificationId = null;
     this.doSimplification();
   }
 
