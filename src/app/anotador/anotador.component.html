@@ -116,6 +116,7 @@
         <button onclick="markWords(false)" class="mini" id='markSentences' data-toggle="tooltip" title="Marcar Sentenças" style='display:none;'><i class="fa fa-align-justify"></i></button>
         <button onclick="clearSelection()" class="mini" id='clearSelection' data-toggle="tooltip" title="Limpar selecionadas"><i class="fa fa-eraser"></i></button>
         <button (click)="saveSimplification()" class="mini" data-toggle="tooltip" title="Salvar Bitexto"><i class="fa fa-save"></i></button>
+        <i class="fa fa-spinner fa-pulse fa-fw" id='waiting' style="display:none;"></i>
         <span id="qtTokens" class='operations-qt-tokens' data-toggle="tooltip" title="Quantidade de palavras da sentença">0</span>
       </div>
 

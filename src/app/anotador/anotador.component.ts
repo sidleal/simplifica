@@ -67,6 +67,14 @@ export class AnotadorComponent implements OnInit {
 
   simplificationParsedText: any;
 
+  operationsMap = {
+    union: 'União de Sentença',
+    division: 'Divisão de Sentença',
+    remotion: 'Remoção de Sentença',
+    inclusion: 'Inclusão de Sentença',
+    rewrite: 'Reescrita de Sentença'
+  }
+
   constructor(private authService: AuthService, public af: AngularFireDatabase, 
     private router: Router, private senterService: SenterService) {
     this.authService.afAuth.authState.subscribe( auth => {
@@ -395,6 +403,9 @@ export class AnotadorComponent implements OnInit {
   }
 
   saveSimplification() {
+    
+    jQuery("#waiting").show();
+
     var textToTitle = document.getElementById("divTextToTitle").innerHTML;
     var textToSubTitle = document.getElementById("divTextToSubTitle").innerHTML;
 
@@ -405,7 +416,7 @@ export class AnotadorComponent implements OnInit {
     var newTextcontent = '';
 
     var textToHTML = document.getElementById("divTextTo").innerHTML;
-    textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.indexOf("</p></div>")+4);
+    textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.lastIndexOf("</p>")+4);
     textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
     var paragraphs = textToHTML.split("|||");
     paragraphs.forEach(p => {
@@ -413,7 +424,7 @@ export class AnotadorComponent implements OnInit {
       idxParagraphs++;
       var parsedParagraph = {"idx": idxParagraphs, "sentences": []};
 
-      p = p.substring(p.indexOf("<span "), p.indexOf("</span></p>")+7);
+      p = p.substring(p.indexOf("<span "), p.lastIndexOf("</span>")+7);
       p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
       var sentences = p.split("|||");
       sentences.forEach(s => {
@@ -463,6 +474,15 @@ export class AnotadorComponent implements OnInit {
     this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
     this.simplificationTextFrom.take(1).subscribe(text => {
 
+      if (this.selectedSimplificationId != null) {
+        this.simplification = this.af.object('/corpora/' + this.selectedCorpusId  + "/simplifications/" + this.selectedSimplificationId);
+        this.simplification.take(1).subscribe(simp => {
+          this.af.object('/corpora/' + this.selectedCorpusId + '/texts/' + simp.to).remove();
+          this.af.object('/corpora/' + this.selectedCorpusId + '/simplifications/' + this.selectedSimplificationId).remove();
+          this.selectedSimplificationId = null;
+        });
+      } 
+
       this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/texts");
       var newName = text.name;
       newName = newName.replace(/nível_[0-9]+/g, "nível_" + (text.level + 1));
@@ -484,7 +504,6 @@ export class AnotadorComponent implements OnInit {
       });
     });
 
-    // this.showTextMenu();
   }
 
   saveOperationList(text) {
@@ -592,25 +611,16 @@ editSimplificationText(textFrom, textTo, simp) {
     jQuery("#divTextFrom").html(this.textFrom);
     jQuery("#divTextTo").html(this.textTo);
 
+    jQuery("#waiting").hide();  
+
   }
  
-  getSimplificationToSentence(simp, sentenceId) {
-    var ret = null;
+  getSimplificationSentences(simp, sentenceId, source) {
+    var ret = [];
     for (var s in simp.sentences) {
       var simpSentence = simp.sentences[s]; 
-      if (simpSentence.from.indexOf(sentenceId) >= 0) {
-        ret = simpSentence;
-      }
-    }
-    return ret;
-  }
-
-  getSimplificationFromSentence(simp, sentenceId) {
-    var ret = null;
-    for (var s in simp.sentences) {
-      var simpSentence = simp.sentences[s]; 
-      if (simpSentence.to.indexOf(sentenceId) >= 0) {
-        ret = simpSentence;
+      if (simpSentence[source].indexOf(sentenceId) >= 0) {
+        ret.push(simpSentence);
       }
     }
     return ret;
@@ -630,24 +640,11 @@ editSimplificationText(textFrom, textTo, simp) {
       for(var s in textFrom.paragraphs[p].sentences) {
         var sObj = textFrom.paragraphs[p].sentences[s];
 
-        var pair = '';
-        var operations = '';
-        if (simp != null) {
-          var simpSentence = this.getSimplificationToSentence(simp, s);
-          var pairList = simpSentence.to.split(','); 
-          for (var i in pairList) {
-            pair += 't.s.' + pairList[i] + ','            
-          }
-          if (!simpSentence.operations.startsWith('none')) {
-            operations = simpSentence.operations;
-          }
-        } else {
-          pair = 't.s.' + s;
-        }
+        var po = this.getPairAndOperations(simp, s, 'to'); 
 
-        out += '<span id=\'f.s.' + s + '\' data-selected=\'false\' data-pair=\'' + pair + '\'';
+        out += '<span id=\'f.s.' + s + '\' data-selected=\'false\' data-pair=\'' + po['pair'] + '\'';
         out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
-        out += ' data-operations=\'' + operations + '\'';
+        out += ' data-operations=\'' + po['operations'] + '\'';
         out += ' onclick=\'sentenceClick(this)\'';
         out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
         for(var t in sObj.tokens) {
@@ -679,6 +676,45 @@ editSimplificationText(textFrom, textTo, simp) {
     return out; 
   }
 
+  getPairAndOperations(simp, s, source) {
+    var ret = {};
+    
+    var prefix = source[0] + '.s.';
+
+    var inverseSource = '';
+    if (source == 'to') {
+      inverseSource = 'from';
+    } else {
+      inverseSource = 'to';
+    }
+    
+    var pair = '';
+    var operations = '';
+    
+    if (simp != null) {
+      var newPairList = [];
+      var simpSentences = this.getSimplificationSentences(simp, s, inverseSource);
+      for (var j in simpSentences) {
+        var pairList = simpSentences[j][source].split(','); 
+        for (var i in pairList) {
+          if(pairList[i] != '') {
+            newPairList.push(prefix + pairList[i]);                
+          }
+        }
+        if (!simpSentences[j].operations.startsWith('none') && operations.indexOf(simpSentences[j].operations) < 0) {
+          operations += simpSentences[j].operations;
+        }  
+      }
+      pair = newPairList.toString();      
+    } else {
+      pair = prefix + s;
+    }
+    ret['pair'] = pair;
+    ret['operations'] = operations;
+
+    return ret;
+  }
+
   parseTextToOut(textTo, simp) {
     var out = '';
     out += "<style type='text/css'>";
@@ -690,24 +726,11 @@ editSimplificationText(textFrom, textTo, simp) {
       for(var s in textTo.paragraphs[p].sentences) {
         var sObj = textTo.paragraphs[p].sentences[s];
 
-        var pair = '';
-        var operations = '';
-        if (simp != null) {
-          var simpSentence = this.getSimplificationFromSentence(simp, s);
-          var pairList = simpSentence.from.split(','); 
-          for (var i in pairList) {
-            pair += 't.s.' + pairList[i] + ','            
-          }
-          if (!simpSentence.operations.startsWith('none')) {
-            operations = simpSentence.operations;
-          }
-        } else {
-          pair = 'f.s.' + s;
-        }
+        var po = this.getPairAndOperations(simp, s, 'from'); 
 
-        out += '<span id=\'t.s.' + s + '\'  data-selected=\'false\' data-pair=\'' + pair + '\'';
+        out += '<span id=\'t.s.' + s + '\'  data-selected=\'false\' data-pair=\'' + po['pair'] + '\'';
         out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
-        out += ' data-operations=\'' + operations + '\'';
+        out += ' data-operations=\'' + po['operations'] + '\'';
         out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
         for(var t in sObj.tokens) {
           var token = sObj.tokens[t].token;
@@ -806,25 +829,40 @@ editSimplificationText(textFrom, textTo, simp) {
   doOperation(type) {
 
     var selectedSentences = jQuery('#selectedSentences').val().split(',');
-    var sentenceList = selectedSentences.toString();
     
-    selectedSentences.forEach(s => {
-        var operations = document.getElementById(s).getAttribute('data-operations');
-        operations += type + '(' + sentenceList + ');';
-        document.getElementById(s).setAttribute('data-operations', operations);
-      });
-
     this.rewriteTextTo(type, selectedSentences);
+
+  }
+
+  updateOperationsList(sentenceId, type) {
+    
+    var sentence = document.getElementById(sentenceId);
+
+    var operations = sentence.getAttribute('data-operations');
+    operations += type + ',';
+    sentence.setAttribute('data-operations', operations);
+
+    var operationsHtml = '';
+    var operationsList = operations.split(",");
+    operationsList.forEach( op => {
+        if (op != '') {
+            var opDesc = this.operationsMap[op];
+            operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
+        }
+    });
+
+    jQuery("#sentenceOperations").html(operationsHtml);
   }
 
   rewriteTextTo(type, selectedSentences) {
       var textToHTML = document.getElementById("divTextTo").innerHTML;
-      textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.indexOf("</p></div>")+4);
+      
+      textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.lastIndexOf("</p>")+4);
       textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
       var paragraphs = textToHTML.split("|||");
 
       paragraphs.forEach(p => {
-          p = p.substring(p.indexOf("<span "), p.indexOf("</span></p>")+7);
+          p = p.substring(p.indexOf("<span "), p.lastIndexOf("</span>")+7);
           p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
           var sentences = p.split("|||");
           
@@ -845,50 +883,35 @@ editSimplificationText(textFrom, textTo, simp) {
   }
 
 
-  doDivision(sentences, selectedSentences) {
-    sentences.forEach(s => {
-        if (s.indexOf(selectedSentences[0]) > 0) {
-            var pp = this.parseSentence(s);
-  
-            this.editSentenceDialog(this, "Divisão de Sentença", pp['content'], function (context, ret, text) {
-                if (ret) {
-                    var parsedText = context.senterService.splitText(text);
-                    var parsedSentences = parsedText['paragraphs'][0]['sentences']; 
-
-                    var newHtml = "";
-                    var newIds = [];
-                    parsedSentences.forEach(ns => {
-                      var newSentHtml = "<span _ngcontent-" + pp['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-                      newSentHtml = newSentHtml.replace("{id}", pp['id'] + '_new_' + ns['idx']);
-                      newSentHtml = newSentHtml.replace("{pair}", pp['pair']);
-                      newSentHtml = newSentHtml.replace("{qtt}", ns['qtt']);
-                      newSentHtml = newSentHtml.replace("{qtw}", ns['qtw']);
-                      newSentHtml = newSentHtml.replace("{content}", ns['text']);
-
-                      newIds.push(pp['id'] + '_new_' + ns['idx']);
-                      newHtml += newSentHtml;
-                    });
-                   
-                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
-                    document.getElementById(selectedSentences[0]).setAttribute('data-pair', newIds.toString());
-                }
-  
-            });
-                
-        }
-    });
-  }
 
   parseSentence(sentence) {
       var ret = {};
-      var regexp = /<span.*ngcontent-(.*)=[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
+
+      var regexp = /ngcontent-([^=]+)/g;
       var match = regexp.exec(sentence);
-      ret['ngContent'] = match[1]; 
-      ret['pair'] = match[2];
-      ret['qtt'] = parseInt(match[3]);
-      ret['qtw'] = parseInt(match[4]);
-      ret['id'] = match[5];
-      ret['content'] = match[6];
+      if (match != null) {
+        ret['ngContent'] = match[1];         
+      } else {
+        ret['ngContent'] = 'aa';
+      }
+
+      regexp = /data-pair="(.+?)"/g;
+      match = regexp.exec(sentence);
+      ret['pair'] = match[1];
+
+      regexp = /data-qtt="(.+?)".*data-qtw="(.+?)"/g;
+      match = regexp.exec(sentence);
+      ret['qtt'] = parseInt(match[1]);
+      ret['qtw'] = parseInt(match[2]);
+
+      regexp = /id="(.+?)"/g;
+      match = regexp.exec(sentence);
+      ret['id'] = match[1];
+
+      regexp = />(.+?)<\/span>/g;
+      match = regexp.exec(sentence);    
+      ret['content'] = match[1];
+
       return ret;
   }
 
@@ -918,11 +941,52 @@ editSimplificationText(textFrom, textTo, simp) {
 
                     document.getElementById(ps['pair']).setAttribute('data-pair', newId);
                     document.getElementById(pps['pair']).setAttribute('data-pair', newId);
+                  
+                    context.updateOperationsList(ps['pair'], 'union');
+                    context.updateOperationsList(pps['pair'], 'union');
                 }
   
             });
         }
         previousSentence = s;
+    });
+  }
+
+
+  doDivision(sentences, selectedSentences) {
+    sentences.forEach(s => {
+        if (s.indexOf(selectedSentences[0]) > 0) {
+            var ps = this.parseSentence(s);
+
+
+            this.editSentenceDialog(this, "Divisão de Sentença", ps['content'], function (context, ret, text) {
+                if (ret) {
+                    var parsedText = context.senterService.splitText(text);
+                    var parsedSentences = parsedText['paragraphs'][0]['sentences']; 
+
+                    var newHtml = "";
+                    var newIds = [];
+                    parsedSentences.forEach(ns => {
+                      var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                      newSentHtml = newSentHtml.replace("{id}", ps['id'] + '_new_' + ns['idx']);
+                      newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+                      newSentHtml = newSentHtml.replace("{qtt}", ns['qtt']);
+                      newSentHtml = newSentHtml.replace("{qtw}", ns['qtw']);
+                      newSentHtml = newSentHtml.replace("{content}", ns['text']);
+
+                      newIds.push(ps['id'] + '_new_' + ns['idx']);
+                      newHtml += newSentHtml;
+                    });
+                   
+                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
+                    document.getElementById(ps['pair']).setAttribute('data-pair', newIds.toString());
+
+                    context.updateOperationsList(ps['pair'], 'division');
+                }
+  
+            });
+                
+        }
     });
   }
 
@@ -956,6 +1020,7 @@ editSimplificationText(textFrom, textTo, simp) {
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
 
                     document.getElementById(ps['pair']).setAttribute('data-pair', ps['id'] + ',' + newId);
+                    context.updateOperationsList(ps['pair'], 'inclusion');
                 }
   
             });

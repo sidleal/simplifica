@@ -97,11 +97,10 @@ function updateOperationsList(sentence) {
     if (sentence != null) {    
         var operations = sentence.getAttribute('data-operations');
         if (operations != '') {
-            var operationsList = operations.split(";");
+            var operationsList = operations.split(",");
             operationsList.forEach( op => {
                 if (op != '') {
-                    var opKey = op.split('(')[0];
-                    var opDesc = operationsMap[opKey];
+                    var opDesc = operationsMap[op];
                     operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
                 }
             });
