@@ -520,6 +520,8 @@ export class AnotadorComponent implements OnInit {
         });
       });
 
+      this.selectSimplification(simpl.key, this.simplificationName);
+
     });
 
   }
@@ -545,87 +547,8 @@ export class AnotadorComponent implements OnInit {
       this.totalParagraphs = text.totP;
       this.totalSentences =  text.totS;
 
-      var out = '';
-      out += "<style type='text/css'>";
-      out += " p span:hover {background:#cdff84;cursor:pointer;}";
-      out += " p span div {display:inline-block;}";
-      out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:pointer;}";
-      out += "</style>";
-      var openQuotes = false;
-      var lastToken = '';
-      for(var p in text.paragraphs) {
-        out += '<p id=\'f.p.' + p + '\'>';
-        for(var s in text.paragraphs[p].sentences) {
-          var sObj = text.paragraphs[p].sentences[s];
-          out += '<span id=\'f.s.' + s + '\' data-selected=\'false\' data-pair=\'t.s.' + s + '\'';
-          out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
-          out += ' data-operations=\'\'';
-          out += ' onclick=\'sentenceClick(this)\'';
-          // out += ' (click)=\'sentenceClick(this)\'';
-          out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
-          for(var t in sObj.tokens) {
-            var token = sObj.tokens[t].token;
-            var idx = sObj.tokens[t].idx;
-
-            if ('\"\''.indexOf(token) >= 0) {
-              openQuotes = !openQuotes;
-              if (openQuotes) {
-                out += ' ';
-              }
-            } else if (openQuotes && '\"\''.indexOf(lastToken) >= 0) {
-              //nothing
-            } else if ('.,)]}!?:'.indexOf(token) < 0 && '([{'.indexOf(lastToken) < 0) {
-              out += ' ';
-            }
-
-            out += '<div id=\'f.t.' + t + '\' data-selected=\'false\' data-pair=\'t.t.' + t + '\'';
-            out += ' data-idx=\'' + idx + '\'';            
-            out += ' onclick=\'wordClick(this)\'';
-            out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
-            lastToken = token;
-            this.tokenList += (idx + "||" + token + "||" + 'f.t.' + t + '|/|');
-          }
-          out += ' </span>';
-        }
-        out += "</p>"
-      }
-      this.textFrom = out;
-
-      out = '';
-      out += "<style type='text/css'>";
-      out += " p span:hover {background:#cdff84;cursor:text;}";
-      // out += " p span div {display:inline-block;padding-top:2px;padding-bottom:2px;}";
-      // out += " p span div:hover {font-weight:bold;text-decoration:underline;cursor:text;}";
-      out += "</style>";
-      var openQuotes = false;
-      for(var p in text.paragraphs) {
-        out += '<p id=\'t.p.' + p + '\'>';
-        for(var s in text.paragraphs[p].sentences) {
-          var sObj = text.paragraphs[p].sentences[s];
-          out += '<span id=\'t.s.' + s + '\'  data-selected=\'false\' data-pair=\'f.s.' + s + '\'';
-          out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
-          out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
-          for(var t in sObj.tokens) {
-            var token = sObj.tokens[t].token;
-            // out += '<div id=\'t.t.' + t + '\' data-pair=\'f.t.' + t + '\'';
-            // out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
-            if ('\"\''.indexOf(token) >= 0) {
-              openQuotes = !openQuotes;
-              if (openQuotes) {
-                out += ' ';
-              }
-            } else if (openQuotes && '\"\''.indexOf(out.substr(-1)) >= 0) {
-              //nothing
-            } else if ('.,)]}!?:'.indexOf(token) < 0 && '([{'.indexOf(out.substr(-1)) < 0) {
-              out += ' ';
-            }
-            out += token;
-          }
-          out += ' </span>';
-        }
-        out += "</p>"
-      }
-      this.textTo = out;
+      this.textFrom = this.parseTextFromOut(text, null);
+      this.textTo = this.parseTextToOut(text, null);
 
     });
     jQuery('#operations').show();
@@ -640,8 +563,6 @@ editSimplification() {
       var simplificationTextTo = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + simp.to);
       this.selectedTextTitle = textFrom.title;
       simplificationTextTo.take(1).subscribe(textTo => {
-        // console.log(textFrom.title + ' - ' + textFrom.level);
-        // console.log(textTo.title + ' - ' + textTo.level);
         this.editSimplificationText(textFrom, textTo, simp);
       });        
     });   
@@ -667,6 +588,10 @@ editSimplificationText(textFrom, textTo, simp) {
 
     jQuery('#operations').show();
     jQuery('#selected-sentence').show();
+
+    jQuery("#divTextFrom").html(this.textFrom);
+    jQuery("#divTextTo").html(this.textTo);
+
   }
  
   getSimplificationToSentence(simp, sentenceId) {
@@ -705,10 +630,10 @@ editSimplificationText(textFrom, textTo, simp) {
       for(var s in textFrom.paragraphs[p].sentences) {
         var sObj = textFrom.paragraphs[p].sentences[s];
 
-        var simpSentence = this.getSimplificationToSentence(simp, s);
         var pair = '';
         var operations = '';
-        if (simpSentence != null) {
+        if (simp != null) {
+          var simpSentence = this.getSimplificationToSentence(simp, s);
           var pairList = simpSentence.to.split(','); 
           for (var i in pairList) {
             pair += 't.s.' + pairList[i] + ','            
@@ -716,6 +641,8 @@ editSimplificationText(textFrom, textTo, simp) {
           if (!simpSentence.operations.startsWith('none')) {
             operations = simpSentence.operations;
           }
+        } else {
+          pair = 't.s.' + s;
         }
 
         out += '<span id=\'f.s.' + s + '\' data-selected=\'false\' data-pair=\'' + pair + '\'';
@@ -763,17 +690,19 @@ editSimplificationText(textFrom, textTo, simp) {
       for(var s in textTo.paragraphs[p].sentences) {
         var sObj = textTo.paragraphs[p].sentences[s];
 
-        var simpSentence = this.getSimplificationFromSentence(simp, s);
         var pair = '';
         var operations = '';
-        if (simpSentence != null) {
+        if (simp != null) {
+          var simpSentence = this.getSimplificationFromSentence(simp, s);
           var pairList = simpSentence.from.split(','); 
           for (var i in pairList) {
-            pair += 'f.s.' + pairList[i] + ','            
+            pair += 't.s.' + pairList[i] + ','            
           }
           if (!simpSentence.operations.startsWith('none')) {
             operations = simpSentence.operations;
           }
+        } else {
+          pair = 'f.s.' + s;
         }
 
         out += '<span id=\'t.s.' + s + '\'  data-selected=\'false\' data-pair=\'' + pair + '\'';
