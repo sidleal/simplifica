@@ -148,10 +148,10 @@
     <div id='selected-sentence' class='operations' style='left:10px;top:85%;display:none;'>
       <div class="operations-header">Seleção</div>
       <div>
+        <span id="qtSentences" class='operations-qt-sentences' data-toggle="tooltip" title="Quantidade de parágrafos e sentenças do texto origem">{{totalParagraphs}} - {{totalSentences}}</span>
         <span id="qtSelectedTokens" class='operations-qt-tokens' data-toggle="tooltip" title="Quantidade de palavras da sentença">0</span>
-        <ul id="sentenceOperations">
-        </ul>
-        <input type="hidden" id="selectedSentences"/>        
+        <span style='float:left;margin-left:10px;'><ul id="sentenceOperations"></ul></span>
+        <input type="hidden" id="selectedSentences"/>
       </div>
     </div>
 

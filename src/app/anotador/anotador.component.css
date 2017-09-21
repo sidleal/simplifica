@@ -141,6 +141,15 @@ input#message {
     margin-right: 10px;
 }
 
+.operations-qt-sentences {
+    float: left;
+    background:#8ABC41;
+    color: white;
+    font-weight: bold;
+    font-size: 1.3em;
+    margin-left: 10px;
+}
+
 .operations-header {
     width: 100%;
     background:#3a72c9;
