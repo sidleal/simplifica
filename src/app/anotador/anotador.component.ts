@@ -443,14 +443,18 @@ export class AnotadorComponent implements OnInit {
         match = regexp.exec(s);
         var sPair = match[1];
 
-        var operations = '';
         var sPairList = sPair.split(',');
+        var newOperationList = [];
         sPairList.forEach(pair => {
           if (document.getElementById(pair) != null) {
-            operations += document.getElementById(pair).getAttribute("data-operations");            
+            var newOperation = document.getElementById(pair).getAttribute("data-operations");
+            if (newOperationList.indexOf(newOperation) < 0) {
+              newOperationList.push(newOperation);            
+            }
           }
         });
-
+        var operations = newOperationList.toString();
+        
         var parsedSentence = {"idx": idxSentences, "text": sContent, "id": sId, "pair": sPair, "operations": operations, "tokens": []};
         
         var parsedText = this.senterService.splitText(sContent);
