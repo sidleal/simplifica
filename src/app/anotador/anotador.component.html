@@ -124,9 +124,9 @@
       <div id="operations-sentenciais" style="display:none;">
         <a (click)="doOperation('division');"> - Divisão de sentença</a><br/>
         <a (click)="doOperation('union');"> - União de sentenças</a><br/>
-        <a onclick="doOperation('remotion');"> - Remoção de sentença</a><br/>
+        <a (click)="doOperation('remotion');"> - Remoção de sentença</a><br/>
         <a (click)="doOperation('inclusion');"> - Inclusão de sentença</a><br/>
-        <a onclick="doOperation('rewrite');"> - Reescrita de sentença</a>
+        <a (click)="doOperation('rewrite');"> - Reescrita de sentença</a>
       </div>
       <div><a onclick="$('#operations-intra-sentenciais').toggle();"><i class="fa fa-text-width"></i> Intra-sentenciais</a></div>
       <div id="operations-intra-sentenciais" style="display:none;">

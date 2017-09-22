@@ -449,16 +449,15 @@ export class AnotadorComponent implements OnInit {
         var sPair = match[1];
 
         var sPairList = sPair.split(',');
-        var newOperationList = [];
+        var operations = '';
         sPairList.forEach(pair => {
           if (document.getElementById(pair) != null) {
             var newOperation = document.getElementById(pair).getAttribute("data-operations");
-            if (newOperationList.indexOf(newOperation) < 0) {
-              newOperationList.push(newOperation);            
+            if (operations.indexOf(newOperation) < 0) {
+              operations += newOperation;
             }
           }
         });
-        var operations = newOperationList.toString();
         
         var parsedSentence = {"idx": idxSentences, "text": sContent, "id": sId, "pair": sPair, "operations": operations, "tokens": []};
         
@@ -483,6 +482,9 @@ export class AnotadorComponent implements OnInit {
     this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
     this.simplificationTextFrom.take(1).subscribe(text => {
 
+      var newName = text.name;
+      newName = newName.replace(/nível_[0-9]+/g, "nível_" + (text.level + 1));
+
       if (this.selectedSimplificationId != null) {
         this.simplification = this.af.object('/corpora/' + this.selectedCorpusId  + "/simplifications/" + this.selectedSimplificationId);
         this.simplification.take(1).subscribe(simp => {
@@ -493,8 +495,6 @@ export class AnotadorComponent implements OnInit {
       } 
 
       this.texts = this.af.list('/corpora/' + this.selectedCorpusId + "/texts");
-      var newName = text.name;
-      newName = newName.replace(/nível_[0-9]+/g, "nível_" + (text.level + 1));
       
       this.texts.push(
         {
@@ -589,6 +589,7 @@ editSimplification() {
     this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + simp.from);
     this.simplificationTextFrom.take(1).subscribe(textFrom => {
       var simplificationTextTo = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + simp.to);
+      this.selectedTextId = simp.from;
       this.selectedTextTitle = textFrom.title;
       simplificationTextTo.take(1).subscribe(textTo => {
         this.editSimplificationText(textFrom, textTo, simp);
@@ -710,8 +711,9 @@ editSimplificationText(textFrom, textTo, simp) {
             newPairList.push(prefix + pairList[i]);                
           }
         }
-        if (!simpSentences[j].operations.startsWith('none') && operations.indexOf(simpSentences[j].operations) < 0) {
-          operations += simpSentences[j].operations;
+        var oper = simpSentences[j].operations;
+        if (!oper.startsWith('none') && operations.indexOf(oper) < 0 && oper.indexOf(s) > 0) {
+            operations += oper;  
         }  
       }
       pair = newPairList.toString();      
@@ -848,14 +850,15 @@ editSimplificationText(textFrom, textTo, simp) {
     var sentence = document.getElementById(sentenceId);
 
     var operations = sentence.getAttribute('data-operations');
-    operations += type + ',';
+    operations += type;
     sentence.setAttribute('data-operations', operations);
 
     var operationsHtml = '';
-    var operationsList = operations.split(",");
+    var operationsList = operations.split(";");
     operationsList.forEach( op => {
         if (op != '') {
-            var opDesc = this.operationsMap[op];
+            var opKey = op.split('(')[0];
+            var opDesc = this.operationsMap[opKey];
             operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
         }
     });
@@ -880,12 +883,12 @@ editSimplificationText(textFrom, textTo, simp) {
                   this.doUnion(sentences, selectedSentences); break;
               case 'division':
                   this.doDivision(sentences, selectedSentences); break;
-              // case 'remotion':
-              //     doRemotion(sentences); break;
+              case 'remotion':
+                  this.doRemotion(sentences, selectedSentences); break;
               case 'inclusion':
                   this.doInclusion(sentences, selectedSentences); break;
-              // case 'rewrite':
-              //     doRewrite(sentences); break;
+              case 'rewrite':
+                  this.doRewrite(sentences, selectedSentences); break;
           }
 
       });
@@ -951,8 +954,8 @@ editSimplificationText(textFrom, textTo, simp) {
                     document.getElementById(ps['pair']).setAttribute('data-pair', newId);
                     document.getElementById(pps['pair']).setAttribute('data-pair', newId);
                   
-                    context.updateOperationsList(ps['pair'], 'union');
-                    context.updateOperationsList(pps['pair'], 'union');
+                    context.updateOperationsList(ps['pair'], 'union(' + ps['pair'] + ',' +  pps['pair'] + ');');
+                    context.updateOperationsList(pps['pair'], 'union(' + ps['pair'] + ',' +  pps['pair'] + ');');
                 }
   
             });
@@ -990,7 +993,7 @@ editSimplificationText(textFrom, textTo, simp) {
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
                     document.getElementById(ps['pair']).setAttribute('data-pair', newIds.toString());
 
-                    context.updateOperationsList(ps['pair'], 'division');
+                    context.updateOperationsList(ps['pair'], 'division(' + selectedSentences[0] + ');');
                 }
   
             });
@@ -1029,7 +1032,7 @@ editSimplificationText(textFrom, textTo, simp) {
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
 
                     document.getElementById(ps['pair']).setAttribute('data-pair', ps['id'] + ',' + newId);
-                    context.updateOperationsList(ps['pair'], 'inclusion');
+                    context.updateOperationsList(ps['pair'], 'inclusion(' + selectedSentences[0] + ',' + ret + ');');
                 }
   
             });
@@ -1037,6 +1040,52 @@ editSimplificationText(textFrom, textTo, simp) {
     });
   }
 
+  doRewrite(sentences, selectedSentences) {
+    sentences.forEach(s => {
+        if (s.indexOf(selectedSentences[0]) > 0) {
+            var ps = this.parseSentence(s);
 
+            this.editSentenceDialog(this, "Reescrita de Sentença", ps['content'], function (context, ret, text) {
+                if (ret) {
+                    var parsedText = context.senterService.splitText(text);
+                    var ns = parsedText['paragraphs'][0]['sentences'][0]; 
+
+                    var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                    newSentHtml = newSentHtml.replace("{id}", ps['id']);
+                    newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+                    newSentHtml = newSentHtml.replace("{qtt}", ns['qtt']);
+                    newSentHtml = newSentHtml.replace("{qtw}", ns['qtw']);
+                    newSentHtml = newSentHtml.replace("{content}", ns['text']);
+                   
+                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+
+                    context.updateOperationsList(ps['pair'], 'rewrite(' + selectedSentences[0] + ');');
+                }
+  
+            });
+                
+        }
+    });
+  }
+
+  doRemotion(sentences, selectedSentences) {
+    var previousSentence = '';
+    sentences.forEach(s => {
+        if (s.indexOf(selectedSentences[0]) > 0) {
+            var ps = this.parseSentence(s);
+            var pps = this.parseSentence(previousSentence);
+  
+            jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, ''));
+
+            document.getElementById(selectedSentences[0]).setAttribute('data-pair', pps['id']);
+            var newPair = document.getElementById(pps['id']).getAttribute('data-pair');
+            newPair += ',' + selectedSentences[0];
+            document.getElementById(pps['id']).setAttribute('data-pair', newPair);
+
+            this.updateOperationsList(selectedSentences[0], 'remotion(' + selectedSentences[0] + ');');
+        }
+        previousSentence = s;
+    });
+  }
 }
 

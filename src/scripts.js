@@ -97,10 +97,11 @@ function updateOperationsList(sentence) {
     if (sentence != null) {    
         var operations = sentence.getAttribute('data-operations');
         if (operations != '') {
-            var operationsList = operations.split(",");
+            var operationsList = operations.split(";");
             operationsList.forEach( op => {
                 if (op != '') {
-                    var opDesc = operationsMap[op];
+                    var opKey = op.split('(')[0];
+                    var opDesc = operationsMap[opKey];
                     operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
                 }
             });
@@ -151,80 +152,6 @@ function wordClick(word) {
 function selectWord(word, style, selected) {
     word.style = style;
     word.setAttribute('data-selected', selected);
-}
-
-
-function doOperation(type) {
-    selectedSentences.forEach(s => {
-        var operations = document.getElementById(s).getAttribute('data-operations');
-        operations += type + '(' + selectedSentences.toString() + ');';
-        document.getElementById(s).setAttribute('data-operations', operations);
-        updateOperationsList(document.getElementById(s));
-    });
-
-    rewriteTextTo(type);
-}
-
-function rewriteTextTo(type) {
-
-    var textToHTML = document.getElementById("divTextTo").innerHTML;
-    textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.indexOf("</p></div>")+4);
-    textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
-    var paragraphs = textToHTML.split("|||");
-    paragraphs.forEach(p => {
-        p = p.substring(p.indexOf("<span "), p.indexOf("</span></p>")+7);
-        p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
-        var sentences = p.split("|||");
-    
-        switch (type) {
-            // case 'union':
-            //     doUnion(sentences); break;
-            // case 'division':
-            //     doDivision(sentences); break;
-            case 'remotion':
-                doRemotion(sentences); break;
-            // case 'inclusion':
-            //     doInclusion(sentences); break;
-            case 'rewrite':
-                doRewrite(sentences); break;
-        }
-
-    });
-    selectedSentences = [];
-}
-
-function doRemotion(sentences) {
-    sentences.forEach(s => {
-        selectedSentences.forEach( ss => {
-            if (s.indexOf(ss) > 0) {
-                $("#divTextTo").html($("#divTextTo").html().replace(s, ''));
-                // document.getElementById(ss).style = '';
-                // document.getElementById(ss).setAttribute('data-selected', 'false');
-                document.getElementById(ss).setAttribute('data-pair', '');
-            }
-        });
-    });
-}
-
-
-function doRewrite(sentences) {
-    sentences.forEach(s => {
-        selectedSentences.forEach( ss => {
-            if (s.indexOf(ss) > 0) {
-                var regexp = /<span[^>]*data-pair="(.+?)".*data-qtt="(.+?)".*data-qtw="(.+?)".*id="(.+?)".*>(.+?)<\/span>/g;
-                var match = regexp.exec(s);
-                var id = match[4];
-                
-                // document.getElementById(ss).style = '';
-                // document.getElementById(ss).setAttribute('data-selected', 'false');
-                
-                // document.getElementById(id).style = '';
-                // document.getElementById(id).setAttribute('data-selected', 'false');
-
-                document.getElementById(id).style = 'font-weight: bold;background: #EDE981;';
-            }
-        });
-    });
 }
 
 
