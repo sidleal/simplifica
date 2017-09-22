@@ -358,8 +358,11 @@ export class AnotadorComponent implements OnInit {
         }
       ).then((sent) => {
         s['newId'] = sent.key;
-        if (this.simplificationParsedText.totS == s['idx']) {
-              this.saveOperationList(text);
+        
+        if (this.simplificationParsedText != null) {
+          if (this.simplificationParsedText.totS == s['idx']) {
+                this.saveOperationList(text);
+          }
         }
  
         this.saveTokens(text, par, sent, s);
@@ -674,7 +677,8 @@ editSimplificationText(textFrom, textTo, simp) {
 
           out += '<div id=\'f.t.' + t + '\' data-selected=\'false\' data-pair=\'t.t.' + t + '\'';
           out += ' data-idx=\'' + idx + '\'';            
-          out += ' onclick=\'wordClick(this)\'';
+          out += ' onclick=\'wordClick(this, false)\'';
+          out += ' oncontextmenu=\'wordClick(this, true); return false;\'';
           out += ' onmouseover=\'overToken(this);\' onmouseout=\'outToken(this);\'>' + token + '</div>';
           lastToken = token;
           this.tokenList += (idx + "||" + token + "||" + 'f.t.' + t + '|/|');

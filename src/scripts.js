@@ -125,8 +125,8 @@ function selectSentence(sentence, style, selected) {
 
 }
 
-function wordClick(word) {
-    if (markingWords) {
+function wordClick(word, right) {
+    if (markingWords || right) {
         var selected = word.getAttribute('data-selected');
         if (selected == 'true') {
             selectedWords.forEach(w => {
