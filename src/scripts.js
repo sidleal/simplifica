@@ -54,6 +54,18 @@ var operationsMap = {
     inclusion: 'Inclusão de Sentença',
     rewrite: 'Reescrita de Sentença',
     lexicalSubst: 'Substituição Lexical',
+    synonymListElab: 'Elaboração com lista de sinônimos',
+    explainPhraseElab: 'Elaboração com oração explicativa',
+    verbalTenseSubst: 'Substituição de tempo verbal',
+    numericExprSimpl: 'Simplificação de expressão numérica',
+    partRemotion: 'Remoção de parte da sentença',
+    passiveVoiceChange: 'Mudança de voz passiva para voz ativa',
+    phraseOrderChange: 'Mudança da ordem das orações',
+    svoChange: 'Mudança da ordem dos constituintes para SVO',
+    advAdjOrderChange: 'Mudança da ordem de adjunto adverbial',
+    pronounToNoun: 'Substituição de pronome por nome',
+    nounSintReduc: 'Redução de sintagma nominal',
+    discMarkerChange: 'Substituição de marcador discursivo',
 }
 
 
@@ -104,15 +116,22 @@ function updateOperationsList(sentence) {
                 if (op != '') {
                     var opKey = op.split('(')[0];
                     var opDesc = operationsMap[opKey];
-
                     var details = '';                    
-                    if (opKey == 'lexicalSubst') {
+
+                    var substOps = ['lexicalSubst', 'synonymListElab', 'explainPhraseElab', 'verbalTenseSubst', 'numericExprSimpl', 'pronounToNoun', 'nounSintReduc'];
+                    if (substOps.indexOf(opKey) >= 0) {
                         var match = /\((.*)\|(.*)\|(.*)\)/g.exec(op);
                         if (match) {
-                          details = match[2] + ' --> ' + match[3];
+                        details = match[2] + ' --> ' + match[3];
                         }
                     }
-        
+                    if (opKey == 'partRemotion') {
+                        var match = /\((.*)\|(.*)\)/g.exec(op);
+                        if (match) {
+                        details = match[2];
+                        }              
+                    }
+                   
                     operationsHtml += "<li data-toggle=\"tooltip\" title=\"" + details + "\">" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
                 }
             });

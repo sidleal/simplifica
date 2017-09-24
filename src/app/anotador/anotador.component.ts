@@ -74,7 +74,18 @@ export class AnotadorComponent implements OnInit {
     inclusion: 'Inclusão de Sentença',
     rewrite: 'Reescrita de Sentença',
     lexicalSubst: 'Substituição Lexical',
-    
+    synonymListElab: 'Elaboração com lista de sinônimos',
+    explainPhraseElab: 'Elaboração com oração explicativa',
+    verbalTenseSubst: 'Substituição de tempo verbal',
+    numericExprSimpl: 'Simplificação de expressão numérica',
+    partRemotion: 'Remoção de parte da sentença',
+    passiveVoiceChange: 'Mudança de voz passiva para voz ativa',
+    phraseOrderChange: 'Mudança da ordem das orações',
+    svoChange: 'Mudança da ordem dos constituintes para SVO',
+    advAdjOrderChange: 'Mudança da ordem de adjunto adverbial',
+    pronounToNoun: 'Substituição de pronome por nome',
+    nounSintReduc: 'Redução de sintagma nominal',
+    discMarkerChange: 'Substituição de marcador discursivo',    
   }
 
   constructor(private authService: AuthService, public af: AngularFireDatabase, 
@@ -867,8 +878,6 @@ editSimplificationText(textFrom, textTo, simp) {
 
   updateOperationsList(sentenceId, type) {
     
-    console.log(sentenceId);
-
     var sentence = document.getElementById(sentenceId);
 
     var operations = sentence.getAttribute('data-operations');
@@ -883,11 +892,19 @@ editSimplificationText(textFrom, textTo, simp) {
             var opDesc = this.operationsMap[opKey];
             var details = '';
 
-            if (opKey == 'lexicalSubst') {
+            var substOps = ['lexicalSubst', 'synonymListElab', 'explainPhraseElab', 'verbalTenseSubst', 'numericExprSimpl', 'pronounToNoun', 'nounSintReduc'];
+ 
+            if (substOps.indexOf(opKey) >= 0) {
               var match = /\((.*)\|(.*)\|(.*)\)/g.exec(op);
               if (match) {
                 details = match[2] + ' --> ' + match[3];
               }
+            }
+            if (opKey == 'partRemotion') {
+              var match = /\((.*)\|(.*)\)/g.exec(op);
+              if (match) {
+                details = match[2];
+              }              
             }
 
             operationsHtml += "<li data-toggle=\"tooltip\" title=\"" + details + "\">" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
@@ -924,8 +941,31 @@ editSimplificationText(textFrom, textTo, simp) {
               //intra-sentenciais
               case 'lexicalSubst':
                   this.doLexicalSubst(sentences, selectedSentence, selectedWords); break;
-
-              }
+              case 'synonymListElab':
+                  this.doSynonymListElab(sentences, selectedSentence, selectedWords); break;
+              case 'explainPhraseElab':
+                  this.doExplainPhraseElab(sentences, selectedSentence, selectedWords); break;
+              case 'verbalTenseSubst':
+                  this.doVerbalTenseSubst(sentences, selectedSentence, selectedWords); break;
+              case 'numericExprSimpl':
+                  this.doNumericExprSimpl(sentences, selectedSentence, selectedWords); break;
+              case 'partRemotion':
+                  this.doPartRemotion(sentences, selectedSentence, selectedWords); break;
+              case 'passiveVoiceChange':
+                  this.doPassiveVoiceChange(sentences, selectedSentence, selectedWords); break;
+              case 'phraseOrderChange':
+                  this.doPhraseOrderChange(sentences, selectedSentence, selectedWords); break;
+              case 'svoChange':
+                  this.doSVOChange(sentences, selectedSentence, selectedWords); break;
+              case 'advAdjOrderChange':
+                  this.doAdvAdjOrderChange(sentences, selectedSentence, selectedWords); break;
+              case 'pronounToNoun':
+                  this.doPronounToNoun(sentences, selectedSentence, selectedWords); break;
+              case 'nounSintReduc':
+                  this.doNounSintReduc(sentences, selectedSentence, selectedWords); break;
+              case 'discMarkerChange':
+                  this.doDiscMarkerChange(sentences, selectedSentence, selectedWords); break;
+          }
 
       });
   }
@@ -1124,40 +1164,114 @@ editSimplificationText(textFrom, textTo, simp) {
     });
   }
 
-
-  doLexicalSubst(sentences, selectedSentence, selectedWords) {
+  doIntraSentenceSubst(sentences, selectedSentence, selectedWords, operation) {
+    var opDesc = this.operationsMap[operation];
     sentences.forEach(s => {
-        if (s.indexOf(selectedSentence) > 0) {
-            var ps = this.parseSentence(s);
+      if (s.indexOf(selectedSentence) > 0) {
+          var ps = this.parseSentence(s);
 
-            var tokens = '';
-            for (var i in selectedWords) {
-              var word = document.getElementById(selectedWords[i]).innerText;
-              tokens += word + ' ';
-            }
-            tokens = tokens.substring(0, tokens.length - 1);
- 
-            this.editSentenceDialog(this, "Substituição Lexical", tokens, function (context, ret, text) {
-                if (ret) {
-                    var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-                    newSentHtml = newSentHtml.replace("{id}", ps['id']);
-                    newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
-                    newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
-                    newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
-                    newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(tokens, text));
-                   
-                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+          var tokens = '';
+          for (var i in selectedWords) {
+            var word = document.getElementById(selectedWords[i]).innerText;
+            tokens += word + ' ';
+          }
+          tokens = tokens.substring(0, tokens.length - 1);
 
-                    context.updateOperationsList(selectedSentence, 'lexicalSubst(' + selectedSentence + '|' + tokens + '|' + text + ');');
-                }
-  
-            });
+          this.editSentenceDialog(this, opDesc, tokens, function (context, ret, text) {
+              if (ret) {
+                  var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                  newSentHtml = newSentHtml.replace("{id}", ps['id']);
+                  newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+                  newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
+                  newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
+                  newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(tokens, text));
                 
-        }
+                  jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+
+                  context.updateOperationsList(selectedSentence, operation + '(' + selectedSentence + '|' + tokens + '|' + text + ');');
+              }
+
+          });
+              
+      }
     });
+
   }
 
+  doLexicalSubst(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'lexicalSubst');
+  }
 
+  doSynonymListElab(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'synonymListElab');
+  }
+
+  doExplainPhraseElab(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'explainPhraseElab');
+  }
+
+  doVerbalTenseSubst(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'verbalTenseSubst');
+  }
+
+  doNumericExprSimpl(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'numericExprSimpl');
+  }
+
+  doPassiveVoiceChange(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'passiveVoiceChange');
+  }
+
+  doPhraseOrderChange(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'phraseOrderChange');
+  }
+
+  doSVOChange(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'svoChange');
+  }
+
+  doAdvAdjOrderChange(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'advAdjOrderChange');
+  }
+
+  doPronounToNoun(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'pronounToNoun');
+  }
+
+  doNounSintReduc(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'nounSintReduc');
+  }
+
+  doDiscMarkerChange(sentences, selectedSentence, selectedWords) {
+    this.doIntraSentenceSubst(sentences, selectedSentence, selectedWords, 'discMarkerChange');
+  }
+
+  doPartRemotion(sentences, selectedSentence, selectedWords) {
+    sentences.forEach(s => {
+      if (s.indexOf(selectedSentence) > 0) {
+          var ps = this.parseSentence(s);
+
+          var tokens = '';
+          for (var i in selectedWords) {
+            var word = document.getElementById(selectedWords[i]).innerText;
+            tokens += word + ' ';
+          }
+          tokens = tokens.substring(0, tokens.length - 1);
+
+          var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+          newSentHtml = newSentHtml.replace("{id}", ps['id']);
+          newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+          newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
+          newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
+          newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(tokens, ''));
+        
+          jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+
+          this.updateOperationsList(selectedSentence, 'partRemotion(' + selectedSentence + '|' + tokens + ');');
+              
+      }
+    });
+  }
 
 
 }

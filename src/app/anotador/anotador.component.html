@@ -143,18 +143,18 @@
       <div><a onclick="$('#operations-intra-sentenciais').toggle();"><i class="fa fa-text-width"></i> Intra-sentenciais</a></div>
       <div id="operations-intra-sentenciais" style="display:none;">
         <a (click)="doOperation('lexicalSubst');"> - Substituição lexical</a><br/>
-        <a onclick="alert('not yet');"> - Elaboração com lista de sinônimos</a><br/>
-        <a onclick="alert('not yet');"> - Elaboração com oração explicativa</a><br/>
-        <a onclick="alert('not yet');"> - Substituição de tempo verbal</a><br/>
-        <a onclick="alert('not yet');"> - Simplificação de expressão numérica</a><br/>
-        <a onclick="alert('not yet');"> - Remoção de parte da sentença</a><br/>
-        <a onclick="alert('not yet');"> - Mudança de voz passiva para voz ativa</a><br/>
-        <a onclick="alert('not yet');"> - Mudança da ordem das orações</a><br/>
-        <a onclick="alert('not yet');"> - Mudança da ordem dos constituintes para SVO</a><br/>
-        <a onclick="alert('not yet');"> - Mudança da ordem de adjunto adverbial</a><br/>
-        <a onclick="alert('not yet');"> - Substituição de pronome por nome</a><br/>
-        <a onclick="alert('not yet');"> - Redução de sintagma nominal</a><br/>
-        <a onclick="alert('not yet');"> - Substituição de marcador discursivo</a>
+        <a (click)="doOperation('synonymListElab');"> - Elaboração com lista de sinônimos</a><br/>
+        <a (click)="doOperation('explainPhraseElab');"> - Elaboração com oração explicativa</a><br/>
+        <a (click)="doOperation('verbalTenseSubst');"> - Substituição de tempo verbal</a><br/>
+        <a (click)="doOperation('numericExprSimpl');"> - Simplificação de expressão numérica</a><br/>
+        <a (click)="doOperation('partRemotion');"> - Remoção de parte da sentença</a><br/>
+        <a (click)="doOperation('passiveVoiceChange');"> - Mudança de voz passiva para voz ativa</a><br/>
+        <a (click)="doOperation('phraseOrderChange');"> - Mudança da ordem das orações</a><br/>
+        <a (click)="doOperation('svoChange');"> - Mudança da ordem dos constituintes para SVO</a><br/>
+        <a (click)="doOperation('advAdjOrderChange');"> - Mudança da ordem de adjunto adverbial</a><br/>
+        <a (click)="doOperation('pronounToNoun');"> - Substituição de pronome por nome</a><br/>
+        <a (click)="doOperation('nounSintReduc');"> - Redução de sintagma nominal</a><br/>
+        <a (click)="doOperation('discMarkerChange');"> - Substituição de marcador discursivo</a>
       </div>        
     </div>
 
@@ -163,39 +163,40 @@
         <div class="small-12 large-6 columns centered">
           <label for="simplificationName">Nome:</label>
           <input type="text" id="simplificationName" placeholder="Nome simples para identificar o bitexto" [(ngModel)]="simplificationName"/>
+        </div>
+        <div class="small-12 large-6 columns centered">
           <label for="simplificationTag">Tags:</label>
           <input type="text" id="simplificationTag" placeholder="Digite as tags separadas por vírgula" [(ngModel)]="simplificationTag"/>
         </div> 
+      </div>
+      <div class="row">
+          <div class="small-12 large-12 columns centered">
+            <hr>
+          </div>
       </div>
 
       <div class="row">
         <div class="small-12 large-6 centered columns">
           <div class="titles">{{(simplificationTextFrom | async)?.title}}</div>
           <div class="titles">{{(simplificationTextFrom | async)?.subTitle}}</div>
+          <div class="editor">
+              <ng-template dynamic-template
+                [template]="textFrom"
+                [context]="context">
+              </ng-template>
+            </div>
         </div>
         <div class="small-12 large-6 centered columns">
           <div contenteditable="true" class="titles" id="divTextToTitle">{{simplificationToTitle}}</div>
           <div contenteditable="true" class="titles" id="divTextToSubTitle">{{simplificationToSubTitle}}</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="small-12 large-6 centered columns">
-          <div class="editor">
-            <ng-template dynamic-template
-              [template]="textFrom"
-              [context]="context">
-            </ng-template>
-          </div>
-        </div>
-        <div class="small-12 large-6 centered columns">
           <div contenteditable="true" class="editor" id="divTextTo">
-            <ng-template dynamic-template
-              [template]="textTo"
-              [context]="context">
-            </ng-template>
+              <ng-template dynamic-template
+                [template]="textTo"
+                [context]="context">
+              </ng-template>
+            </div>
           </div>
-        </div>
-      </div> 
+      </div>
 
       <div class="row">
         <div class="small-12 large-6 centered columns">
