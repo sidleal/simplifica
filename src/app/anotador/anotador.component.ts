@@ -855,7 +855,7 @@ editSimplificationText(textFrom, textTo, simp) {
     if (selectedSentence == '' && selectedWords.length > 0) {
       selectedSentence = document.getElementById(selectedWords[0]).parentNode.attributes['id'].value;
     }
-    
+
     this.rewriteTextTo(type, selectedSentence, selectedWords);
 
     jQuery('#operations-sentenciais').hide();
@@ -867,6 +867,8 @@ editSimplificationText(textFrom, textTo, simp) {
 
   updateOperationsList(sentenceId, type) {
     
+    console.log(sentenceId);
+
     var sentence = document.getElementById(sentenceId);
 
     var operations = sentence.getAttribute('data-operations');
@@ -1025,9 +1027,9 @@ editSimplificationText(textFrom, textTo, simp) {
                     });
                    
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
-                    document.getElementById(ps['pair']).setAttribute('data-pair', newIds.toString());
+                    document.getElementById(selectedSentence).setAttribute('data-pair', newIds.toString());
 
-                    context.updateOperationsList(ps['pair'], 'division(' + selectedSentence + ');');
+                    context.updateOperationsList(selectedSentence, 'division(' + selectedSentence + ');');
                 }
   
             });
@@ -1065,8 +1067,8 @@ editSimplificationText(textFrom, textTo, simp) {
                     
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
 
-                    document.getElementById(ps['pair']).setAttribute('data-pair', ps['id'] + ',' + newId);
-                    context.updateOperationsList(ps['pair'], 'inclusion(' + selectedSentence + '|' + ret + ');');
+                    document.getElementById(selectedSentence).setAttribute('data-pair', ps['id'] + ',' + newId);
+                    context.updateOperationsList(selectedSentence, 'inclusion(' + selectedSentence + '|' + ret + ');');
                 }
   
             });
@@ -1093,7 +1095,7 @@ editSimplificationText(textFrom, textTo, simp) {
                    
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
-                    context.updateOperationsList(ps['pair'], 'rewrite(' + selectedSentence + ');');
+                    context.updateOperationsList(selectedSentence, 'rewrite(' + selectedSentence + ');');
                 }
   
             });
@@ -1146,7 +1148,7 @@ editSimplificationText(textFrom, textTo, simp) {
                    
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
-                    context.updateOperationsList(ps['pair'], 'lexicalSubst(' + selectedSentence + '|' + tokens + '|' + text + ');');
+                    context.updateOperationsList(selectedSentence, 'lexicalSubst(' + selectedSentence + '|' + tokens + '|' + text + ');');
                 }
   
             });

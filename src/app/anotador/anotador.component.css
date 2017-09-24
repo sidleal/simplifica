@@ -142,12 +142,11 @@ input#message {
 }
 
 .operations-qt-sentences {
-    float: left;
+    float: right;
     background:#8ABC41;
     color: white;
-    font-weight: bold;
-    font-size: 1.3em;
-    margin-left: 10px;
+    font-size: 1.5em;
+    margin-right: 30px;
 }
 
 .operations-header {
