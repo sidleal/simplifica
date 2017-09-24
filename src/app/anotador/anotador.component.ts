@@ -72,7 +72,9 @@ export class AnotadorComponent implements OnInit {
     division: 'Divisão de Sentença',
     remotion: 'Remoção de Sentença',
     inclusion: 'Inclusão de Sentença',
-    rewrite: 'Reescrita de Sentença'
+    rewrite: 'Reescrita de Sentença',
+    lexicalSubst: 'Substituição Lexical',
+    
   }
 
   constructor(private authService: AuthService, public af: AngularFireDatabase, 
@@ -455,10 +457,13 @@ export class AnotadorComponent implements OnInit {
         var operations = '';
         sPairList.forEach(pair => {
           if (document.getElementById(pair) != null) {
-            var newOperation = document.getElementById(pair).getAttribute("data-operations");
-            if (operations.indexOf(newOperation) < 0) {
-              operations += newOperation;
-            }
+            var newOperations = document.getElementById(pair).getAttribute("data-operations").split(';');
+            for (var i in newOperations) {
+              var newOperation = newOperations[i];
+              if (newOperation != '' && operations.indexOf(newOperation) < 0) {
+                operations += newOperation + ';';
+              }
+            }            
           }
         });
         
@@ -686,7 +691,7 @@ editSimplificationText(textFrom, textTo, simp) {
         out += ' </span>';
       }
       out += "</p>"
-    }   
+    }
     return out; 
   }
 
@@ -844,8 +849,19 @@ editSimplificationText(textFrom, textTo, simp) {
   doOperation(type) {
 
     var selectedSentences = jQuery('#selectedSentences').val().split(',');
+    var selectedSentence = selectedSentences[0]; // apenas uma sentença (talvez mais de uma no futuro)
+
+    var selectedWords = jQuery('#selectedWords').val().split(',');
+    if (selectedSentence == '' && selectedWords.length > 0) {
+      selectedSentence = document.getElementById(selectedWords[0]).parentNode.attributes['id'].value;
+    }
     
-    this.rewriteTextTo(type, selectedSentences);
+    this.rewriteTextTo(type, selectedSentence, selectedWords);
+
+    jQuery('#operations-sentenciais').hide();
+    jQuery('#operations-intra-sentenciais').hide();
+    jQuery('#hideOps').hide();
+    jQuery('#showOps').show();
 
   }
 
@@ -863,14 +879,23 @@ editSimplificationText(textFrom, textTo, simp) {
         if (op != '') {
             var opKey = op.split('(')[0];
             var opDesc = this.operationsMap[opKey];
-            operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
+            var details = '';
+
+            if (opKey == 'lexicalSubst') {
+              var match = /\((.*)\|(.*)\|(.*)\)/g.exec(op);
+              if (match) {
+                details = match[2] + ' --> ' + match[3];
+              }
+            }
+
+            operationsHtml += "<li data-toggle=\"tooltip\" title=\"" + details + "\">" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
         }
     });
 
     jQuery("#sentenceOperations").html(operationsHtml);
   }
 
-  rewriteTextTo(type, selectedSentences) {
+  rewriteTextTo(type, selectedSentence, selectedWords) {
       var textToHTML = document.getElementById("divTextTo").innerHTML;
       
       textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.lastIndexOf("</p>")+4);
@@ -884,16 +909,21 @@ editSimplificationText(textFrom, textTo, simp) {
           
           switch (type) {
               case 'union':
-                  this.doUnion(sentences, selectedSentences); break;
+                  this.doUnion(sentences, selectedSentence); break;
               case 'division':
-                  this.doDivision(sentences, selectedSentences); break;
+                  this.doDivision(sentences, selectedSentence); break;
               case 'remotion':
-                  this.doRemotion(sentences, selectedSentences); break;
+                  this.doRemotion(sentences, selectedSentence); break;
               case 'inclusion':
-                  this.doInclusion(sentences, selectedSentences); break;
+                  this.doInclusion(sentences, selectedSentence); break;
               case 'rewrite':
-                  this.doRewrite(sentences, selectedSentences); break;
-          }
+                  this.doRewrite(sentences, selectedSentence); break;
+
+              //intra-sentenciais
+              case 'lexicalSubst':
+                  this.doLexicalSubst(sentences, selectedSentence, selectedWords); break;
+
+              }
 
       });
   }
@@ -931,10 +961,10 @@ editSimplificationText(textFrom, textTo, simp) {
       return ret;
   }
 
-  doUnion(sentences, selectedSentences) {
+  doUnion(sentences, selectedSentence) {
     var previousSentence = '';
     sentences.forEach(s => {
-        if (s.indexOf(selectedSentences[0]) > 0) {
+        if (s.indexOf(selectedSentence) > 0) {
             var ps = this.parseSentence(s);
             var pps = this.parseSentence(previousSentence);
   
@@ -958,8 +988,8 @@ editSimplificationText(textFrom, textTo, simp) {
                     document.getElementById(ps['pair']).setAttribute('data-pair', newId);
                     document.getElementById(pps['pair']).setAttribute('data-pair', newId);
                   
-                    context.updateOperationsList(ps['pair'], 'union(' + ps['pair'] + ',' +  pps['pair'] + ');');
-                    context.updateOperationsList(pps['pair'], 'union(' + ps['pair'] + ',' +  pps['pair'] + ');');
+                    context.updateOperationsList(ps['pair'], 'union(' + ps['pair'] + '|' +  pps['pair'] + ');');
+                    context.updateOperationsList(pps['pair'], 'union(' + ps['pair'] + '|' +  pps['pair'] + ');');
                 }
   
             });
@@ -969,9 +999,9 @@ editSimplificationText(textFrom, textTo, simp) {
   }
 
 
-  doDivision(sentences, selectedSentences) {
+  doDivision(sentences, selectedSentence) {
     sentences.forEach(s => {
-        if (s.indexOf(selectedSentences[0]) > 0) {
+        if (s.indexOf(selectedSentence) > 0) {
             var ps = this.parseSentence(s);
 
 
@@ -997,7 +1027,7 @@ editSimplificationText(textFrom, textTo, simp) {
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
                     document.getElementById(ps['pair']).setAttribute('data-pair', newIds.toString());
 
-                    context.updateOperationsList(ps['pair'], 'division(' + selectedSentences[0] + ');');
+                    context.updateOperationsList(ps['pair'], 'division(' + selectedSentence + ');');
                 }
   
             });
@@ -1007,9 +1037,9 @@ editSimplificationText(textFrom, textTo, simp) {
   }
 
 
-  doInclusion(sentences, selectedSentences) {
+  doInclusion(sentences, selectedSentence) {
     sentences.forEach(s => {
-        if (s.indexOf(selectedSentences[0]) > 0) {
+        if (s.indexOf(selectedSentence) > 0) {
             var ps = this.parseSentence(s);
   
             this.editSentenceDialogInclusion(this, "Inclusão de Sentença", '', function (context, ret, text) {
@@ -1036,7 +1066,7 @@ editSimplificationText(textFrom, textTo, simp) {
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
 
                     document.getElementById(ps['pair']).setAttribute('data-pair', ps['id'] + ',' + newId);
-                    context.updateOperationsList(ps['pair'], 'inclusion(' + selectedSentences[0] + ',' + ret + ');');
+                    context.updateOperationsList(ps['pair'], 'inclusion(' + selectedSentence + '|' + ret + ');');
                 }
   
             });
@@ -1044,9 +1074,9 @@ editSimplificationText(textFrom, textTo, simp) {
     });
   }
 
-  doRewrite(sentences, selectedSentences) {
+  doRewrite(sentences, selectedSentence) {
     sentences.forEach(s => {
-        if (s.indexOf(selectedSentences[0]) > 0) {
+        if (s.indexOf(selectedSentence) > 0) {
             var ps = this.parseSentence(s);
 
             this.editSentenceDialog(this, "Reescrita de Sentença", ps['content'], function (context, ret, text) {
@@ -1063,7 +1093,7 @@ editSimplificationText(textFrom, textTo, simp) {
                    
                     jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
-                    context.updateOperationsList(ps['pair'], 'rewrite(' + selectedSentences[0] + ');');
+                    context.updateOperationsList(ps['pair'], 'rewrite(' + selectedSentence + ');');
                 }
   
             });
@@ -1072,24 +1102,61 @@ editSimplificationText(textFrom, textTo, simp) {
     });
   }
 
-  doRemotion(sentences, selectedSentences) {
+  doRemotion(sentences, selectedSentence) {
     var previousSentence = '';
     sentences.forEach(s => {
-        if (s.indexOf(selectedSentences[0]) > 0) {
+        if (s.indexOf(selectedSentence) > 0) {
             var ps = this.parseSentence(s);
             var pps = this.parseSentence(previousSentence);
   
             jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, ''));
 
-            document.getElementById(selectedSentences[0]).setAttribute('data-pair', pps['id']);
+            document.getElementById(selectedSentence).setAttribute('data-pair', pps['id']);
             var newPair = document.getElementById(pps['id']).getAttribute('data-pair');
-            newPair += ',' + selectedSentences[0];
+            newPair += ',' + selectedSentence;
             document.getElementById(pps['id']).setAttribute('data-pair', newPair);
 
-            this.updateOperationsList(selectedSentences[0], 'remotion(' + selectedSentences[0] + ');');
+            this.updateOperationsList(selectedSentence, 'remotion(' + selectedSentence + ');');
         }
         previousSentence = s;
     });
   }
+
+
+  doLexicalSubst(sentences, selectedSentence, selectedWords) {
+    sentences.forEach(s => {
+        if (s.indexOf(selectedSentence) > 0) {
+            var ps = this.parseSentence(s);
+
+            var tokens = '';
+            for (var i in selectedWords) {
+              var word = document.getElementById(selectedWords[i]).innerText;
+              tokens += word + ' ';
+            }
+            tokens = tokens.substring(0, tokens.length - 1);
+ 
+            this.editSentenceDialog(this, "Substituição Lexical", tokens, function (context, ret, text) {
+                if (ret) {
+                    var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                    newSentHtml = newSentHtml.replace("{id}", ps['id']);
+                    newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+                    newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
+                    newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
+                    newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(tokens, text));
+                   
+                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+
+                    context.updateOperationsList(ps['pair'], 'lexicalSubst(' + selectedSentence + '|' + tokens + '|' + text + ');');
+                }
+  
+            });
+                
+        }
+    });
+  }
+
+
+
+
 }
 

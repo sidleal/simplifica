@@ -52,7 +52,8 @@ var operationsMap = {
     division: 'Divisão de Sentença',
     remotion: 'Remoção de Sentença',
     inclusion: 'Inclusão de Sentença',
-    rewrite: 'Reescrita de Sentença'
+    rewrite: 'Reescrita de Sentença',
+    lexicalSubst: 'Substituição Lexical',
 }
 
 
@@ -79,17 +80,18 @@ function clearSelection() {
         selectSentence(document.getElementById(s), '', 'false');
         document.getElementById("qtSelectedTokens").innerHTML = '';
         document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
-        $("#sentenceOperations").html('');
         updateOperationsList(null);
     });
     selectedSentences = []
+    $("#sentenceOperations").html('');
 
     selectedWords.forEach(w => {
         word = document.getElementById(w);
         word.style = '';
         word.setAttribute('data-selected', 'false');
     });
-    selectedWords = [];    
+    selectedWords = [];
+    $("#selectedWords").html('');
 }
 
 function updateOperationsList(sentence) {
@@ -102,7 +104,16 @@ function updateOperationsList(sentence) {
                 if (op != '') {
                     var opKey = op.split('(')[0];
                     var opDesc = operationsMap[opKey];
-                    operationsHtml += "<li>" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
+
+                    var details = '';                    
+                    if (opKey == 'lexicalSubst') {
+                        var match = /\((.*)\|(.*)\|(.*)\)/g.exec(op);
+                        if (match) {
+                          details = match[2] + ' --> ' + match[3];
+                        }
+                    }
+        
+                    operationsHtml += "<li data-toggle=\"tooltip\" title=\"" + details + "\">" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
                 }
             });
         }
@@ -133,18 +144,21 @@ function wordClick(word, right) {
                 selectWord(document.getElementById(w), '', 'false');
             });
             selectedWords = [];
+            $("#selectedWords").val('');
         } else {
             if (selectedWords.length > 0) {
                 var firstWordIdx = document.getElementById(selectedWords[0]).getAttribute('data-idx');
                 var lastWordIdx = word.getAttribute('data-idx');
                 for (var i = parseInt(firstWordIdx); i < parseInt(lastWordIdx);i++) {
-                    var midWord = document.getElementById(getTokenIdFromIdx(i));
-                    selectWord(midWord, 'background: #EDE981;font-weight: bold;', 'true');
-                    selectedWords.push(midWord.id);
+                    var midWordId = getTokenIdFromIdx(i);
+                    if (selectedWords.indexOf(midWordId) < 0) {
+                        var midWord = document.getElementById(midWordId);
+                        selectWord(midWord, 'background: #edb65d;font-weight: bold;', 'true');    
+                    }
                 }
             }
-            selectWord(word, 'background: #EDE981;font-weight: bold;', 'true');
-            selectedWords.push(word.id);
+            selectWord(word, 'background: #edb65d;font-weight: bold;', 'true');
+            
         }
     }
 }
@@ -152,6 +166,10 @@ function wordClick(word, right) {
 function selectWord(word, style, selected) {
     word.style = style;
     word.setAttribute('data-selected', selected);
+    if (selected == 'true') {
+        selectedWords.push(word.id);
+    }
+    $("#selectedWords").val(selectedWords.toString());
 }
 
 

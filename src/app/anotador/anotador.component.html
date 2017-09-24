@@ -112,7 +112,9 @@
     <div id='operations' class='operations' style='top: 15%;left: 70%;display:none;'>
       <div class="operations-header">Operações</div>
       <div class='operations-tools'>
-        <button onclick="markWords(true)" class="mini" id='markWords' data-toggle="tooltip" title="Marcar Palavras"><i class="fa fa-text-width"></i></button>
+        <button onclick="$('#operations-sentenciais').hide();$('#operations-intra-sentenciais').hide();$('#hideOps').hide();$('#showOps').show();" style='display:none;' class="mini" id='hideOps' data-toggle="tooltip" title="Ocultar todas as operações"><i class="fa fa-chevron-up"></i></button>
+        <button onclick="$('#operations-sentenciais').show();$('#operations-intra-sentenciais').show();$('#hideOps').show();$('#showOps').hide();" class="mini" id='showOps' data-toggle="tooltip" title="Mostrar todas as operações"><i class="fa fa-chevron-down"></i></button>
+        <button onclick="markWords(true)" class="mini" id='markWords' data-toggle="tooltip" title="Marcar Palavras (botão direito do mouse também funciona)"><i class="fa fa-text-width"></i></button>
         <button onclick="markWords(false)" class="mini" id='markSentences' data-toggle="tooltip" title="Marcar Sentenças" style='display:none;'><i class="fa fa-align-justify"></i></button>
         <button onclick="clearSelection()" class="mini" id='clearSelection' data-toggle="tooltip" title="Limpar selecionadas"><i class="fa fa-eraser"></i></button>
         <button (click)="saveSimplification()" class="mini" data-toggle="tooltip" title="Salvar Bitexto"><i class="fa fa-save"></i></button>
@@ -130,7 +132,7 @@
       </div>
       <div><a onclick="$('#operations-intra-sentenciais').toggle();"><i class="fa fa-text-width"></i> Intra-sentenciais</a></div>
       <div id="operations-intra-sentenciais" style="display:none;">
-        <a onclick="alert('not yet');"> - Substituição lexical</a><br/>
+        <a (click)="doOperation('lexicalSubst');"> - Substituição lexical</a><br/>
         <a onclick="alert('not yet');"> - Elaboração com lista de sinônimos</a><br/>
         <a onclick="alert('not yet');"> - Elaboração com oração explicativa</a><br/>
         <a onclick="alert('not yet');"> - Substituição de tempo verbal</a><br/>
@@ -153,6 +155,7 @@
         <span id="qtSelectedTokens" class='operations-qt-tokens' data-toggle="tooltip" title="Quantidade de palavras da sentença">0</span>
         <span style='float:left;margin-left:10px;'><ul id="sentenceOperations"></ul></span>
         <input type="hidden" id="selectedSentences"/>
+        <input type="hidden" id="selectedWords"/>
       </div>
     </div>
 
