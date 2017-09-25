@@ -6,6 +6,7 @@ import { SenterService } from '../providers/senter.service';
 import { ChangeDetectorRef } from '@angular/core';
 import 'rxjs/add/operator/take';
 import * as moment from 'moment';
+import { HostListener } from '@angular/core';
 
 declare var jQuery:any;
 
@@ -888,7 +889,9 @@ editSimplificationText(textFrom, textTo, simp) {
     var operationsList = operations.split(";");
     operationsList.forEach( op => {
         if (op != '') {
-            var opKey = op.split('(')[0];
+            var opTokens = op.split('(');
+            var opKey = opTokens[0];
+            
             var opDesc = this.operationsMap[opKey];
             var details = '';
 
@@ -899,15 +902,14 @@ editSimplificationText(textFrom, textTo, simp) {
               if (match) {
                 details = match[2] + ' --> ' + match[3];
               }
-            }
-            if (opKey == 'partRemotion') {
+            } else if (opKey == 'partRemotion') {
               var match = /\((.*)\|(.*)\)/g.exec(op);
               if (match) {
                 details = match[2];
               }              
             }
 
-            operationsHtml += "<li data-toggle=\"tooltip\" title=\"" + details + "\">" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"alert('excluir');\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
+            operationsHtml += "<li data-toggle=\"tooltip\" title=\"" + details + "\">" + opDesc + " <i class=\"fa fa-trash-o \" data-toggle=\"tooltip\" title=\"Excluir\" onclick=\"window.dispatchEvent(new CustomEvent('undoOperation', { bubbles: true, detail: '" + op + "' }));\" onMouseOver=\"this.style='cursor:pointer;color:red;';\" onMouseOut=\"this.style='cursor:pointer;';\"></i>"
         }
     });
 
@@ -1274,5 +1276,64 @@ editSimplificationText(textFrom, textTo, simp) {
   }
 
 
+  @HostListener('window:undoOperation', ['$event.detail'])
+  undoOperation(operation) {
+    console.log(operation);
+
+    var opTokens = operation.split('(');
+    var opKey = opTokens[0];
+    var sentenceId = opTokens[1].split('|')[0];
+
+    if (!sentenceId.startsWith('f.s.')) {
+      sentenceId = 'f.s.' + sentenceId;
+    }
+
+    if (sentenceId.indexOf(')') > 0) {
+      sentenceId = sentenceId.substring(0, sentenceId.indexOf(')'));
+    }
+
+    var fromSentence = document.getElementById(sentenceId);
+
+    var textToHTML = document.getElementById("divTextTo").innerHTML;
+    
+    textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.lastIndexOf("</p>")+4);
+    textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
+    var paragraphs = textToHTML.split("|||");
+
+    console.log(sentenceId);
+
+    paragraphs.forEach(p => {
+        p = p.substring(p.indexOf("<span "), p.lastIndexOf("</span>")+7);
+        p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
+        var sentences = p.split("|||");
+   
+        sentences.forEach(s => {
+          if (s.indexOf(sentenceId) > 0) {
+              var ps = this.parseSentence(s);
+
+              console.log(ps);
+              console.log(fromSentence.innerText);
+
+              var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+              newSentHtml = newSentHtml.replace("{id}", ps['id']);
+              newSentHtml = newSentHtml.replace("{pair}", fromSentence.getAttribute('id'));
+              newSentHtml = newSentHtml.replace("{qtt}", fromSentence.getAttribute('qtt'));
+              newSentHtml = newSentHtml.replace("{qtw}", fromSentence.getAttribute('qtw'));
+              newSentHtml = newSentHtml.replace("{content}", fromSentence.innerText);
+            
+              jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+              
+              fromSentence.setAttribute('data-operations', '');
+              jQuery("#sentenceOperations").html('');
+
+          }
+         
+        });
+
+    });
+
+  }
+
+      
 }
 
