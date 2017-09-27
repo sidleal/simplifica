@@ -167,9 +167,10 @@ function selectSentence(sentence, style, selected) {
 
 function wordClick(word, right) {
     
-    clearSentenceSelection();
-
     if (markingWords || right) {
+
+        clearSentenceSelection();
+        
         var selected = word.getAttribute('data-selected');
         if (selected == 'true') {
             selectedWords.forEach(w => {

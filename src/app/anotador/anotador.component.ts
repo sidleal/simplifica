@@ -890,7 +890,7 @@ editSimplificationText(textFrom, textTo, simp) {
     var selectedSentence = selectedSentences[0]; // apenas uma sentença (talvez mais de uma no futuro)
 
     var selectedWords = jQuery('#selectedWords').val().split(',');
-    if (selectedWords.length > 0) {
+    if (selectedWords.length > 0 && selectedWords[0] != '' ) {
       selectedSentence = document.getElementById(selectedWords[0]).parentNode.attributes['id'].value;
     }
 
