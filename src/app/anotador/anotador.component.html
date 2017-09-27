@@ -114,8 +114,8 @@
       <div class='operations-tools'>
         <button onclick="$('#operations-sentenciais').hide();$('#operations-intra-sentenciais').hide();$('#hideOps').hide();$('#showOps').show();" style='display:none;' class="mini" id='hideOps' data-toggle="tooltip" title="Ocultar todas as operações"><i class="fa fa-chevron-up"></i></button>
         <button onclick="$('#operations-sentenciais').show();$('#operations-intra-sentenciais').show();$('#hideOps').show();$('#showOps').hide();" class="mini" id='showOps' data-toggle="tooltip" title="Mostrar todas as operações"><i class="fa fa-chevron-down"></i></button>
-        <button onclick="markWords(true)" class="mini" id='markWords' data-toggle="tooltip" title="Marcar Palavras (botão direito do mouse também funciona)"><i class="fa fa-text-width"></i></button>
-        <button onclick="markWords(false)" class="mini" id='markSentences' data-toggle="tooltip" title="Marcar Sentenças" style='display:none;'><i class="fa fa-align-justify"></i></button>
+        <button onclick="markWords(false)" class="mini" id='markWords' data-toggle="tooltip" title="Marcando Palavras (clique para mudar para sentenças)" style='display:none;'><i class="fa fa-text-width"></i></button>
+        <button onclick="markWords(true)" class="mini" id='markSentences' data-toggle="tooltip" title="Marcando Sentenças (clique para mudar para palavras)" ><i class="fa fa-align-justify"></i></button>
         <button onclick="clearSelection()" class="mini" id='clearSelection' data-toggle="tooltip" title="Limpar selecionadas"><i class="fa fa-eraser"></i></button>
         <button (click)="saveSimplification()" class="mini" data-toggle="tooltip" title="Salvar Bitexto"><i class="fa fa-save"></i></button>
         <i class="fa fa-spinner fa-pulse fa-fw" id='waiting' style="display:none;"></i>
@@ -154,7 +154,8 @@
         <a (click)="doOperation('advAdjOrderChange');"> - Mudança da ordem de adjunto adverbial</a><br/>
         <a (click)="doOperation('pronounToNoun');"> - Substituição de pronome por nome</a><br/>
         <a (click)="doOperation('nounSintReduc');"> - Redução de sintagma nominal</a><br/>
-        <a (click)="doOperation('discMarkerChange');"> - Substituição de marcador discursivo</a>
+        <a (click)="doOperation('discMarkerChange');"> - Substituição de marcador discursivo</a><br/>
+        <a (click)="doOperation('notMapped');"> - Operação Não Mapeada</a>
       </div>        
     </div>
 

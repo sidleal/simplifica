@@ -86,7 +86,8 @@ export class AnotadorComponent implements OnInit {
     advAdjOrderChange: 'Mudança da ordem de adjunto adverbial',
     pronounToNoun: 'Substituição de pronome por nome',
     nounSintReduc: 'Redução de sintagma nominal',
-    discMarkerChange: 'Substituição de marcador discursivo',    
+    discMarkerChange: 'Substituição de marcador discursivo',
+    notMapped: 'Operação Não Mapeada'    
   }
 
   constructor(private authService: AuthService, public af: AngularFireDatabase, 
@@ -166,6 +167,31 @@ export class AnotadorComponent implements OnInit {
             Cancelar: function () {
                 jQuery(this).dialog("close");
                 callback(context, -1, '');
+            }
+        },
+        close: function (event, ui) {
+            jQuery(this).remove();
+            callback(context, false, '');
+        }
+    });
+  };
+
+  editSentenceDialogNotMapped(context, operation, sentence, callback) {
+    jQuery('<div></div>').appendTo('body')
+    .html('<div>Operação: <input type="text" id="opDesc"/><br/><textarea rows="5" cols="80" id="editSentenceText">' + sentence + '</textarea></div>')
+    .dialog({
+        modal: true, title: operation, zIndex: 10000, autoOpen: true,
+        width: 'auto', resizable: true,
+        buttons: {
+            Confirmar: function () {
+                var opDesc = jQuery('#opDesc').val();
+                var text = jQuery('#editSentenceText').val();
+                callback(context, true, opDesc, text);
+                jQuery(this).dialog("close");
+            },
+            Cancelar: function () {
+                jQuery(this).dialog("close");
+                callback(context, false, '', '');
             }
         },
         close: function (event, ui) {
@@ -864,7 +890,7 @@ editSimplificationText(textFrom, textTo, simp) {
     var selectedSentence = selectedSentences[0]; // apenas uma sentença (talvez mais de uma no futuro)
 
     var selectedWords = jQuery('#selectedWords').val().split(',');
-    if (selectedSentence == '' && selectedWords.length > 0) {
+    if (selectedWords.length > 0) {
       selectedSentence = document.getElementById(selectedWords[0]).parentNode.attributes['id'].value;
     }
 
@@ -906,6 +932,11 @@ editSimplificationText(textFrom, textTo, simp) {
               var match = /\((.*)\|(.*)\)/g.exec(op);
               if (match) {
                 details = match[2];
+              }              
+            } else if (opKey == 'notMapped') {
+              var match = /\((.*)\|(.*)\|(.*)\|(.*)\)/g.exec(op);
+              if (match) {
+                details = match[4] + ': ' + match[2] + ' --> ' + match[3];
               }              
             }
 
@@ -967,6 +998,8 @@ editSimplificationText(textFrom, textTo, simp) {
                   this.doNounSintReduc(sentences, selectedSentence, selectedWords); break;
               case 'discMarkerChange':
                   this.doDiscMarkerChange(sentences, selectedSentence, selectedWords); break;
+              case 'notMapped':
+                  this.doNotMapped(sentences, selectedSentence, selectedWords); break;
           }
 
       });
@@ -1275,6 +1308,38 @@ editSimplificationText(textFrom, textTo, simp) {
     });
   }
 
+  doNotMapped(sentences, selectedSentence, selectedWords) {
+    sentences.forEach(s => {
+      if (s.indexOf(selectedSentence) > 0) {
+          var ps = this.parseSentence(s);
+
+          var tokens = '';
+          for (var i in selectedWords) {
+            var word = document.getElementById(selectedWords[i]).innerText;
+            tokens += word + ' ';
+          }
+          tokens = tokens.substring(0, tokens.length - 1);
+
+          this.editSentenceDialogNotMapped(this, this.operationsMap["notMapped"], tokens, function (context, ret, opDesc, text) {
+              if (ret) {
+                  var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                  newSentHtml = newSentHtml.replace("{id}", ps['id']);
+                  newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+                  newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
+                  newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
+                  newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(tokens, text));
+                
+                  jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+
+                  context.updateOperationsList(selectedSentence, 'notMapped(' + selectedSentence + '|' + tokens + '|' + text + '|' + opDesc + ');');
+              }
+
+          });
+              
+      }
+    });
+
+  }
 
   @HostListener('window:undoOperation', ['$event.detail'])
   undoOperation(operation) {

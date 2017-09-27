@@ -39,11 +39,11 @@ function markWords(newValue) {
     markingWords = newValue;
 
     if (newValue) {
-        document.getElementById('markWords').style='display:none;';
-        document.getElementById('markSentences').style='';
-    } else {
         document.getElementById('markWords').style='';
         document.getElementById('markSentences').style='display:none;';
+    } else {
+        document.getElementById('markWords').style='display:none;';
+        document.getElementById('markSentences').style='';
     }
 }
 
@@ -66,6 +66,7 @@ var operationsMap = {
     pronounToNoun: 'Substituição de pronome por nome',
     nounSintReduc: 'Redução de sintagma nominal',
     discMarkerChange: 'Substituição de marcador discursivo',
+    notMapped: 'Operação Não Mapeada'
 }
 
 
@@ -88,14 +89,7 @@ function sentenceClick(sentence) {
 
 function clearSelection() {
 
-    selectedSentences.forEach( s => {
-        selectSentence(document.getElementById(s), '', 'false');
-        document.getElementById("qtSelectedTokens").innerHTML = '';
-        document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
-        updateOperationsList(null);
-    });
-    selectedSentences = []
-    $("#sentenceOperations").html('');
+    clearSentenceSelection();
 
     selectedWords.forEach(w => {
         word = document.getElementById(w);
@@ -104,6 +98,17 @@ function clearSelection() {
     });
     selectedWords = [];
     $("#selectedWords").html('');
+}
+
+function clearSentenceSelection() {
+    selectedSentences.forEach( s => {
+        selectSentence(document.getElementById(s), '', 'false');
+        document.getElementById("qtSelectedTokens").innerHTML = '';
+        document.getElementById("qtSelectedTokens").title = "Quantidade de palavras da sentença";
+        updateOperationsList(null);
+    });
+    selectedSentences = []
+    $("#sentenceOperations").html('');
 }
 
 function updateOperationsList(sentence) {
@@ -124,11 +129,15 @@ function updateOperationsList(sentence) {
                         if (match) {
                         details = match[2] + ' --> ' + match[3];
                         }
-                    }
-                    if (opKey == 'partRemotion') {
+                    } else if (opKey == 'partRemotion') {
                         var match = /\((.*)\|(.*)\)/g.exec(op);
                         if (match) {
                         details = match[2];
+                        }              
+                    } else if (opKey == 'notMapped') {
+                        var match = /\((.*)\|(.*)\|(.*)\|(.*)\)/g.exec(op);
+                        if (match) {
+                          details = match[4] + ': ' + match[2] + ' --> ' + match[3];
                         }              
                     }
                    
@@ -157,6 +166,9 @@ function selectSentence(sentence, style, selected) {
 }
 
 function wordClick(word, right) {
+    
+    clearSentenceSelection();
+
     if (markingWords || right) {
         var selected = word.getAttribute('data-selected');
         if (selected == 'true') {
