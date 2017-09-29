@@ -276,7 +276,7 @@ export class AnotadorComponent implements OnInit {
       }
     });
     this.stage = "corpora";
-    this.breadcrumb = "editor > meus corpora"
+    this.breadcrumb = "editor > meus corpora";
     this.refresh();
   }
 
@@ -288,7 +288,7 @@ export class AnotadorComponent implements OnInit {
 
   newCorpus() {
     this.stage = "newCorpus";
-    this.breadcrumb = "editor > novo córpus"
+    this.breadcrumb = "editor > novo córpus";
     this.refresh();
   }
 
