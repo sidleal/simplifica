@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SenterService } from '../providers/senter.service';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AuthService } from '../providers/auth.service';
 
 @Component({
   selector: 'app-senter',
@@ -22,7 +23,15 @@ export class SenterComponent implements OnInit {
   jsonOutput: string = '';
   jsonOutputNoFormat: string = '';
 
-  constructor(private router: Router, private senterService: SenterService, private af: AngularFireDatabase) { }
+  loggedUser: string;
+
+  constructor(private authService: AuthService, private router: Router, private senterService: SenterService, 
+    private af: AngularFireDatabase) { 
+      this.authService.afAuth.authState.subscribe( auth => {
+        this.loggedUser = auth.email;     
+    });
+
+  }
 
   ngOnInit() {
   }
