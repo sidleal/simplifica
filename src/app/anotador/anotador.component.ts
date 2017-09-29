@@ -7,6 +7,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import 'rxjs/add/operator/take';
 import * as moment from 'moment';
 import { HostListener } from '@angular/core';
+import { NgZone } from '@angular/core';
 
 declare var jQuery:any;
 
@@ -90,12 +91,20 @@ export class AnotadorComponent implements OnInit {
     notMapped: 'Operação Não Mapeada'    
   }
 
-  constructor(private authService: AuthService, public af: AngularFireDatabase, 
+  constructor(private zone: NgZone, private cdr: ChangeDetectorRef, private authService: AuthService, public af: AngularFireDatabase, 
     private router: Router, private senterService: SenterService) {
     this.authService.afAuth.authState.subscribe( auth => {
         this.loggedUser = auth.email;     
     });
     this.showMenu();
+  }
+
+  refresh() {
+    setTimeout(() => {
+      this.zone.run(() => {
+        this.cdr.detectChanges();
+      });
+    });  
   }
 
   confirmDialog(message, callback) {
@@ -256,7 +265,8 @@ export class AnotadorComponent implements OnInit {
 
   showMenu() {
     this.stage = "menu";
-    this.breadcrumb = "editor > menu"
+    this.breadcrumb = "editor > menu";
+    this.refresh();
   }
 
   listCorpora() {
@@ -267,6 +277,7 @@ export class AnotadorComponent implements OnInit {
     });
     this.stage = "corpora";
     this.breadcrumb = "editor > meus corpora"
+    this.refresh();
   }
 
   selectCorpus(corpusId, corpusName) {
@@ -278,6 +289,7 @@ export class AnotadorComponent implements OnInit {
   newCorpus() {
     this.stage = "newCorpus";
     this.breadcrumb = "editor > novo córpus"
+    this.refresh();
   }
 
   saveCorpus() {
@@ -292,6 +304,7 @@ export class AnotadorComponent implements OnInit {
         this.af.object('/corpora/' + corpusId).remove();        
       }
     });
+    this.refresh();
   }
 
   backToMenu() {
@@ -301,6 +314,7 @@ export class AnotadorComponent implements OnInit {
   showTextMenu() {
     this.stage = "textMenu";
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos";
+    this.refresh();
   }
 
   listTexts() {
@@ -311,6 +325,7 @@ export class AnotadorComponent implements OnInit {
         limitToLast: 50
       }
     });
+    this.refresh();
   }
 
   newText() {
@@ -324,6 +339,7 @@ export class AnotadorComponent implements OnInit {
     this.textSource = '';
     this.textContent = '';
     this.textRawContent = '';
+    this.refresh();
   }
 
   deleteText(textId) {
@@ -332,7 +348,7 @@ export class AnotadorComponent implements OnInit {
         this.af.object('/corpora/' + this.selectedCorpusId + '/texts/' + textId).remove();
       }
     });
-
+    this.refresh();
   }
 
   saveText() {
@@ -439,6 +455,7 @@ export class AnotadorComponent implements OnInit {
         limitToLast: 50
       }
     });
+    this.refresh();
   }
    
   deleteSimplification(simpId) {
@@ -1343,7 +1360,6 @@ editSimplificationText(textFrom, textTo, simp) {
 
   @HostListener('window:undoOperation', ['$event.detail'])
   undoOperation(operation) {
-    console.log(operation);
 
     var opTokens = operation.split('(');
     var opKey = opTokens[0];
@@ -1365,8 +1381,6 @@ editSimplificationText(textFrom, textTo, simp) {
     textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
     var paragraphs = textToHTML.split("|||");
 
-    console.log(sentenceId);
-
     paragraphs.forEach(p => {
         p = p.substring(p.indexOf("<span "), p.lastIndexOf("</span>")+7);
         p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
@@ -1375,9 +1389,6 @@ editSimplificationText(textFrom, textTo, simp) {
         sentences.forEach(s => {
           if (s.indexOf(sentenceId) > 0) {
               var ps = this.parseSentence(s);
-
-              console.log(ps);
-              console.log(fromSentence.innerText);
 
               var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
               newSentHtml = newSentHtml.replace("{id}", ps['id']);
