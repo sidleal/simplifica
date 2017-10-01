@@ -123,7 +123,7 @@ function updateOperationsList(sentence) {
                     var opDesc = operationsMap[opKey];
                     var details = '';                    
 
-                    var substOps = ['lexicalSubst', 'synonymListElab', 'explainPhraseElab', 'verbalTenseSubst', 'numericExprSimpl', 'pronounToNoun', 'nounSintReduc'];
+                    var substOps = ['lexicalSubst', 'synonymListElab', 'explainPhraseElab', 'verbalTenseSubst', 'numericExprSimpl', 'pronounToNoun', 'passiveVoiceChange', 'phraseOrderChange', 'svoChange', 'advAdjOrderChange', 'discMarkerChange', 'doNounSintReduc'];
                     if (substOps.indexOf(opKey) >= 0) {
                         var match = /\((.*)\|(.*)\|(.*)\)/g.exec(op);
                         if (match) {

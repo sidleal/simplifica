@@ -90,7 +90,10 @@ export class AnotadorComponent implements OnInit {
     discMarkerChange: 'Substituição de marcador discursivo',
     notMapped: 'Operação Não Mapeada'    
   }
+  
+  substOps = ['lexicalSubst', 'synonymListElab', 'explainPhraseElab', 'verbalTenseSubst', 'numericExprSimpl', 'pronounToNoun', 'passiveVoiceChange', 'phraseOrderChange', 'svoChange', 'advAdjOrderChange', 'discMarkerChange', 'doNounSintReduc'];
 
+  
   constructor(private zone: NgZone, private cdr: ChangeDetectorRef, private authService: AuthService, public af: AngularFireDatabase, 
     private router: Router, private senterService: SenterService) {
     this.authService.afAuth.authState.subscribe( auth => {
@@ -925,7 +928,9 @@ editSimplificationText(textFrom, textTo, simp) {
     var sentence = document.getElementById(sentenceId);
 
     var operations = sentence.getAttribute('data-operations');
-    operations += type;
+    if (type != null) {
+      operations += type;
+    }
     sentence.setAttribute('data-operations', operations);
 
     var operationsHtml = '';
@@ -938,9 +943,7 @@ editSimplificationText(textFrom, textTo, simp) {
             var opDesc = this.operationsMap[opKey];
             var details = '';
 
-            var substOps = ['lexicalSubst', 'synonymListElab', 'explainPhraseElab', 'verbalTenseSubst', 'numericExprSimpl', 'pronounToNoun', 'nounSintReduc'];
- 
-            if (substOps.indexOf(opKey) >= 0) {
+            if (this.substOps.indexOf(opKey) >= 0) {
               var match = /\((.*)\|(.*)\|(.*)\)/g.exec(op);
               if (match) {
                 details = match[2] + ' --> ' + match[3];
@@ -1373,8 +1376,6 @@ editSimplificationText(textFrom, textTo, simp) {
       sentenceId = sentenceId.substring(0, sentenceId.indexOf(')'));
     }
 
-    var fromSentence = document.getElementById(sentenceId);
-
     var textToHTML = document.getElementById("divTextTo").innerHTML;
     
     textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.lastIndexOf("</p>")+4);
@@ -1385,27 +1386,97 @@ editSimplificationText(textFrom, textTo, simp) {
         p = p.substring(p.indexOf("<span "), p.lastIndexOf("</span>")+7);
         p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
         var sentences = p.split("|||");
-   
-        sentences.forEach(s => {
-          if (s.indexOf(sentenceId) > 0) {
-              var ps = this.parseSentence(s);
 
-              var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-              newSentHtml = newSentHtml.replace("{id}", ps['id']);
-              newSentHtml = newSentHtml.replace("{pair}", fromSentence.getAttribute('id'));
-              newSentHtml = newSentHtml.replace("{qtt}", fromSentence.getAttribute('qtt'));
-              newSentHtml = newSentHtml.replace("{qtw}", fromSentence.getAttribute('qtw'));
-              newSentHtml = newSentHtml.replace("{content}", fromSentence.innerText);
-            
-              jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
-              
-              fromSentence.setAttribute('data-operations', '');
-              jQuery("#sentenceOperations").html('');
+        if (this.substOps.indexOf(opKey) >= 0) {
+          this.undoSubstOps(sentences, sentenceId, operation);
+        } else if (opKey == 'notMapped') {
+          this.undoNotMapped(sentences, sentenceId, operation);
+        } else if (opKey == 'inclusion') {
+          this.undoInclusion(sentences, sentenceId, operation);
+        }
 
-          }
-         
-        });
+    });
 
+    if (this.substOps.indexOf(opKey) < 0 && opKey != 'notMapped' && opKey != 'inclusion') {
+      alert('Oops. Não funciona ainda.');          
+    }
+
+  }
+
+  undoSubstOps(sentences, sentenceId, operation) {
+    var fromSentence = document.getElementById(sentenceId);
+    var match = /\((.*)\|(.*)\|(.*)\)/g.exec(operation);
+    var oldWords = match[2];
+    var newWords = match[3];
+
+    sentences.forEach(s => {
+      if (s.indexOf(sentenceId) > 0) {
+          var ps = this.parseSentence(s);
+
+          var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"\"> {content}</span>";
+          newSentHtml = newSentHtml.replace("{id}", ps['id']);
+          newSentHtml = newSentHtml.replace("{pair}", fromSentence.getAttribute('id'));
+          newSentHtml = newSentHtml.replace("{qtt}", fromSentence.getAttribute('qtt'));
+          newSentHtml = newSentHtml.replace("{qtw}", fromSentence.getAttribute('qtw'));
+          newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(newWords, oldWords));
+
+          jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+          
+          var operations = fromSentence.getAttribute('data-operations');
+          fromSentence.setAttribute('data-operations', operations.replace(operation, ''));
+          this.updateOperationsList(sentenceId, null);
+
+      }
+     
+    });
+
+  }
+
+  undoNotMapped(sentences, sentenceId, operation) {
+    var fromSentence = document.getElementById(sentenceId);
+    var match = /\((.*)\|(.*)\|(.*)\|(.*)\)/g.exec(operation);
+    var oldWords = match[2];
+    var newWords = match[3];
+
+    sentences.forEach(s => {
+      if (s.indexOf(sentenceId) > 0) {
+          var ps = this.parseSentence(s);
+
+          var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"\"> {content}</span>";
+          newSentHtml = newSentHtml.replace("{id}", ps['id']);
+          newSentHtml = newSentHtml.replace("{pair}", fromSentence.getAttribute('id'));
+          newSentHtml = newSentHtml.replace("{qtt}", fromSentence.getAttribute('qtt'));
+          newSentHtml = newSentHtml.replace("{qtw}", fromSentence.getAttribute('qtw'));
+          newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(newWords, oldWords));
+
+          jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+          
+          var operations = fromSentence.getAttribute('data-operations');
+          fromSentence.setAttribute('data-operations', operations.replace(operation, ''));
+          this.updateOperationsList(sentenceId, null);
+
+      }
+     
+    });
+
+    
+  }
+
+  undoInclusion(sentences, sentenceId, operation) {
+    var fromSentence = document.getElementById(sentenceId);
+    var fromPair = fromSentence.getAttribute("data-pair");
+    var includedSentence = fromPair.split(',')[1];
+
+    sentences.forEach(s => {
+      if (s.indexOf(includedSentence) > 0) {
+          jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, ''));
+          
+          var operations = fromSentence.getAttribute('data-operations');
+          fromSentence.setAttribute('data-operations', operations.replace(operation, ''));
+          this.updateOperationsList(sentenceId, null);
+
+      }
+     
     });
 
   }
