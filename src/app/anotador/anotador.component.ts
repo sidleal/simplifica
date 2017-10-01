@@ -809,7 +809,8 @@ editSimplificationText(textFrom, textTo, simp) {
         out += '<span id=\'t.s.' + s + '\'  data-selected=\'false\' data-pair=\'' + po['pair'] + '\'';
         out += ' data-qtt=\'' + sObj.qtt + '\' data-qtw=\'' + sObj.qtw + '\'';
         out += ' data-operations=\'' + po['operations'] + '\'';
-        out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>'
+        out += ' onmouseover=\'overSentence(this);\' onmouseout=\'outSentence(this);\'>';
+        // TODO: alterar pela function criada.
         for(var t in sObj.tokens) {
           var token = sObj.tokens[t].token;
           if ('\"\''.indexOf(token) >= 0) {
@@ -1219,31 +1220,58 @@ editSimplificationText(textFrom, textTo, simp) {
     });
   }
 
+
+  parseWordTokens(tokens) {
+    var openQuotes = false;
+    var out = '';
+    for(var i in tokens) {
+
+      var token = tokens[i];
+      if ('\"\''.indexOf(token) >= 0) {
+        openQuotes = !openQuotes;
+        if (openQuotes) {
+          out += ' ';
+        }
+      } else if (openQuotes && '\"\''.indexOf(out.substr(-1)) >= 0) {
+        //nothing
+      } else if ('.,)]}!?:'.indexOf(token) < 0 && '([{'.indexOf(out.substr(-1)) < 0) {
+        out += ' ';
+      }
+      out += token;
+    }
+    // tokens = tokens.substring(0, tokens.length - 1);    
+    return out;
+  }
+
+  parseSelectedWordTokens(selectedWords) {
+    var tokens = [];
+    for (var i in selectedWords) {
+      var word = document.getElementById(selectedWords[i]).innerText;
+      tokens.push(word);
+    }
+    return this.parseWordTokens(tokens);
+  }
+
   doIntraSentenceSubst(sentences, selectedSentence, selectedWords, operation) {
     var opDesc = this.operationsMap[operation];
     sentences.forEach(s => {
       if (s.indexOf(selectedSentence) > 0) {
           var ps = this.parseSentence(s);
 
-          var tokens = '';
-          for (var i in selectedWords) {
-            var word = document.getElementById(selectedWords[i]).innerText;
-            tokens += word + ' ';
-          }
-          tokens = tokens.substring(0, tokens.length - 1);
+          var parsedTokens = this.parseSelectedWordTokens(selectedWords);
 
-          this.editSentenceDialog(this, opDesc, tokens, function (context, ret, text) {
+          this.editSentenceDialog(this, opDesc, parsedTokens, function (context, ret, text) {
               if (ret) {
                   var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
                   newSentHtml = newSentHtml.replace("{id}", ps['id']);
                   newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
                   newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
                   newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
-                  newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(tokens, text));
+                  newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, text));
                 
                   jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
-                  context.updateOperationsList(selectedSentence, operation + '(' + selectedSentence + '|' + tokens + '|' + text + ');');
+                  context.updateOperationsList(selectedSentence, operation + '(' + selectedSentence + '|' + parsedTokens + '|' + text + ');');
               }
 
           });
@@ -1306,24 +1334,18 @@ editSimplificationText(textFrom, textTo, simp) {
       if (s.indexOf(selectedSentence) > 0) {
           var ps = this.parseSentence(s);
 
-          var tokens = '';
-          for (var i in selectedWords) {
-            var word = document.getElementById(selectedWords[i]).innerText;
-            tokens += word + ' ';
-          }
-          tokens = tokens.substring(0, tokens.length - 1);
+          var parsedTokens = this.parseSelectedWordTokens(selectedWords);
 
           var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
           newSentHtml = newSentHtml.replace("{id}", ps['id']);
           newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
           newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
           newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
-          newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(tokens, ''));
-        
+          newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, ''));
+          
           jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
-          this.updateOperationsList(selectedSentence, 'partRemotion(' + selectedSentence + '|' + tokens + ');');
-              
+          this.updateOperationsList(selectedSentence, 'partRemotion(' + selectedSentence + '|' + parsedTokens + ');');
       }
     });
   }
@@ -1333,25 +1355,20 @@ editSimplificationText(textFrom, textTo, simp) {
       if (s.indexOf(selectedSentence) > 0) {
           var ps = this.parseSentence(s);
 
-          var tokens = '';
-          for (var i in selectedWords) {
-            var word = document.getElementById(selectedWords[i]).innerText;
-            tokens += word + ' ';
-          }
-          tokens = tokens.substring(0, tokens.length - 1);
+          var parsedTokens = this.parseSelectedWordTokens(selectedWords);
 
-          this.editSentenceDialogNotMapped(this, this.operationsMap["notMapped"], tokens, function (context, ret, opDesc, text) {
+          this.editSentenceDialogNotMapped(this, this.operationsMap["notMapped"], parsedTokens, function (context, ret, opDesc, text) {
               if (ret) {
                   var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
                   newSentHtml = newSentHtml.replace("{id}", ps['id']);
                   newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
                   newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
                   newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
-                  newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(tokens, text));
+                  newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, text));
                 
                   jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
-                  context.updateOperationsList(selectedSentence, 'notMapped(' + selectedSentence + '|' + tokens + '|' + text + '|' + opDesc + ');');
+                  context.updateOperationsList(selectedSentence, 'notMapped(' + selectedSentence + '|' + parsedTokens + '|' + text + '|' + opDesc + ');');
               }
 
           });
