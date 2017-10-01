@@ -97,7 +97,7 @@ function clearSelection() {
         word.setAttribute('data-selected', 'false');
     });
     selectedWords = [];
-    $("#selectedWords").html('');
+    $("#selectedWords").val('');
 }
 
 function clearSentenceSelection() {
@@ -108,7 +108,28 @@ function clearSentenceSelection() {
         updateOperationsList(null);
     });
     selectedSentences = []
+    $("#selectedSentences").val('');
     $("#sentenceOperations").html('');
+
+
+    var textToHTML = document.getElementById("divTextTo").innerHTML;
+    textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.lastIndexOf("</p>")+4);
+    textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
+    var paragraphs = textToHTML.split("|||");
+
+    paragraphs.forEach(p => {
+        p = p.substring(p.indexOf("<span "), p.lastIndexOf("</span>")+7);
+        p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
+        var sentences = p.split("|||");
+
+        sentences.forEach(s => {
+            var newS = s.replace(/style=".*?"/g, 'style=""')
+            jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newS));
+        });
+      
+    });
+
+
 }
 
 function updateOperationsList(sentence) {
