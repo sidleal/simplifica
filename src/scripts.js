@@ -98,7 +98,12 @@ function sentenceClick(sentence) {
 function clearSelection() {
 
     clearSentenceSelection();
+    clearWordSelection();
 
+}
+
+function clearWordSelection() {
+    
     selectedWords.forEach(w => {
         word = document.getElementById(w);
         word.style = '';
@@ -198,7 +203,7 @@ function wordClick(word, right) {
     
     if (markingWords || right) {
 
-        clearSentenceSelection();
+        //clearSentenceSelection();
         
         var selected = word.getAttribute('data-selected');
         if (selected == 'true') {

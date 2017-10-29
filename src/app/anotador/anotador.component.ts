@@ -495,6 +495,7 @@ export class AnotadorComponent implements OnInit {
     var idxTokens = 0;
     var idxWords = 0;
     var newTextcontent = '';
+    var qtRemoved = 0;
 
     var textToHTML = document.getElementById("divTextTo").innerHTML;
     textToHTML = textToHTML.substring(textToHTML.indexOf("<p "), textToHTML.lastIndexOf("</p>")+4);
@@ -517,9 +518,12 @@ export class AnotadorComponent implements OnInit {
         regexp = /<span.+?>(.+?)<\/span>/g
         match = regexp.exec(s);
         var sContent = match[1];
-        newTextcontent += sContent;
-        pContent += sContent;
-
+        if (sContent != '#rem#') {
+          newTextcontent += sContent;
+          pContent += sContent;
+        } else {
+          qtRemoved++;
+        }
         regexp = /data-pair="(.+?)"/g
         match = regexp.exec(s);
         var sPair = match[1];
@@ -559,7 +563,7 @@ export class AnotadorComponent implements OnInit {
       newTextcontent += '\n';
     });
 
-    this.simplificationParsedText = {"totP": idxParagraphs, "totS": idxSentences, "totT": idxTokens, "totW": idxWords, "paragraphs": parsedParagraphs};
+    this.simplificationParsedText = {"totP": idxParagraphs, "totS": idxSentences - qtRemoved, "totT": idxTokens, "totW": idxWords, "paragraphs": parsedParagraphs};
 
     this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
     this.simplificationTextFrom.take(1).subscribe(text => {
@@ -692,6 +696,8 @@ editSimplificationText(textFrom, textTo, simp) {
     
     this.stage = "doSimplification";
     this.breadcrumb = "editor > meus corpora > " + this.selectedCorpusName + " > textos > " + this.selectedTextTitle + " > Editar Simplificação";
+
+    jQuery("#sentenceOperations").html('');
 
     this.simplificationToTitle = textTo.title;
     this.simplificationToSubTitle = textTo.subTitle;
@@ -1231,23 +1237,17 @@ editSimplificationText(textFrom, textTo, simp) {
   }
 
   doRemotion(sentences, selectedSentence) {
-    var previousSentence = '';
     sentences.forEach(s => {
         if (s.indexOf(selectedSentence) > 0) {
             var ps = this.parseSentence(s);
-            var pps = this.parseSentence(previousSentence);
   
-            jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, ''));
-
-            document.getElementById(selectedSentence).setAttribute('data-pair', pps['id']);
-            var newPair = document.getElementById(pps['id']).getAttribute('data-pair');
-            newPair += ',' + selectedSentence;
-            document.getElementById(pps['id']).setAttribute('data-pair', newPair);
+            jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, s.replace(ps['content'], '#rem#')));
 
             this.updateOperationsList(selectedSentence, 'remotion(' + selectedSentence + ');');
         }
-        previousSentence = s;
     });
+
+
   }
 
 
@@ -1284,30 +1284,30 @@ editSimplificationText(textFrom, textTo, simp) {
 
   doIntraSentenceSubst(sentences, selectedSentence, selectedWords, operation) {
     var opDesc = this.operationsMap[operation];
-    sentences.forEach(s => {
-      if (s.indexOf(selectedSentence) > 0) {
-          var ps = this.parseSentence(s);
+    // sentences.forEach(s => {
+    //   if (s.indexOf(selectedSentence) > 0) {
+    //       var ps = this.parseSentence(s);
 
           var parsedTokens = this.parseSelectedWordTokens(selectedWords);
 
           this.editSentenceDialog(this, opDesc, parsedTokens, function (context, ret, text) {
               if (ret) {
-                  var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-                  newSentHtml = newSentHtml.replace("{id}", ps['id']);
-                  newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
-                  newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
-                  newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
-                  newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, text));
+                  // var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                  // newSentHtml = newSentHtml.replace("{id}", ps['id']);
+                  // newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+                  // newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
+                  // newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
+                  // newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, text));
                 
-                  jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+                  // jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
                   context.updateOperationsList(selectedSentence, operation + '(' + selectedSentence + '|' + parsedTokens + '|' + text + ');');
               }
 
           });
               
-      }
-    });
+    //   }
+    // });
 
   }
 
@@ -1360,51 +1360,51 @@ editSimplificationText(textFrom, textTo, simp) {
   }
 
   doPartRemotion(sentences, selectedSentence, selectedWords) {
-    sentences.forEach(s => {
-      if (s.indexOf(selectedSentence) > 0) {
-          var ps = this.parseSentence(s);
+    // sentences.forEach(s => {
+    //   if (s.indexOf(selectedSentence) > 0) {
+    //       var ps = this.parseSentence(s);
 
           var parsedTokens = this.parseSelectedWordTokens(selectedWords);
 
-          var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-          newSentHtml = newSentHtml.replace("{id}", ps['id']);
-          newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
-          newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
-          newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
-          newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, ''));
+          // var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+          // newSentHtml = newSentHtml.replace("{id}", ps['id']);
+          // newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+          // newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
+          // newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
+          // newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, ''));
           
-          jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+          // jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
           this.updateOperationsList(selectedSentence, 'partRemotion(' + selectedSentence + '|' + parsedTokens + ');');
-      }
-    });
+    //   }
+    // });
   }
 
   doNotMapped(sentences, selectedSentence, selectedWords) {
-    sentences.forEach(s => {
-      if (s.indexOf(selectedSentence) > 0) {
-          var ps = this.parseSentence(s);
+    // sentences.forEach(s => {
+    //   if (s.indexOf(selectedSentence) > 0) {
+    //       var ps = this.parseSentence(s);
 
           var parsedTokens = this.parseSelectedWordTokens(selectedWords);
 
           this.editSentenceDialogNotMapped(this, this.operationsMap["notMapped"], parsedTokens, function (context, ret, opDesc, text) {
               if (ret) {
-                  var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
-                  newSentHtml = newSentHtml.replace("{id}", ps['id']);
-                  newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
-                  newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
-                  newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
-                  newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, text));
+                  // var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                  // newSentHtml = newSentHtml.replace("{id}", ps['id']);
+                  // newSentHtml = newSentHtml.replace("{pair}", ps['pair']);
+                  // newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
+                  // newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
+                  // newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(parsedTokens, text));
                 
-                  jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+                  // jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
 
                   context.updateOperationsList(selectedSentence, 'notMapped(' + selectedSentence + '|' + parsedTokens + '|' + text + '|' + opDesc + ');');
               }
 
           });
               
-      }
-    });
+    //   }
+    // });
 
   }
 
@@ -1429,23 +1429,30 @@ editSimplificationText(textFrom, textTo, simp) {
     textToHTML = textToHTML.replace(/(<\/p>)(<p)/g, "$1|||$2");
     var paragraphs = textToHTML.split("|||");
 
-    paragraphs.forEach(p => {
-        p = p.substring(p.indexOf("<span "), p.lastIndexOf("</span>")+7);
-        p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
-        var sentences = p.split("|||");
+    if (opKey == 'rewrite') {
+      this.undoRewrite(sentenceId, operation);
 
-        if (this.substOps.indexOf(opKey) >= 0) {
-          this.undoSubstOps(sentences, sentenceId, operation);
-        } else if (opKey == 'notMapped') {
-          this.undoNotMapped(sentences, sentenceId, operation);
-        } else if (opKey == 'inclusion') {
-          this.undoInclusion(sentences, sentenceId, operation);
-        }
+    } else {
 
-    });
+      paragraphs.forEach(p => {
+          p = p.substring(p.indexOf("<span "), p.lastIndexOf("</span>")+7);
+          p = p.replace(/(<\/span>)(<span)/g, "$1|||$2");
+          var sentences = p.split("|||");
 
-    if (this.substOps.indexOf(opKey) < 0 && opKey != 'notMapped' && opKey != 'inclusion') {
-      alert('Oops. Não funciona ainda.');          
+          if (this.substOps.indexOf(opKey) >= 0) {
+            this.undoSubstOps(sentences, sentenceId, operation);
+          } else if (opKey == 'notMapped') {
+            this.undoNotMapped(sentences, sentenceId, operation);
+          } else if (opKey == 'inclusion') {
+            this.undoInclusion(sentences, sentenceId, operation);
+          } else if (opKey == 'division') {
+            this.undoDivision(sentences, sentenceId, operation);
+          } else if (opKey == 'remotion') {
+            this.undoRemotion(sentences, sentenceId, operation);
+          }
+
+      });
+
     }
 
   }
@@ -1460,14 +1467,14 @@ editSimplificationText(textFrom, textTo, simp) {
       if (s.indexOf(sentenceId) > 0) {
           var ps = this.parseSentence(s);
 
-          var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"\"> {content}</span>";
-          newSentHtml = newSentHtml.replace("{id}", ps['id']);
-          newSentHtml = newSentHtml.replace("{pair}", fromSentence.getAttribute('id'));
-          newSentHtml = newSentHtml.replace("{qtt}", fromSentence.getAttribute('qtt'));
-          newSentHtml = newSentHtml.replace("{qtw}", fromSentence.getAttribute('qtw'));
-          newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(newWords, oldWords));
+          // var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"\"> {content}</span>";
+          // newSentHtml = newSentHtml.replace("{id}", ps['id']);
+          // newSentHtml = newSentHtml.replace("{pair}", fromSentence.getAttribute('id'));
+          // newSentHtml = newSentHtml.replace("{qtt}", fromSentence.getAttribute('qtt'));
+          // newSentHtml = newSentHtml.replace("{qtw}", fromSentence.getAttribute('qtw'));
+          // newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(newWords, oldWords));
 
-          jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+          // jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
           
           var operations = fromSentence.getAttribute('data-operations');
           fromSentence.setAttribute('data-operations', operations.replace(operation, ''));
@@ -1489,14 +1496,14 @@ editSimplificationText(textFrom, textTo, simp) {
       if (s.indexOf(sentenceId) > 0) {
           var ps = this.parseSentence(s);
 
-          var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"\"> {content}</span>";
-          newSentHtml = newSentHtml.replace("{id}", ps['id']);
-          newSentHtml = newSentHtml.replace("{pair}", fromSentence.getAttribute('id'));
-          newSentHtml = newSentHtml.replace("{qtt}", fromSentence.getAttribute('qtt'));
-          newSentHtml = newSentHtml.replace("{qtw}", fromSentence.getAttribute('qtw'));
-          newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(newWords, oldWords));
+          // var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"false\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"\"> {content}</span>";
+          // newSentHtml = newSentHtml.replace("{id}", ps['id']);
+          // newSentHtml = newSentHtml.replace("{pair}", fromSentence.getAttribute('id'));
+          // newSentHtml = newSentHtml.replace("{qtt}", fromSentence.getAttribute('qtt'));
+          // newSentHtml = newSentHtml.replace("{qtw}", fromSentence.getAttribute('qtw'));
+          // newSentHtml = newSentHtml.replace("{content}", ps['content'].replace(newWords, oldWords));
 
-          jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+          // jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
           
           var operations = fromSentence.getAttribute('data-operations');
           fromSentence.setAttribute('data-operations', operations.replace(operation, ''));
@@ -1528,6 +1535,71 @@ editSimplificationText(textFrom, textTo, simp) {
 
   }
 
-      
+  undoDivision(sentences, sentenceId, operation) {
+    var fromSentence = document.getElementById(sentenceId);
+    var fromPair = fromSentence.getAttribute("data-pair");
+    var pairSentences = fromPair.split(',');
+
+    var unitedSentence = "";
+    sentences.forEach(s => {
+      pairSentences.forEach(pair => {
+        if (s.indexOf(pair) > 0) {
+          var ps = this.parseSentence(s);
+          unitedSentence += ps['content'];
+          pairSentences.splice(pairSentences.indexOf(pair), 1);
+
+          if (pairSentences.length > 0) {
+            jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, ''));        
+          } else {
+            var newId = sentenceId.replace('f.s', 't.s');
+
+            var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+            newSentHtml = newSentHtml.replace("{id}", newId);
+            newSentHtml = newSentHtml.replace("{pair}", sentenceId);
+            newSentHtml = newSentHtml.replace("{qtt}", ps['qtt']);
+            newSentHtml = newSentHtml.replace("{qtw}", ps['qtw']);
+            newSentHtml = newSentHtml.replace("{content}", unitedSentence);
+    
+            jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newSentHtml));
+            var operations = fromSentence.getAttribute('data-operations');
+            fromSentence.setAttribute('data-operations', operations.replace(operation, ''));
+            this.updateOperationsList(sentenceId, null);
+            document.getElementById(sentenceId).setAttribute('data-pair', newId);
+          }
+    
+        }
+      });
+
+    });
+
+  }
+
+  undoRewrite(sentenceId, operation) {
+    var fromSentence = document.getElementById(sentenceId);
+
+    var operations = fromSentence.getAttribute('data-operations');
+    fromSentence.setAttribute('data-operations', operations.replace(operation, ''));
+    this.updateOperationsList(sentenceId, null);
+
+  }
+
+  undoRemotion(sentences, sentenceId, operation) {
+    var fromSentence = document.getElementById(sentenceId);
+    var fromPair = fromSentence.getAttribute("data-pair");
+
+    sentences.forEach(s => {
+      if (s.indexOf(fromPair) > 0) {
+          jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, s.replace('#rem#', fromSentence.innerText)));
+          
+          var operations = fromSentence.getAttribute('data-operations');
+          fromSentence.setAttribute('data-operations', operations.replace(operation, ''));
+          this.updateOperationsList(sentenceId, null);
+
+      }
+    });
+
+  }
+
+
 }
 
