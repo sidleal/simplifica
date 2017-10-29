@@ -65,11 +65,13 @@ var operationsMap = {
     pronounToNoun: 'Substituição de pronome por nome',
     nounSintReduc: 'Redução de sintagma nominal',
     discMarkerChange: 'Substituição de marcador discursivo',
+    definitionElab: 'Elaboração léxica com definição',
     notMapped: 'Operação Não Mapeada'
 }
 
 
 function sentenceClick(sentence) {
+    
     if (!markingWords) {
         var selected = sentence.getAttribute('data-selected');
         
@@ -157,7 +159,7 @@ function updateOperationsList(sentence) {
                     var opDesc = operationsMap[opKey];
                     var details = '';                    
 
-                    var substOps = ['lexicalSubst', 'synonymListElab', 'explainPhraseElab', 'verbalTenseSubst', 'numericExprSimpl', 'pronounToNoun', 'passiveVoiceChange', 'phraseOrderChange', 'svoChange', 'advAdjOrderChange', 'discMarkerChange', 'doNounSintReduc'];
+                    var substOps = ['lexicalSubst', 'synonymListElab', 'explainPhraseElab', 'verbalTenseSubst', 'numericExprSimpl', 'pronounToNoun', 'passiveVoiceChange', 'phraseOrderChange', 'svoChange', 'advAdjOrderChange', 'discMarkerChange', 'doNounSintReduc', 'definitionElab'];
                     if (substOps.indexOf(opKey) >= 0) {
                         var match = /\((.*)\|(.*)\|(.*)\)/g.exec(op);
                         if (match) {

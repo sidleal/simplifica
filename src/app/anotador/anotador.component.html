@@ -121,8 +121,8 @@
         <i class="fa fa-spinner fa-pulse fa-fw" id='waiting' style="display:none;"></i>
 
         <span id="qtSelectedTokens" class='operations-qt-tokens' data-toggle="tooltip" title="Quantidade de palavras da sentença selecionada">0</span>
-        <span id="qtSentencesTo" class='operations-qt-sentences' data-toggle="tooltip" title="Quantidade de parágrafos, sentenças e palavras do texto destino">{{totalParagraphsTo}} - {{totalSentencesTo}} - {{totalWordsTo}}</span>
-        <span id="qtSentences" class='operations-qt-sentences' data-toggle="tooltip" title="Quantidade de parágrafos, sentenças e palavras do texto origem">{{totalParagraphs}} - {{totalSentences}} - {{totalWords}}</span>
+        <span id="qtSentencesTo" class='operations-qt-sentences' data-toggle="tooltip" title="DESTINO: parágrafos - sentenças - palavras">{{totalParagraphsTo}} - {{totalSentencesTo}} - {{totalWordsTo}}</span>
+        <span id="qtSentences" class='operations-qt-sentences' data-toggle="tooltip" title="ORIGEM: parágrafos - sentenças - palavras">{{totalParagraphs}} - {{totalSentences}} - {{totalWords}}</span>
       </div>
 
       <div style='width:100%;display:inline-block;'>
@@ -154,6 +154,7 @@
         <a (click)="doOperation('pronounToNoun');"> - Substituição de pronome por nome</a><br/>
         <a (click)="doOperation('nounSintReduc');"> - Redução de sintagma nominal</a><br/>
         <a (click)="doOperation('discMarkerChange');"> - Substituição de marcador discursivo</a><br/>
+        <a (click)="doOperation('definitionElab');"> - Elaboração léxica com definição</a><br/>
         <a (click)="doOperation('notMapped');"> - Operação Não Mapeada</a>
       </div>        
     </div>
