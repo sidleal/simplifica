@@ -1449,6 +1449,8 @@ editSimplificationText(textFrom, textTo, simp) {
             this.undoDivision(sentences, sentenceId, operation);
           } else if (opKey == 'remotion') {
             this.undoRemotion(sentences, sentenceId, operation);
+          } else if (opKey == 'union') {
+            this.undoUnion(sentences, sentenceId, operation);
           }
 
       });
@@ -1573,6 +1575,59 @@ editSimplificationText(textFrom, textTo, simp) {
     });
 
   }
+
+  undoUnion(sentences, sentenceId, operation) {
+    var fromSentence = document.getElementById(sentenceId);
+    var fromPair = fromSentence.getAttribute("data-pair");
+
+    sentences.forEach(s => {
+        if (s.indexOf(fromPair) > 0) {
+            var ps = this.parseSentence(s);
+
+            this.editSentenceDialog(this, "Desfazer União de Sentença", ps['content'], function (context, ret, text) {
+                if (ret) {
+                    var parsedText = context.senterService.splitText(text);
+                    var parsedSentences = parsedText['paragraphs'][0]['sentences']; 
+
+                    var toPairs = ps['pair'].split(',');
+
+                    var fromSentence1 = document.getElementById(toPairs[0]);
+                    var fromSentence2 = document.getElementById(toPairs[1]);
+
+                    var newHtml = "";
+
+                    for (var i = 0; i < 2; i++) {
+                      var newSentHtml = "<span _ngcontent-" + ps['ngContent'] + "=\"\" data-pair=\"{pair}\" data-qtt=\"{qtt}\" data-qtw=\"{qtw}\" data-selected=\"true\" id=\"{id}\" onmouseout=\"outSentence(this);\" onmouseover=\"overSentence(this);\" style=\"font-weight: bold;background: #EDE981;\"> {content}</span>";
+                      newSentHtml = newSentHtml.replace("{id}", toPairs[i].replace('f.s.', 't.s.'));
+                      newSentHtml = newSentHtml.replace("{pair}", toPairs[i]);
+                      newSentHtml = newSentHtml.replace("{qtt}", parsedSentences[i]['qtt']);
+                      newSentHtml = newSentHtml.replace("{qtw}", parsedSentences[i]['qtw']);
+                      newSentHtml = newSentHtml.replace("{content}", parsedSentences[i]['text']);
+                      newHtml += newSentHtml;    
+                    }
+                   
+                    jQuery("#divTextTo").html(jQuery("#divTextTo").html().replace(s, newHtml));
+
+                    var operations = fromSentence1.getAttribute('data-operations');
+                    fromSentence1.setAttribute('data-operations', operations.replace(operation, ''));
+                    operations = fromSentence2.getAttribute('data-operations');
+                    fromSentence2.setAttribute('data-operations', operations.replace(operation, ''));
+                    context.updateOperationsList(toPairs[0], null);
+                    context.updateOperationsList(toPairs[1], null);
+
+                    fromSentence1.setAttribute('data-pair', toPairs[0].replace('f.s.', 't.s.'));
+                    fromSentence2.setAttribute('data-pair', toPairs[1].replace('f.s.', 't.s.'));
+
+                  }
+  
+            });
+                
+        }
+    });
+  }
+
+
+
 
   undoRewrite(sentenceId, operation) {
     var fromSentence = document.getElementById(sentenceId);
