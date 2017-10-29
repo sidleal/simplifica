@@ -108,6 +108,7 @@ export class SenterService {
     var idxParagraphs = 0;
     var idxSentences = 0;
     var idxTokens = 0;
+    var idxWords = 0;
 
     parsedText['paragraphs'] = [];
 
@@ -130,8 +131,9 @@ export class SenterService {
                 idxTokens++;
                 qtt++;
                 parsedSentence['tokens'].push({"idx": idxTokens, "token": t});
-                if (t.length > 1 || '{[()]}.,"?!;:-\''.indexOf(t) < 0) {
+                if (t.length > 1 || '{[()]}.,"?!;:-\'#'.indexOf(t) < 0) {
                   qtw++;
+                  idxWords++;
                 }
               }
             });
@@ -147,6 +149,7 @@ export class SenterService {
     parsedText['totP'] = idxParagraphs;
     parsedText['totS'] = idxSentences;
     parsedText['totT'] = idxTokens;
+    parsedText['totW'] = idxWords;
 
     return parsedText;
   }

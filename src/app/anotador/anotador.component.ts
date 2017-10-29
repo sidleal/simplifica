@@ -60,6 +60,13 @@ export class AnotadorComponent implements OnInit {
   
   totalParagraphs: number;
   totalSentences: number;
+  totalWords: number;
+  totalTokens: number;
+  
+  totalParagraphsTo: number;
+  totalSentencesTo: number;
+  totalWordsTo: number;
+  totalTokensTo: number;
 
   searchText: string;
 
@@ -374,7 +381,11 @@ export class AnotadorComponent implements OnInit {
         level: 0
       }
     ).then((text) => { 
-      var parsedText = this.senterService.splitText(this.textContent);
+      var textContentFull = "";
+      textContentFull += "# " + this.textTitle + "\n";
+      textContentFull += "## " + this.textSubTitle + "\n";
+      textContentFull += this.textContent;     
+      var parsedText = this.senterService.splitText(textContentFull);
       this.saveParagraphs(text, parsedText); 
     });
 
@@ -388,6 +399,7 @@ export class AnotadorComponent implements OnInit {
         totP: parsedText['totP'],
         totS:  parsedText['totS'],
         totT:  parsedText['totT'],
+        totW:  parsedText['totW'],
       });
 
     var paragraphs = this.af.list('/corpora/' + this.selectedCorpusId + "/texts/" + text.key + "/paragraphs");
@@ -481,6 +493,7 @@ export class AnotadorComponent implements OnInit {
     var idxParagraphs = 0;
     var idxSentences = 0;
     var idxTokens = 0;
+    var idxWords = 0;
     var newTextcontent = '';
 
     var textToHTML = document.getElementById("divTextTo").innerHTML;
@@ -534,6 +547,9 @@ export class AnotadorComponent implements OnInit {
         parsedS["tokens"].forEach(t => {
           idxTokens++;
           parsedSentence['tokens'].push({"idx": idxTokens, "token": t["token"]});
+          if (t["token"].length > 1 || '{[()]}.,"?!;:-\'#'.indexOf(t["token"]) < 0) {
+            idxWords++;
+          }
         });
 
         parsedParagraph.sentences.push(parsedSentence);
@@ -543,7 +559,7 @@ export class AnotadorComponent implements OnInit {
       newTextcontent += '\n';
     });
 
-    this.simplificationParsedText = {"totP": idxParagraphs, "totS": idxSentences, "totT": idxTokens, "paragraphs": parsedParagraphs};
+    this.simplificationParsedText = {"totP": idxParagraphs, "totS": idxSentences, "totT": idxTokens, "totW": idxWords, "paragraphs": parsedParagraphs};
 
     this.simplificationTextFrom = this.af.object('/corpora/' + this.selectedCorpusId  + "/texts/" + this.selectedTextId);
     this.simplificationTextFrom.take(1).subscribe(text => {
@@ -640,6 +656,13 @@ export class AnotadorComponent implements OnInit {
   
       this.totalParagraphs = text.totP;
       this.totalSentences =  text.totS;
+      this.totalWords =  text.totW;
+      this.totalTokens =  text.totT;
+      
+      this.totalParagraphsTo = text.totP;
+      this.totalSentencesTo =  text.totS;
+      this.totalWordsTo =  text.totW;
+      this.totalTokensTo =  text.totT;
 
       this.textFrom = this.parseTextFromOut(text, null);
       this.textTo = this.parseTextToOut(text, null);
@@ -677,7 +700,14 @@ editSimplificationText(textFrom, textTo, simp) {
 
     this.totalParagraphs = textFrom.totP;
     this.totalSentences =  textFrom.totS;
-  
+    this.totalWords =  textFrom.totW;
+    this.totalTokens =  textFrom.totT;
+
+    this.totalParagraphsTo = textTo.totP;
+    this.totalSentencesTo =  textTo.totS;
+    this.totalWordsTo =  textTo.totW;
+    this.totalTokensTo =  textTo.totT;
+
     this.textFrom = this.parseTextFromOut(textFrom, simp);
     this.textTo = this.parseTextToOut(textTo, simp);
 

@@ -147,6 +147,8 @@ input#message {
     color: white;
     font-size: 1.5em;
     margin-right: 30px;
+    margin-bottom: 20px;
+    margin-top: 10px;
 }
 
 .operations-header {

@@ -1,8 +1,6 @@
 
 function overSentence(sentence) {
     toggleObject(sentence, "background: #b0cfff;");
-    document.getElementById("qtTokens").innerHTML = sentence.getAttribute("data-qtw");
-    document.getElementById("qtTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
 }
 
 function outSentence(sentence) {
@@ -19,11 +17,12 @@ function outToken(token) {
 
 function toggleObject(obj, style) {
     pairObjList = obj.getAttribute('data-pair').split(',');
-    pairObjList.forEach( pairObj => {
-        if (document.getElementById(pairObj) != null) {
-            var selected = document.getElementById(pairObj).getAttribute('data-selected');
+    pairObjList.forEach( pairObjId => {
+        pairObj = document.getElementById(pairObjId);
+        if (pairObj != null) {
+            var selected = pairObj.getAttribute('data-selected');
             if (selected == 'false') {
-                document.getElementById(pairObj).style = style;            
+                pairObj.style = style;
             }
         }    
     });
@@ -79,8 +78,17 @@ function sentenceClick(sentence) {
         if (selected == 'false') {
             selectSentence(sentence, 'background: #EDE981;', 'true');
             selectedSentences.push(sentence.id);
-            document.getElementById("qtSelectedTokens").innerHTML = sentence.getAttribute("data-qtw");
-            document.getElementById("qtSelectedTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença";
+        
+            var qtTokensPair = [];
+            pairObjList = sentence.getAttribute('data-pair').split(',');
+            pairObjList.forEach( pairObjId => {
+                pairObj = document.getElementById(pairObjId);
+                if (pairObj != null) {
+                    qtTokensPair.push(pairObj.getAttribute("data-qtw"));
+                }    
+            });
+            document.getElementById("qtSelectedTokens").innerHTML = sentence.getAttribute("data-qtw") + " -> " + qtTokensPair.toString();
+            document.getElementById("qtSelectedTokens").title = sentence.getAttribute("data-qtw") + " palavras ( e " + sentence.getAttribute("data-qtt") + " tokens) na sentença de origem, destino: " + qtTokensPair.toString();
             updateOperationsList(sentence);
         }
         $("#selectedSentences").val(selectedSentences.toString());

@@ -121,9 +121,8 @@
         <i class="fa fa-spinner fa-pulse fa-fw" id='waiting' style="display:none;"></i>
 
         <span id="qtSelectedTokens" class='operations-qt-tokens' data-toggle="tooltip" title="Quantidade de palavras da sentença selecionada">0</span>
-        <span id="qtSentences" class='operations-qt-sentences' data-toggle="tooltip" title="Quantidade de parágrafos e sentenças do texto origem">{{totalParagraphs}} - {{totalSentences}}</span>
-        
-        <span id="qtTokens" class='operations-qt-tokens' data-toggle="tooltip" style='display:none;' title="Quantidade de palavras da sentença">0</span>
+        <span id="qtSentencesTo" class='operations-qt-sentences' data-toggle="tooltip" title="Quantidade de parágrafos, sentenças e palavras do texto destino">{{totalParagraphsTo}} - {{totalSentencesTo}} - {{totalWordsTo}}</span>
+        <span id="qtSentences" class='operations-qt-sentences' data-toggle="tooltip" title="Quantidade de parágrafos, sentenças e palavras do texto origem">{{totalParagraphs}} - {{totalSentences}} - {{totalWords}}</span>
       </div>
 
       <div style='width:100%;display:inline-block;'>
@@ -178,8 +177,8 @@
 
       <div class="row">
         <div class="small-12 large-6 centered columns">
-          <div class="titles">{{(simplificationTextFrom | async)?.title}}</div>
-          <div class="titles">{{(simplificationTextFrom | async)?.subTitle}}</div>
+          <div class="titles" style="display:none;">{{(simplificationTextFrom | async)?.title}}</div>
+          <div class="titles" style="display:none;">{{(simplificationTextFrom | async)?.subTitle}}</div>
           <div class="editor">
               <ng-template dynamic-template
                 [template]="textFrom"
@@ -188,8 +187,8 @@
             </div>
         </div>
         <div class="small-12 large-6 centered columns">
-          <div contenteditable="true" class="titles" id="divTextToTitle">{{simplificationToTitle}}</div>
-          <div contenteditable="true" class="titles" id="divTextToSubTitle">{{simplificationToSubTitle}}</div>
+          <div contenteditable="true" class="titles" id="divTextToTitle" style="display:none;">{{simplificationToTitle}}</div>
+          <div contenteditable="true" class="titles" id="divTextToSubTitle" style="display:none;">{{simplificationToSubTitle}}</div>
           <div contenteditable="true" class="editor" id="divTextTo">
               <ng-template dynamic-template
                 [template]="textTo"
