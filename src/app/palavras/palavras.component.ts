@@ -37,7 +37,7 @@ export class PalavrasComponent implements OnInit {
        headers: headers,
        responseType: ResponseContentType.Text
     });
-    return this.http.post("http://143.107.183.175:23380/" + type, "sentence=" + this.content, options).toPromise()
+    return this.http.post("https://us-central1-simplifica-4d2b8.cloudfunctions.net/callPalavras", "sentence=" + this.content + "&type=" + type, options).toPromise()
       .then((res: Response) => {
         this.output = res.text();
       })
