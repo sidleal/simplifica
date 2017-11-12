@@ -1,0 +1,15 @@
+<div class="row">
+  <div class="small-12 centered columns">
+    <h3>Palavras</h3>
+    <textarea id="content" placeholder="Conteúdo" [(ngModel)]="content" rows="10"></textarea>
+    <button (click)="parseFlat()" class="default"><i class="fa fa-list-ul fa-2x"></i><br/>Saída Normal</button>
+    <button (click)="parseTree()" class="default"><i class="fa fa-tree fa-2x"></i><br/>Saída em Árvore</button>
+    <button (click)="backToMenu()" class="natural"><i class="fa fa-arrow-left fa-2x"></i><br/>Voltar</button>
+    
+    <div id="results" *ngIf="output != None">
+      <h4>Resultados:</h4>
+      <textarea id="output" [(ngModel)]="output" rows="20"></textarea>
+    </div>
+
+  </div>
+</div>

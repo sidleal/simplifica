@@ -20,5 +20,9 @@ export class MenuComponent implements OnInit {
       this.router.navigate(['senter']);
   }
 
+  abrirPalavras() {
+    this.router.navigate(['palavras']);
+  }
+
 }
 

@@ -14,22 +14,24 @@ import { AnotadorComponent } from './anotador/anotador.component';
 import { MenuComponent } from './menu/menu.component';
 import { SenterComponent } from './senter/senter.component';
 import { NgxDynamicTemplateModule } from 'ngx-dynamic-template';
+import { PalavrasComponent } from './palavras/palavras.component';
 
 
 export const firebaseConfig = {
-    apiKey: "",
+    apiKey: "xx",
     authDomain: "simplifica-4d2b8.firebaseapp.com",
     databaseURL: "https://simplifica-4d2b8.firebaseio.com",
     projectId: "simplifica-4d2b8",
     storageBucket: "simplifica-4d2b8.appspot.com",
-    messagingSenderId: "748540676280"
+    messagingSenderId: "xx"
 };
 
 const routes: Routes = [
   { path: '', component: MenuComponent },
   { path: 'login', component: LoginComponent },
   { path: 'anotador', component: AnotadorComponent },
-  { path: 'senter', component: SenterComponent }
+  { path: 'senter', component: SenterComponent },
+  { path: 'palavras', component: PalavrasComponent }
 ];
 
 @NgModule({
@@ -38,7 +40,8 @@ const routes: Routes = [
     LoginComponent,
     AnotadorComponent,
     MenuComponent,
-    SenterComponent
+    SenterComponent,
+    PalavrasComponent
   ],
   imports: [
     BrowserModule,
