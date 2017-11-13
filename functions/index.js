@@ -6,12 +6,13 @@ exports.callPalavras = functions.https.onRequest((request, response) => {
     response.setHeader("Access-Control-Allow-Origin", "*");
 
     var post_data = querystring.stringify({
-        'sentence' : request.body.sentence
+        'sentence' : request.body.sentence,
+        'options' : request.body.options
     });
 
     var post_options = {
-        host: '143.107.183.175',
-        port: '23380',
+        host: '',
+        port: '80',
         path: '/' + request.body.type,
         method: 'POST',
         headers: {

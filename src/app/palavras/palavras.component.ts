@@ -13,10 +13,12 @@ export class PalavrasComponent implements OnInit {
   
   content: string;
   output: string;
+  options: string;
 
   constructor(private http:Http, private router: Router,) { }
 
   ngOnInit() {
+   this.options = "";
   }
 
   backToMenu() {
@@ -33,11 +35,13 @@ export class PalavrasComponent implements OnInit {
 
   parse(type: string) {
     let headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' });
-    let options = new RequestOptions({
+    let requestOptions = new RequestOptions({
        headers: headers,
        responseType: ResponseContentType.Text
     });
-    return this.http.post("https://us-central1-simplifica-4d2b8.cloudfunctions.net/callPalavras", "sentence=" + this.content + "&type=" + type, options).toPromise()
+    return this.http.post("https://teste/callPalavras", 
+      "sentence=" + this.content + "&type=" + type + "&options=" + this.options, 
+      requestOptions).toPromise()
       .then((res: Response) => {
         this.output = res.text();
       })
