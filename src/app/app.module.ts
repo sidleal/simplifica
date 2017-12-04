@@ -15,16 +15,7 @@ import { MenuComponent } from './menu/menu.component';
 import { SenterComponent } from './senter/senter.component';
 import { NgxDynamicTemplateModule } from 'ngx-dynamic-template';
 import { PalavrasComponent } from './palavras/palavras.component';
-
-
-export const firebaseConfig = {
-    apiKey: "xx",
-    authDomain: "simplifica-4d2b8.firebaseapp.com",
-    databaseURL: "https://simplifica-4d2b8.firebaseio.com",
-    projectId: "simplifica-4d2b8",
-    storageBucket: "simplifica-4d2b8.appspot.com",
-    messagingSenderId: "xx"
-};
+import { environment } from '../environments/environment';
 
 const routes: Routes = [
   { path: '', component: MenuComponent },
@@ -47,7 +38,7 @@ const routes: Routes = [
     BrowserModule,
     FormsModule,
     HttpModule,
-    AngularFireModule.initializeApp(firebaseConfig),
+    AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
     RouterModule.forRoot(routes),

@@ -3,6 +3,7 @@ import { Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-palavras',
@@ -39,7 +40,7 @@ export class PalavrasComponent implements OnInit {
        headers: headers,
        responseType: ResponseContentType.Text
     });
-    return this.http.post("https://teste/callPalavras", 
+    return this.http.post(environment.urlFunctionPalavras, 
       "sentence=" + this.content + "&type=" + type + "&options=" + this.options, 
       requestOptions).toPromise()
       .then((res: Response) => {

@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const querystring = require('querystring');
 const http = require('http');
+const environment = require('../../environments/environment');
 
 exports.callPalavras = functions.https.onRequest((request, response) => {
     response.setHeader("Access-Control-Allow-Origin", "*");
@@ -11,8 +12,8 @@ exports.callPalavras = functions.https.onRequest((request, response) => {
     });
 
     var post_options = {
-        host: '',
-        port: '80',
+        host: environment.palavrasIP,
+        port: environment.palavrasPort,
         path: '/' + request.body.type,
         method: 'POST',
         headers: {
