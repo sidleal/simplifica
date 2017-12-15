@@ -1,7 +1,7 @@
-# Simplifica 
-## Plataforma de Simplificação para a Língua Portuguesa
+# ~~Simplifica~~ 
 
-### Projeto em desenvolvimento...
+### Projeto descontinuado! 
+Continua em https://github.com/sidleal/simpligo-pln, com o backend reescrito em Go.
 
 ### Ambiente
  * Instalar nodejs / npm / angular-cli
